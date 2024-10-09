@@ -146,6 +146,7 @@ const TaskScheduler = () => {
     },
   ]);
   const [clickedEvent,setClickedEvent] = useState(null)
+  const [selectedDate,setSelectedDate] = useState()
 
   console.log({ myEvents });
 
@@ -449,6 +450,7 @@ const TaskScheduler = () => {
             pages={3}
             className="mbsc-textfield"
             inputProps={props}
+            onChange={(e)=>setSelectedDate(e.value)}
             // maxHeight={"400px"}
             // maxWidth={"1000px"}
             // isOpen={true}
@@ -494,6 +496,7 @@ const TaskScheduler = () => {
             externalDrop={true}
             externalDrag={true}
             // height={"500px"}
+            selectedDate={selectedDate}
             colors={myColors}
             onCellDoubleClick={() => setOpen(true)}
             onEventClick={handleEventClick}
