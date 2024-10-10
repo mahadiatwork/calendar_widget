@@ -78,7 +78,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
               Starts :
             </Typography>
             <Datepicker
-              controls={["calendar"]}
+              controls={["calendar",'time']}
               calendarType="month"
               display="center"
               calendarScroll={"vertical"}
@@ -97,7 +97,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
               Ends :
             </Typography>
             <Datepicker
-              controls={["calendar"]}
+              controls={["calendar",'time']}
               calendarType="month"
               display="center"
               calendarScroll={"vertical"}
@@ -110,8 +110,15 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
             />
           </Box>
           <FormControlLabel
-            value="no end date"
-            control={<Radio size="small" />}
+            control={
+              <Radio
+                size="small"
+                checked={formData.noEndDate}
+                onChange={(e) =>
+                  handleInputChange("noEndDate", e.target.checked)
+                }
+              />
+            }
             label="No end date"
           />
         </Grid>

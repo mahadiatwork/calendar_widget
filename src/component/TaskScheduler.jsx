@@ -18,7 +18,7 @@ import {
   Toast,
 } from "@mobiscroll/react";
 import PropTypes from "prop-types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import "./test.css";
 import EventForm from "./formComponent/EventForm";
@@ -29,8 +29,16 @@ setOptions({
   themeVariant: "light",
 });
 
+const formatTime = (date, hour) => {
+  const newDate = new Date(date); // create a copy of the date
+  newDate.setHours(hour, 0, 0, 0); // set the specific hour (6 or 7 AM)
+  return newDate.toISOString().slice(0, 16); // get the date in ISO format (YYYY-MM-DDTHH:mm)
+};
+
 const now = new Date();
-const today = new Date(now.setMinutes(59));
+const startTime = formatTime(now, 6); // Get 6 AM
+  const endTime = formatTime(now, 8); // Get 7 AM
+const today = now.toISOString().slice(0, 16);;
 const yesterday = new Date(
   now.getFullYear(),
   now.getMonth(),
@@ -147,6 +155,7 @@ const TaskScheduler = () => {
   ]);
   const [clickedEvent,setClickedEvent] = useState(null)
   const [selectedDate,setSelectedDate] = useState()
+  const calendarRef = useRef(null);
 
   console.log({ myEvents });
 
@@ -197,7 +206,7 @@ const TaskScheduler = () => {
   const [myView, setMyView] = useState({
     schedule: {
       type: "day",
-      startTime: "08:00",
+      startTime: "06:00",
       endTime: "24:00",
       allDay: false,
     },
@@ -230,7 +239,7 @@ const TaskScheduler = () => {
             allDay: false,
             startDay: 1,
             endDay: 5,
-            startTime: "08:00",
+            startTime: "06:00",
             endTime: "24:00",
           },
         };
@@ -240,7 +249,7 @@ const TaskScheduler = () => {
           schedule: {
             type: "day",
             allDay: false,
-            startTime: "08:00",
+            startTime: "06:00",
             endTime: "24:00",
           },
         };
@@ -249,7 +258,7 @@ const TaskScheduler = () => {
         myView = {
           schedule: {
             type: "day",
-            startTime: "08:00",
+            startTime: "06:00",
             endTime: "24:00",
             allDay: false,
           },
@@ -332,16 +341,16 @@ const TaskScheduler = () => {
   );
 
   const myInvalid = useMemo(
-    () => [
+    () =>[
       {
+        start: '06:00',
+        end: '08:00',
+        // title: 'Lunch break',
+        type: 'lunch',
         recurring: {
-          repeat: "daily",
-          until: yesterday,
+          repeat: 'daily',
+          // weekDays: 'MO,TU,WE,TH,FR',
         },
-      },
-      {
-        start: yesterday,
-        end: today,
       },
     ],
     []
@@ -481,6 +490,17 @@ const TaskScheduler = () => {
     setOpen(true)
   }
 
+  const getCurrentDate = () =>{
+    
+  }
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      getCurrentDate();
+    }
+  }, []);
+  console.log({selectedDate})
+
   return (
     <div className="mbsc-grid mbsc-no-padding">
       <div className="mbsc-row">
@@ -489,7 +509,9 @@ const TaskScheduler = () => {
             data={myEvents}
             view={myView}
             resources={meetings}
-            // invalid={myInvalid}
+            invalid={myInvalid}
+            // refDate={calendarRef}
+            onPageChange={(e)=>setSelectedDate(e.firstDay)}
             dragToMove={true}
             dragToCreate={true}
             eventOverlap={false}
@@ -528,6 +550,8 @@ const TaskScheduler = () => {
             setOpen={setOpen}
             onClose={onClose}
             clickedEvent={clickedEvent}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
           />
         </Modal>
         {/* <Popup
@@ -558,7 +582,7 @@ const TaskScheduler = () => {
           </div> */}
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default TaskScheduler;

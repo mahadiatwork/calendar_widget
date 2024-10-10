@@ -27,7 +27,7 @@ function TabPanel(props) {
   );
 }
 
-const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent }) => {
+const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedDate,setSelectedDate }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
   const [textvalue, setTextValue] = useState("");
@@ -51,6 +51,7 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent }) => {
     noEndDate: false,
     quillContent: "",
     color: "#d1891f",
+    Banner:false,
   });
 
   const handleChange = (event, newValue) => {
@@ -137,6 +138,7 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent }) => {
         <FirstComponent
           formData={formData}
           handleInputChange={handleInputChange}
+          selectedDate={selectedDate}
         />
         <Box display="flex" justifyContent="space-between" mt={2}>
           <Button size="small" disabled>

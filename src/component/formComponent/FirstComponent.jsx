@@ -15,7 +15,7 @@ import CustomTextField from "../atom/CustomTextField";
 import { useState } from "react";
 import { Datepicker } from "@mobiscroll/react";
 
-const FirstComponent = ({ formData, handleInputChange }) => {
+const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
   const [activityType, setActivityType] = useState([
@@ -61,6 +61,7 @@ const FirstComponent = ({ formData, handleInputChange }) => {
     return (
       <CustomTextField
         fullWidth
+        disabled={formData.Banner ? true :false }
         size="small"
         placeholder={placeholder}
         variant="outlined"
@@ -68,6 +69,39 @@ const FirstComponent = ({ formData, handleInputChange }) => {
         onClick={() => openDatepickerState(true)}
       />
     );
+  };
+
+  const formatTime = (date, hour) => {
+    const newDate = new Date(date);
+    newDate.setHours(hour, 0, 0, 0);
+    // Manually format the date in YYYY-MM-DDTHH:mm without converting to UTC
+    const year = newDate.getFullYear();
+    const month = String(newDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const day = String(newDate.getDate()).padStart(2, "0");
+    const hours = String(newDate.getHours()).padStart(2, "0");
+    const minutes = String(newDate.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const handleBannerChecked = (e) => {
+    handleInputChange("Banner", e.target.checked);
+    console.log({ selectedDate });
+    if (selectedDate) {
+      const timeAt6AM = formatTime(selectedDate, 6);
+      const timeAt7AM = formatTime(selectedDate, 7);
+      console.log("fahim", timeAt6AM, timeAt7AM);
+      handleInputChange("start", timeAt6AM);
+      handleInputChange("end", timeAt7AM);
+    } else {
+      const now = new Date();
+      console.log(now);
+      const timeAt6AM = formatTime(now, 6);
+      const timeAt7AM = formatTime(now, 7);
+      console.log("fahim", timeAt6AM, timeAt7AM);
+      handleInputChange("start", timeAt6AM);
+      handleInputChange("end", timeAt7AM);
+    }
   };
 
   return (
@@ -137,12 +171,15 @@ const FirstComponent = ({ formData, handleInputChange }) => {
         </Grid>
 
         <Grid size={4}>
-          
-        <Datepicker
-            controls={["calendar","time"]}
+          <Datepicker
+            controls={["calendar", "time"]}
             display="center"
             inputComponent={() =>
-              customInputComponent("start", "Start Time", setOpenStartDatepicker)
+              customInputComponent(
+                "start",
+                "Start Time",
+                setOpenStartDatepicker
+              )
             }
             onClose={() => setOpenStartDatepicker(false)}
             onChange={(e) => handleInputChange("start", e.value)}
@@ -150,9 +187,8 @@ const FirstComponent = ({ formData, handleInputChange }) => {
           />
         </Grid>
         <Grid size={4}>
-          
-        <Datepicker
-            controls={["calendar","time"]}
+          <Datepicker
+            controls={["calendar", "time"]}
             display="center"
             inputComponent={() =>
               customInputComponent("end", "End Time", setOpenEndDatepicker)
@@ -244,14 +280,6 @@ const FirstComponent = ({ formData, handleInputChange }) => {
               ))}
             </Select>
           </FormControl>
-          {/* <CustomTextField
-            fullWidth
-            size="small"
-            placeholder="Associate with"
-            variant="outlined"
-            value={formData.associateWith}
-            onChange={(e) => handleInputChange("associateWith", e.target.value)}
-          /> */}
         </Grid>
 
         <Grid size={12}>
@@ -347,7 +375,7 @@ const FirstComponent = ({ formData, handleInputChange }) => {
           />
         </Grid>
 
-        <Grid size={4}>
+        <Grid size={3}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -382,7 +410,7 @@ const FirstComponent = ({ formData, handleInputChange }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={4}>
+        <Grid size={3}>
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -417,13 +445,24 @@ const FirstComponent = ({ formData, handleInputChange }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={4}>
+        <Grid size={3}>
           <CustomTextField
             type="color"
             label="color"
             fullWidth
             value={formData.color}
             onChange={(e) => handleInputChange("color", e.target.value)}
+          />
+        </Grid>
+        <Grid size={3} alignItems={"center"}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.Banner}
+                onChange={handleBannerChecked}
+              />
+            }
+            label="Banner"
           />
         </Grid>
       </Grid>
