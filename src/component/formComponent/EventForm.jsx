@@ -30,7 +30,7 @@ function TabPanel(props) {
 const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedDate,setSelectedDate }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
-  const [textvalue, setTextValue] = useState("");
+  const todayDate = new Date()
   const [formData, setFormData] = useState({
     id:`job${myEvents.length+1}`,
     title: "",
@@ -46,7 +46,7 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedD
     priority: "",
     ringAlarm: "",
     gender: "once",
-    start: "",
+    start: todayDate,
     end: "",
     noEndDate: false,
     quillContent: "",

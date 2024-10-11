@@ -155,9 +155,7 @@ const TaskScheduler = () => {
   ]);
   const [clickedEvent,setClickedEvent] = useState(null)
   const [selectedDate,setSelectedDate] = useState()
-  const calendarRef = useRef(null);
 
-  console.log({ myEvents });
 
   const [appointments, setAppointments] = useState([
     {
@@ -356,10 +354,6 @@ const TaskScheduler = () => {
     []
   );
 
-  // const setDropElm = useCallback((elm) => {
-  //   setDropCont(elm);
-  // }, []);
-
   const handleEventCreate = useCallback((args) => {
     const event = args.event;
     event.unscheduled = false;
@@ -490,15 +484,6 @@ const TaskScheduler = () => {
     setOpen(true)
   }
 
-  const getCurrentDate = () =>{
-    
-  }
-
-  useEffect(() => {
-    if (calendarRef.current) {
-      getCurrentDate();
-    }
-  }, []);
   console.log({selectedDate})
 
   return (
