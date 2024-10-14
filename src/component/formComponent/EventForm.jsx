@@ -27,6 +27,28 @@ function TabPanel(props) {
   );
 }
 
+function addDurationToDateTime(dateString, duration) {
+  // Convert the date string to a Date object
+  let date = new Date(dateString);
+
+  // Split the duration into hours and minutes
+  const [hours, minutes] = duration.split(':').map(Number);
+
+  // Add the duration to the date object
+  date.setHours(date.getHours() + hours);
+  date.setMinutes(date.getMinutes() + minutes);
+
+  // Format the date back to a string (keeping the original format)
+  const modifiedDate = date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
+  
+  return modifiedDate;
+}
+
+// Example usage:
+const result = addDurationToDateTime("2024-10-07T14:00", "2:30");
+console.log(result); // This will print the modified date-time string
+
+
 const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedDate,setSelectedDate }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
@@ -38,18 +60,17 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedD
     endTime: "",
     duration: "",
     associateWith: "",
-    Event_title: "",
+    Type_of_Activity: "",
     resource: 0,
     scheduleFor:'',
     scheduleWith:[],
     location: "",
     priority: "",
     ringAlarm: "",
-    gender: "once",
+    occurrence: "once",
     start: todayDate,
     end: "",
     noEndDate: false,
-    quillContent: "",
     color: "#d1891f",
     Banner:false,
   });

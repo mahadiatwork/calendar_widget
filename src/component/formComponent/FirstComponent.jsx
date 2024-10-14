@@ -52,7 +52,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
 
     if (selectedActivity) {
       // Update both the activity type and the resource
-      handleInputChange("title", selectedActivity.type);
+      handleInputChange("Type_of_Activity", selectedActivity.type);
       handleInputChange("resource", selectedActivity.resource);
     }
   };
@@ -114,7 +114,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
             placeholder="Event_title"
             variant="outlined"
             value={formData.Event_title}
-            onChange={(e) => handleInputChange("Event_title", e.target.value)}
+            onChange={(e) => handleInputChange("title", e.target.value)}
           />
         </Grid>
 
@@ -131,7 +131,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
               id="demo-simple-select-standard"
               label="Activity type"
               fullWidth
-              value={formData.title}
+              value={formData.Type_of_Activity}
               onChange={handleActivityChange}
               MenuProps={{
                 //   disablePortal: true,  // This ensures the dropdown is not restricted to the modal's container

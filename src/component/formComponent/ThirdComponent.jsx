@@ -40,8 +40,8 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
         <RadioGroup
           aria-labelledby="demo-radio-buttons-group-label"
           name="radio-buttons-group"
-          value={formData.gender}
-          onChange={(e) => handleInputChange("gender", e.target.value)}
+          value={formData.occurrence}
+          onChange={(e) => handleInputChange("occurrence", e.target.value)}
         >
           <FormControlLabel
             value="once"
