@@ -43,6 +43,23 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
     "fahim",
   ]);
   const [openDatepicker, setOpenDatepicker] = useState(false);
+  const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
+
+  function addMinutesToDateTime(formatType,durationInMinutes) {
+    // Create a new Date object using the start time from formData
+    console.log(formatType,durationInMinutes)
+      let date = new Date(formData.start);
+  
+      date.setMinutes(date.getMinutes() + parseInt(durationInMinutes, 10)); 
+      const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  
+      const modifiedDate = localDate.toISOString().slice(0, 16); 
+
+      handleInputChange("end", modifiedDate);
+
+   
+}
+
 
   const handleActivityChange = (event) => {
     const selectedType = event.target.value;
@@ -181,6 +198,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
                 setOpenStartDatepicker
               )
             }
+            returnFormat="iso8601"
             onClose={() => setOpenStartDatepicker(false)}
             onChange={(e) => handleInputChange("start", e.value)}
             isOpen={openStartDatepicker}
@@ -212,7 +230,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
               label="Duration"
               fullWidth
               value={formData.duration}
-              onChange={(e) => handleInputChange("duration", e.target.value)}
+              onChange={(e) => {handleInputChange("duration", e.target.value); addMinutesToDateTime("duration",e.target.value)}}
               sx={{
                 "& .MuiSelect-select": {
                   padding: "3px 10px", // Adjust the padding to shrink the Select content
@@ -227,9 +245,9 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
                 },
               }}
             >
-              <MenuItem value={10}>5 minutes</MenuItem>
-              <MenuItem value={20}>10 minutes</MenuItem>
-              <MenuItem value={30}>15 minutes</MenuItem>
+              {durations.map((minute,index)=>(
+              <MenuItem key={index} value={minute}>{minute} minutes</MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -404,9 +422,9 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
                 },
               }}
             >
-              <MenuItem value={10}>Low</MenuItem>
-              <MenuItem value={20}>Medium</MenuItem>
-              <MenuItem value={30}>High</MenuItem>
+              <MenuItem value={'low'}>Low</MenuItem>
+              <MenuItem value={'medium'}>Medium</MenuItem>
+              <MenuItem value={"high"}>High</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -424,7 +442,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
               label="Ring Alarm"
               fullWidth
               value={formData.ringAlarm}
-              onChange={(e) => handleInputChange("ringAlarm", e.target.value)}
+              onChange={(e) =>addMinutesToDateTime("remindAt",e.target.value)}
               sx={{
                 "& .MuiSelect-select": {
                   padding: "3px 10px", // Adjust the padding to shrink the Select content
@@ -439,9 +457,9 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
                 },
               }}
             >
-              <MenuItem value={10}>5 minutes</MenuItem>
-              <MenuItem value={20}>10 minutes</MenuItem>
-              <MenuItem value={30}>15 minutes</MenuItem>
+              {[5,10,15,20,25,30].map((ring,index)=>(
+                <MenuItem key={index} value={ring}>{ring} minutes</MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>

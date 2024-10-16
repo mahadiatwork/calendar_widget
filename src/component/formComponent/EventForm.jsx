@@ -44,6 +44,18 @@ function addDurationToDateTime(dateString, duration) {
   return modifiedDate;
 }
 
+function getLocalDateTime() {
+  const today = new Date();
+
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so add 1
+  const day = String(today.getDate()).padStart(2, '0');
+  const hours = String(today.getHours()).padStart(2, '0'); // Local hours
+  const minutes = String(today.getMinutes()).padStart(2, '0'); // Local minutes
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 // Example usage:
 const result = addDurationToDateTime("2024-10-07T14:00", "2:30");
 console.log(result); // This will print the modified date-time string
@@ -52,7 +64,9 @@ console.log(result); // This will print the modified date-time string
 const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedDate,setSelectedDate }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
-  const todayDate = new Date()
+  const todayDate = getLocalDateTime();
+
+  console.log({todayDate})
   const [formData, setFormData] = useState({
     id:`job${myEvents.length+1}`,
     title: "",
@@ -66,7 +80,7 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedD
     scheduleWith:[],
     location: "",
     priority: "",
-    ringAlarm: "",
+    Remind_At: "",
     occurrence: "once",
     start: todayDate,
     end: "",
