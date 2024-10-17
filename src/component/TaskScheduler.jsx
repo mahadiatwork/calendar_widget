@@ -1,5 +1,4 @@
 import {
-  Button,
   CalendarNav,
   CalendarNext,
   CalendarPrev,
@@ -23,8 +22,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import "./test.css";
 import EventForm from "./formComponent/EventForm";
-import { Box, Modal, TextField } from "@mui/material";
+import { Box, Button, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Modal, OutlinedInput, TextField } from "@mui/material";
 import CustomTextField from "./atom/CustomTextField";
+import DrawerComponent from "./DrawerComponent";
 
 setOptions({
   theme: "ios",
@@ -89,12 +89,12 @@ const TaskScheduler = () => {
       endTime: "2024-10-16T10:51:33.490Z",
       duration: 120,
       associateWith: "mark",
-      Type_of_Activity: "presentation",
+      Type_of_Activity: "room_1",
       resource: 12,
       scheduleFor: 19,
       scheduleWith: ["tony", "mahadi", "fahim"],
       location: "halishahar,ctg",
-      priority: 17,
+      priority: 'low',
       Remind_At: "2024-10-16T15:50",
       occurrence: "monthly",
       start: "2024-10-16T08:35:11.320Z",
@@ -111,12 +111,12 @@ const TaskScheduler = () => {
       endTime: "2024-10-16T15:33:07.297Z",
       duration: 60,
       associateWith: "mark",
-      Type_of_Activity: "call_billing",
+      Type_of_Activity: "todo_billing",
       resource: 15,
       scheduleFor: 21,
       scheduleWith: ["tony", "mahadi", "fahim"],
       location: "uttara,dhaka",
-      priority: 16,
+      priority: 'medium',
       Remind_At: "2024-10-16T05:10",
       occurrence: "daily",
       start: "2024-10-16T13:43:33.144Z",
@@ -133,12 +133,12 @@ const TaskScheduler = () => {
       endTime: "2024-10-16T18:58:57.743Z",
       duration: 30,
       associateWith: "mark",
-      Type_of_Activity: "call_billing",
+      Type_of_Activity: "initial_consultation",
       resource: 7,
       scheduleFor: 17,
       scheduleWith: ["tony", "mahadi", "fahim"],
       location: "uttara,dhaka",
-      priority: 21,
+      priority: 'high',
       Remind_At: "2024-10-16T11:59",
       occurrence: "weekly",
       start: "2024-10-16T16:52:57.099Z",
@@ -155,12 +155,12 @@ const TaskScheduler = () => {
       endTime: "2024-10-16T20:49:18.953Z",
       duration: 60,
       associateWith: "mark",
-      Type_of_Activity: "presentation",
+      Type_of_Activity: "meeting",
       resource: 1,
       scheduleFor: 26,
       scheduleWith: ["tony", "mahadi", "fahim"],
       location: "halishahar,ctg",
-      priority: 21,
+      priority: 'low',
       Remind_At: "2024-10-16T14:58",
       occurrence: "monthly",
       start: "2024-10-16T03:00:41.929Z",
@@ -177,12 +177,12 @@ const TaskScheduler = () => {
       endTime: "2024-10-16T08:26:15.556Z",
       duration: 30,
       associateWith: "mark",
-      Type_of_Activity: "call_billing",
+      Type_of_Activity: "meeting",
       resource: 1,
       scheduleFor: 21,
       scheduleWith: ["tony", "mahadi", "fahim"],
       location: "agrabad,ctg",
-      priority: 8,
+      priority: 'medium',
       Remind_At: "2024-10-16T16:00",
       occurrence: "daily",
       start: "2024-10-16T02:51:29.625Z",
@@ -199,12 +199,12 @@ const TaskScheduler = () => {
       endTime: "2024-10-16T07:45:21.123Z",
       duration: 30,
       associateWith: "tony",
-      Type_of_Activity: "meeting",
+      Type_of_Activity: "mail",
       resource: 9,
       scheduleFor: 15,
       scheduleWith: ["tony", "mahadi", "fahim"],
       location: "uttara,dhaka",
-      priority: 11,
+      priority: 'high',
       Remind_At: "2024-10-16T07:00",
       occurrence: "daily",
       start: "2024-10-16T07:15:00.000Z",
@@ -221,12 +221,12 @@ const TaskScheduler = () => {
       endTime: "2024-10-16T10:35:10.321Z",
       duration: 30,
       associateWith: "mahadi",
-      Type_of_Activity: "call_billing",
+      Type_of_Activity: "room_3",
       resource: 14,
       scheduleFor: 25,
       scheduleWith: ["tony", "mahadi", "fahim"],
       location: "halishahar,ctg",
-      priority: 9,
+      priority: 'low',
       Remind_At: "2024-10-16T10:00",
       occurrence: "weekly",
       start: "2024-10-16T10:05:00.000Z",
@@ -243,12 +243,12 @@ const TaskScheduler = () => {
       endTime: "2024-10-16T12:15:22.012Z",
       duration: 30,
       associateWith: "fahim",
-      Type_of_Activity: "presentation",
+      Type_of_Activity: "todo",
       resource: 2,
       scheduleFor: 20,
       scheduleWith: ["tony", "mahadi", "fahim"],
       location: "uttara,dhaka",
-      priority: 20,
+      priority: 'medium',
       Remind_At: "2024-10-16T11:40",
       occurrence: "daily",
       start: "2024-10-16T11:45:00.000Z",
@@ -261,7 +261,8 @@ const TaskScheduler = () => {
   ]);
   const [clickedEvent, setClickedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState();
-
+  const [priorityFilter,setPriorityFilter] = useState([])
+  const [activityTypeFilter, setActivityTypeFilter] = useState([]);
   const [appointments, setAppointments] = useState([
     {
       id: "d1",
@@ -305,7 +306,9 @@ const TaskScheduler = () => {
   const [open, setOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isToastOpen, setToastOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [view, setView] = useState("day");
+  const [filteredEvents, setFilteredEvents] = useState(myEvents);
   const [myView, setMyView] = useState({
     schedule: {
       type: "day",
@@ -314,6 +317,8 @@ const TaskScheduler = () => {
       allDay: false,
     },
   });
+
+ const priority= ['low','medium','high']
   // const myView = useMemo(
   //   () => ({
   //     schedule: {
@@ -527,6 +532,22 @@ const TaskScheduler = () => {
     setToastOpen(false);
   }, []);
 
+  // Call handleFilterEvents when priorityFilter or myEvents change
+  useEffect(() => {
+    let filtered = myEvents;
+
+    if (priorityFilter.length > 0) {
+      filtered = filtered.filter((event) => priorityFilter.includes(event.priority));
+    }
+
+    if (activityTypeFilter.length > 0) {
+      filtered = filtered.filter((event) => activityTypeFilter.includes(event.Type_of_Activity));
+    }
+
+    setFilteredEvents(filtered);
+  }, [priorityFilter, activityTypeFilter, myEvents]);
+  
+  
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
     return (
@@ -536,13 +557,13 @@ const TaskScheduler = () => {
           <SegmentedGroup value={view} onChange={changeView}>
             <Segmented value="month">Month</Segmented>
             <Segmented value="week">Week</Segmented>
-            <Segmented value="day">day</Segmented>
+            <Segmented value="day">Day</Segmented>
           </SegmentedGroup>
         </div>
         <CalendarPrev className="cal-header-prev" />
         <CalendarToday className="cal-header-today" />
         <CalendarNext className="cal-header-next" />
-
+  
         <Datepicker
           controls={["calendar"]}
           calendarType="month"
@@ -552,30 +573,19 @@ const TaskScheduler = () => {
           className="mbsc-textfield"
           inputProps={props}
           onChange={(e) => setSelectedDate(e.value)}
-          // maxHeight={"400px"}
-          // maxWidth={"1000px"}
-          // isOpen={true}
-          // showOnFocus={false}
-          // showOnClick={false}
         />
-
+  
         <Box display={"flex"}>
-          <Dropdown label="priority"  inputStyle="box" labelStyle="inline">
-            <option value="low">low</option>
-            <option value="medium">medium</option>
-            <option value="high">high</option>
-          </Dropdown>
+          <Button variant="contained" size="small" onClick={()=>setDrawerOpen(true)} sx={{right:8}}>Filter</Button>
         </Box>
       </>
     );
-  }, [changeView, view]);
+  }, [view, priorityFilter, changeView]);
 
   useEffect(() => {
     for (const event of myEvents) {
-      // convert dates to date objects
       event.start = event.start ? new Date(event.start) : event.start;
       event.end = event.end ? new Date(event.end) : event.end;
-      // mark past events as fixed by setting the event.editable property to false
       event.editable = !!(event.start && today < event.start);
     }
   }, [myEvents]);
@@ -597,7 +607,7 @@ const TaskScheduler = () => {
       <div className="mbsc-row">
         <div className="mbsc-col-sm-12 docs-appointment-calendar">
           <Eventcalendar
-            data={myEvents}
+            data={filteredEvents}
             view={myView}
             resources={meetings}
             invalid={myInvalid}
@@ -628,6 +638,7 @@ const TaskScheduler = () => {
             onClose={handleCloseToast}
           />
         </div>
+        <DrawerComponent open={drawerOpen} setOpen={setDrawerOpen} priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter} activityTypeFilter={activityTypeFilter} setActivityTypeFilter={setActivityTypeFilter}/>
 
         <Modal
           open={open}
@@ -645,32 +656,6 @@ const TaskScheduler = () => {
             setSelectedDate={setSelectedDate}
           />
         </Modal>
-        {/* <Popup
-          display="center"
-          width={400}
-          contentPadding={false}
-          touchUi={false}
-          headerText="Assign task"
-          buttons={['ok']}
-          // anchor={anchor}
-          isOpen={open}
-          onClose={onClose}
-        >
-          <EventForm />
-        </Popup> */}
-        {/* <div className="mbsc-form-group">
-            <Input label="Task" defaultValue={'title'} readOnly></Input>
-            <Textarea label="Details" defaultValue={'details'} placeholder="Add description..."></Textarea>
-            <Select
-              // data={myData}
-              value={"technician"}
-              // onChange={changeSelected}
-              display="anchored"
-              touchUi={false}
-              label="Technician"
-              placeholder="Please select..."
-            />
-          </div> */}
       </div>
     </div>
   );
