@@ -46,8 +46,8 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
   const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
 
   function addMinutesToDateTime(formatType,durationInMinutes) {
-    // Create a new Date object using the start time from formData
-    console.log(formatType,durationInMinutes)
+    // // Create a new Date object using the start time from formData
+    // console.log(formatType,durationInMinutes)
     if (formatType === "duration") {
       let date = new Date(formData.start);
   
@@ -118,15 +118,15 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
     if (selectedDate) {
       const timeAt6AM = formatTime(selectedDate, 6);
       const timeAt7AM = formatTime(selectedDate, 7);
-      console.log("fahim", timeAt6AM, timeAt7AM);
+      // console.log("fahim", timeAt6AM, timeAt7AM);
       handleInputChange("start", timeAt6AM);
       handleInputChange("end", timeAt7AM);
     } else {
       const now = new Date();
-      console.log(now);
+      // console.log(now);
       const timeAt6AM = formatTime(now, 6);
       const timeAt7AM = formatTime(now, 7);
-      console.log("fahim", timeAt6AM, timeAt7AM);
+      // console.log("fahim", timeAt6AM, timeAt7AM);
       handleInputChange("start", timeAt6AM);
       handleInputChange("end", timeAt7AM);
     }
@@ -222,6 +222,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
             inputComponent={() =>
               customInputComponent("end", "End Time", setOpenEndDatepicker)
             }
+            returnFormat="iso8601"
             onClose={() => setOpenEndDatepicker(false)}
             onChange={(e) => handleInputChange("end", e.value)}
             isOpen={openEndDatepicker}

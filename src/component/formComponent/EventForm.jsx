@@ -1,7 +1,15 @@
 import React from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import { Input, Select, Textarea } from "@mobiscroll/react";
-import { Box, Button, IconButton, Tab, Tabs, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import FirstComponent from "./FirstComponent";
@@ -10,6 +18,10 @@ import ThirdComponent from "./ThirdComponent";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import CloseIcon from "@mui/icons-material/Close";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+const ZOHO = window.ZOHO;
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -32,7 +44,7 @@ function addDurationToDateTime(dateString, duration) {
   let date = new Date(dateString);
 
   // Split the duration into hours and minutes
-  const [hours, minutes] = duration.split(':').map(Number);
+  const [hours, minutes] = duration.split(":").map(Number);
 
   // Add the duration to the date object
   date.setHours(date.getHours() + hours);
@@ -40,7 +52,7 @@ function addDurationToDateTime(dateString, duration) {
 
   // Format the date back to a string (keeping the original format)
   const modifiedDate = date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
-  
+
   return modifiedDate;
 }
 
@@ -48,27 +60,32 @@ function getLocalDateTime() {
   const today = new Date();
 
   const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so add 1
-  const day = String(today.getDate()).padStart(2, '0');
-  const hours = String(today.getHours()).padStart(2, '0'); // Local hours
-  const minutes = String(today.getMinutes()).padStart(2, '0'); // Local minutes
+  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed, so add 1
+  const day = String(today.getDate()).padStart(2, "0");
+  const hours = String(today.getHours()).padStart(2, "0"); // Local hours
+  const minutes = String(today.getMinutes()).padStart(2, "0"); // Local minutes
 
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-// Example usage:
-const result = addDurationToDateTime("2024-10-07T14:00", "2:30");
-console.log(result); // This will print the modified date-time string
-
-
-const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedDate,setSelectedDate }) => {
+const EventForm = ({
+  myEvents,
+  setEvents,
+  setOpen,
+  onClose,
+  clickedEvent,
+  selectedDate,
+  setSelectedDate,
+}) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
   const todayDate = getLocalDateTime();
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
 
-  console.log({todayDate})
+  // console.log({todayDate})
   const [formData, setFormData] = useState({
-    id:`job${myEvents.length+1}`,
+    id: `job${myEvents.length + 1}`,
     title: "",
     startTime: "",
     endTime: "",
@@ -76,8 +93,8 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedD
     associateWith: "",
     Type_of_Activity: "",
     resource: 0,
-    scheduleFor:'',
-    scheduleWith:[],
+    scheduleFor: "",
+    scheduleWith: [],
     location: "",
     priority: "",
     Remind_At: "",
@@ -86,7 +103,7 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedD
     end: "",
     noEndDate: false,
     color: "#d1891f",
-    Banner:false,
+    Banner: false,
   });
 
   const handleChange = (event, newValue) => {
@@ -107,10 +124,10 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedD
       value = parseInt(value, 10); // Convert the input to an integer
     }
 
-    if(field === "scheduleWith"){
+    if (field === "scheduleWith") {
       setFormData((prev) => ({
         ...prev,
-        [field]: Array.isArray(value) ? [...value] : value,  // Spread array values for multiple selections
+        [field]: Array.isArray(value) ? [...value] : value, // Spread array values for multiple selections
       }));
     }
     setFormData((prevState) => ({
@@ -122,8 +139,33 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedD
   const handleSubmit = () => {
     console.log("Form Data Submitted:", formData);
     // Add your submit logic here (e.g., send data to the backend)
-    setEvents((prev) => [...prev, formData]);
-    setOpen(false);
+    // setEvents((prev) => [...prev, formData]);
+    var recordData = {
+      Event_Title: formData.title,
+      Duration_Min: formData.duration.toString(),
+      Type_of_Activity: formData.Type_of_Activity,
+      resource: formData.resource,
+      Venue: formData.location,
+      Event_Priority: formData.priority,
+      Remind_At: dayjs(formData.Remind_At).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
+      // Recurring_Activity: formData.occurrence,
+      Start_DateTime: dayjs(formData.start).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
+      End_DateTime: dayjs(formData.end).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
+      Colour: formData.color,
+      Banner: formData.Banner,
+    };
+    console.log(recordData)
+    ZOHO.CRM.API.insertRecord({
+      Entity: "Events",
+      APIData: recordData,
+      Trigger: ["workflow"],
+    }).then(function (data) {
+      console.log("tazwer", data);
+      handleInputChange('id',data?.data[0].details?.id)
+
+      setEvents((prev) => [...prev, formData]);
+      setOpen(false);
+    });
   };
 
   return (
@@ -199,7 +241,12 @@ const EventForm = ({ myEvents,setEvents, setOpen, onClose,clickedEvent,selectedD
           value={formData.quillContent}
           onChange={(content) => handleInputChange("quillContent", content)}
         /> */}
-        <TextField multiline rows={10} fullWidth onChange={(content) => handleInputChange("quillContent", content)}/>
+        <TextField
+          multiline
+          rows={10}
+          fullWidth
+          onChange={(content) => handleInputChange("quillContent", content)}
+        />
         <Box display="flex" justifyContent="space-between" mt={2}>
           <Button
             size="small"
