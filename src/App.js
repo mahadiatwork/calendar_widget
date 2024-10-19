@@ -60,6 +60,7 @@ function App() {
                 noEndDate: false,
                 color: item.Colour,
                 Banner:item.Banner,
+                Description:item?.Description
               }
             })
             setEvents(x)
@@ -68,33 +69,6 @@ function App() {
       });
     }
   }, [zohoLoaded]);
-
-  // useEffect(()=>{
-  //   const x = data.map((item,index)=>{
-  //     return {
-  //       id:item.id,
-  //       title: item.Event_Title,
-  //       startTime: "",
-  //       endTime: "",
-  //       duration: "",
-  //       associateWith: "",
-  //       Type_of_Activity: item.Type_of_Activity,
-  //       resource: item.resource,
-  //       scheduleFor:'',
-  //       scheduleWith:[],
-  //       location: item.Check_In_Address,
-  //       priority: item.Event_Priority,
-  //       ringAlarm: "",
-  //       occurrence: "once",
-  //       start: item.Start_DateTime,
-  //       end: item.End_DateTime,
-  //       noEndDate: false,
-  //       color: item.Colour,
-  //       Banner:item.Banner,
-  //     }
-  //   })
-  //   setEvents(x)
-  // },[])
 
   console.log({faky:myEvents})
   return (

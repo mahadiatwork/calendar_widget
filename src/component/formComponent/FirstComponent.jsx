@@ -14,8 +14,15 @@ import React from "react";
 import CustomTextField from "../atom/CustomTextField";
 import { useState } from "react";
 import { Datepicker } from "@mobiscroll/react";
+import ContactField from "../atom/ContactField";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import AccountField from "../atom/AccountField";
 
 const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
   const [activityType, setActivityType] = useState([
@@ -93,7 +100,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
         size="small"
         placeholder={placeholder}
         variant="outlined"
-        value={formData[field]}
+        value={( formData[field] !== "")?dayjs(formData[field]).format('YYYY-MM-DDTHH:mm'):null}
         onClick={() => openDatepickerState(true)}
       />
     );
@@ -141,7 +148,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
             size="small"
             placeholder="Event_title"
             variant="outlined"
-            value={formData.Event_title}
+            value={formData.title}
             onChange={(e) => handleInputChange("title", e.target.value)}
           />
         </Grid>
@@ -265,7 +272,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
         </Grid>
 
         <Grid size={12}>
-          <FormControl fullWidth size="small">
+          {/* <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
               sx={{ top: "-5px" }}
@@ -309,11 +316,15 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
                 </MenuItem>
               ))}
             </Select>
-          </FormControl>
+          </FormControl> */}
+          <AccountField
+            value={formData.associateWith} // Use formData
+            handleInputChange={handleInputChange}
+          />
         </Grid>
 
         <Grid size={12}>
-          <FormControl fullWidth size="small">
+          {/* <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
               sx={{ top: "-5px" }}
@@ -356,7 +367,12 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
                 </MenuItem>
               ))}
             </Select>
-          </FormControl>
+          </FormControl> */}
+          <ContactField
+            value={formData.scheduleWith} // Use formData
+            handleInputChange={handleInputChange}
+            // ZOHO={ZOHO}
+          />
         </Grid>
 
         <Grid size={6}>

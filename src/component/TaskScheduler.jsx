@@ -600,7 +600,7 @@ const TaskScheduler = ({myEvents,setEvents}) => {
     setOpen(true);
   };
 
-  // console.log({ myEvents });
+  console.log({ clickedEvent });
 
   return (
     <div className="mbsc-grid mbsc-no-padding">
@@ -654,6 +654,7 @@ const TaskScheduler = ({myEvents,setEvents}) => {
             clickedEvent={clickedEvent}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
+
           />
         </Modal>
       </div>
