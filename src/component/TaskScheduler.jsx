@@ -79,7 +79,7 @@ Appointment.propTypes = {
   data: PropTypes.object.isRequired,
 };
 
-const TaskScheduler = ({myEvents,setEvents}) => {
+const TaskScheduler = ({myEvents,setEvents,users}) => {
   const [clickedEvent, setClickedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState();
   const [priorityFilter,setPriorityFilter] = useState([])
@@ -374,6 +374,8 @@ const TaskScheduler = ({myEvents,setEvents}) => {
   const handleCellDoubleClick = (args) =>{
     console.log(args)
     handleInputChange('start',args.date)
+    handleInputChange('end', dayjs(args.date).add(1, 'hour'))
+    handleInputChange('duration', 60)
     const selectedActivity = activityType.find(
       (item) => item.resource === args.resource
     );
@@ -537,6 +539,7 @@ const TaskScheduler = ({myEvents,setEvents}) => {
             formData={formData}
             handleInputChange={handleInputChange}
             setFormData={setFormData}
+            users={users}
           />
         </Modal>
       </div>

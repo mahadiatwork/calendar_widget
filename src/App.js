@@ -8,8 +8,7 @@ const ZOHO = window.ZOHO;
 function App() {
   const [myEvents, setEvents] = useState([]);
   const [zohoLoaded, setZohoLoaded] = useState(false);
-  const [recordId, setRecordId] = useState();
-  const [moduleName, setModuleName] = useState();
+  const [users, setUsers] = useState();
 
   async function initZoho() {
     ZOHO.embeddedApp.on("PageLoad", async function (data) {
@@ -67,13 +66,22 @@ function App() {
         }
         // setEvents(d?.data)
       });
+
+      ZOHO.CRM.API.getAllRecords({
+        Entity: "users",
+        sort_order: "asc",
+        per_page: 100,
+        page: 1,
+      }).then((usersResponse)=>{
+        setUsers(usersResponse.users)
+      })
     }
   }, [zohoLoaded]);
 
   console.log({faky:myEvents})
   return (
     <div>
-      <TaskScheduler myEvents={myEvents} setEvents={setEvents}/>
+      <TaskScheduler myEvents={myEvents} setEvents={setEvents} users={users}/>
       {/* <TaskScheduler /> */}
     </div>
   );

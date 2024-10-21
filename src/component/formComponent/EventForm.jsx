@@ -81,6 +81,7 @@ const EventForm = ({
   formData,
   setFormData,
   handleInputChange,
+  users
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
@@ -254,7 +255,7 @@ const EventForm = ({
         top: "50%",
         left: "50%",
         transform: "translate(-50%, -50%)",
-        width: 600,
+        width: 650,
         bgcolor: "background.paper",
         border: "2px solid #000",
         boxShadow: 24,
@@ -294,6 +295,7 @@ const EventForm = ({
           selectedDate={selectedDate}
           activityType={activityType}
           setActivityType={setActivityType}
+          users={users}
         />
         <Box display="flex" justifyContent="space-between" mt={2}>
           <Button size="small" disabled>

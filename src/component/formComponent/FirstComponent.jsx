@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -20,7 +21,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import AccountField from "../atom/AccountField";
 
-const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType,setActivityType }) => {
+const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType,setActivityType,users }) => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
@@ -94,7 +95,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
         size="small"
         placeholder={placeholder}
         variant="outlined"
-        value={( formData[field] !== "")?dayjs(formData[field]).format('YYYY-MM-DDTHH:mm'):null}
+        value={( formData[field] !== "")?dayjs(formData[field]).format('DD/MM/YYYY h:mm A'):null}
         onClick={() => openDatepickerState(true)}
         
       />
@@ -391,37 +392,37 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
 
         <Grid size={6}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
-            <InputLabel
-              id="demo-simple-select-standard-label"
-              sx={{ top: "-5px" }}
-            >
-              Schedule for ...
-            </InputLabel>
-            <Select
-              labelId="demo-simple-select-standard-label"
-              id="demo-simple-select-standard"
-              label="Schedule for"
-              fullWidth
-              value={formData.scheduleFor}
-              onChange={(e) => handleInputChange("scheduleFor", e.target.value)}
-              sx={{
-                "& .MuiSelect-select": {
-                  padding: "3px 10px", // Adjust the padding to shrink the Select content
-                },
-                "& .MuiOutlinedInput-root": {
-                  // height: '40px', // Set a consistent height
-                  padding: 0, // Ensure no extra padding
-                },
-                "& .MuiInputBase-input": {
-                  display: "flex",
-                  alignItems: "center", // Align the content vertically
-                },
+          <Autocomplete
+              id="schedule-for-autocomplete"
+              size="small"
+              options={
+                users && users.length > 0
+                  ? users.map((user) => user.full_name)
+                  : []
+              }
+              getOptionLabel={(option) => option || ""}
+              value={formData.scheduleFor || ""} // Use formData
+              onChange={(event, newValue) => {
+                handleInputChange("scheduleFor", newValue || "");
               }}
-            >
-              <MenuItem value={10}>Low</MenuItem>
-              <MenuItem value={20}>Medium</MenuItem>
-              <MenuItem value={30}>High</MenuItem>
-            </Select>
+              renderInput={(params) => (
+                <TextField
+                  size="small"
+                  {...params}
+                  label="Schedule for ..."
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      padding: 0,
+                    },
+                    "& .MuiInputBase-input": {
+                      padding: "3px 10px",
+                      display: "flex",
+                      alignItems: "center",
+                    },
+                  }}
+                />
+              )}
+            />
           </FormControl>
         </Grid>
         <Grid size={6}>
