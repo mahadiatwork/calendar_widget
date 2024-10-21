@@ -74,40 +74,42 @@ const EventForm = ({
   setEvents,
   setOpen,
   onClose,
-  clickedEvent,
+  activityType,
+  setActivityType,
   selectedDate,
   setSelectedDate,
+  formData,
+  setFormData,
+  handleInputChange,
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
   const todayDate = getLocalDateTime();
   dayjs.extend(utc);
   dayjs.extend(timezone);
-  const newEvent = clickedEvent?.event;
-
   console.log({ myEvents });
-  const [formData, setFormData] = useState({
-    id: newEvent?.id || "",
-    title: newEvent?.title || "",
-    startTime: "",
-    endTime: "",
-    duration: parseInt(newEvent?.duration) || 0,
-    associateWith: newEvent?.associateWith || "",
-    Type_of_Activity: newEvent?.Type_of_Activity?.toLowerCase() || "",
-    resource: newEvent?.resource || 0,
-    scheduleFor: newEvent?.scheduleFor || "",
-    scheduleWith: newEvent?.scheduleWith || [],
-    location: newEvent?.location || "",
-    priority: newEvent?.priority?.toLowerCase() || "",
-    Remind_At: newEvent?.ringAlarm || "",
-    occurrence: newEvent?.occurrence || "once",
-    start: newEvent?.start || todayDate,
-    end: newEvent?.end || "",
-    noEndDate: false,
-    color: newEvent?.color || "#d1891f",
-    Banner: newEvent?.Banner || false,
-    Description: newEvent?.Description || "",
-  });
+  // const [formData, setFormData] = useState({
+  //   id: newEvent?.id || "",
+  //   title: newEvent?.title || "",
+  //   startTime: "",
+  //   endTime: "",
+  //   duration: parseInt(newEvent?.duration) || 0,
+  //   associateWith: newEvent?.associateWith || "",
+  //   Type_of_Activity: newEvent?.Type_of_Activity?.toLowerCase() || "",
+  //   resource: newEvent?.resource || 0,
+  //   scheduleFor: newEvent?.scheduleFor || "",
+  //   scheduleWith: newEvent?.scheduleWith || [],
+  //   location: newEvent?.location || "",
+  //   priority: newEvent?.priority?.toLowerCase() || "",
+  //   Remind_At: newEvent?.ringAlarm || "",
+  //   occurrence: newEvent?.occurrence || "once",
+  //   start: newEvent?.start || todayDate,
+  //   end: newEvent?.end || "",
+  //   noEndDate: false,
+  //   color: newEvent?.color || "#d1891f",
+  //   Banner: newEvent?.Banner || false,
+  //   Description: newEvent?.Description || "",
+  // });
 
   console.log({ formData });
 
@@ -124,21 +126,31 @@ const EventForm = ({
     if (value > 0) setValue(value - 1); // Decrement to previous tab
   };
 
-  const handleInputChange = (field, value) => {
-    if (field === "resource") {
-      value = parseInt(value, 10); // Convert the input to an integer
-    }
-
-    if (field === "scheduleWith") {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: Array.isArray(value) ? [...value] : value, // Spread array values for multiple selections
-      }));
-    }
-    setFormData((prevState) => ({
-      ...prevState,
-      [field]: value,
-    }));
+  const handleClose = () => {
+    setFormData({
+      id: "",
+      title: "",
+      startTime: "",
+      endTime: "",
+      duration: 0,
+      associateWith: null,
+      Type_of_Activity: "",
+      resource: 0,
+      scheduleFor: "",
+      scheduleWith: [],
+      location: "",
+      priority: "",
+      Remind_At: "",
+      occurrence: "once",
+      start: "",
+      end: "",
+      noEndDate: false,
+      color: "#d1891f",
+      Banner: false,
+      Description: "",
+    });
+    onClose();
+    setOpen(false);
   };
 
   const handleSubmit = () => {
@@ -155,12 +167,34 @@ const EventForm = ({
       ZOHO.CRM.API.updateRecord(config).then(function (data) {
         console.log("tazwer", data);
         if (data.data[0].code === "SUCCESS") {
-          alert("Event Updated Successfully")
+          alert("Event Updated Successfully");
           setEvents((prevEvents) =>
             prevEvents.map((event) =>
               event.id === formData.id ? formData : event
             )
           );
+          setFormData({
+            id: "",
+            title: "",
+            startTime: "",
+            endTime: "",
+            duration: 0,
+            associateWith: null,
+            Type_of_Activity: "",
+            resource: 0,
+            scheduleFor: "",
+            scheduleWith: [],
+            location: "",
+            priority: "",
+            Remind_At: "",
+            occurrence: "once",
+            start: "",
+            end: "",
+            noEndDate: false,
+            color: "#d1891f",
+            Banner: false,
+            Description: "",
+          });
           setOpen(false);
         }
       });
@@ -182,40 +216,34 @@ const EventForm = ({
             handleInputChange("id", data?.data[0].details?.id);
 
             setEvents((prev) => [...prev, formData]);
+            setFormData({
+              id: "",
+              title: "",
+              startTime: "",
+              endTime: "",
+              duration: 0,
+              associateWith: null,
+              Type_of_Activity: "",
+              resource: 0,
+              scheduleFor: "",
+              scheduleWith: [],
+              location: "",
+              priority: "",
+              Remind_At: "",
+              occurrence: "once",
+              start: "",
+              end: "",
+              noEndDate: false,
+              color: "#d1891f",
+              Banner: false,
+              Description: "",
+            });
             setOpen(false);
           }
         })
         .catch((error) => {
           console.error("Error submitting the form:", error);
         });
-
-      // var recordData = {
-      //   Event_Title: formData.title,
-      //   Duration_Min: formData.duration.toString(),
-      //   Type_of_Activity: formData.Type_of_Activity,
-      //   resource: formData.resource,
-      //   Venue: formData.location,
-      //   Event_Priority: formData.priority,
-      //   Remind_At: dayjs(formData.Remind_At).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
-      //   // Recurring_Activity: formData.occurrence,
-      //   Start_DateTime: dayjs(formData.start).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
-      //   End_DateTime: dayjs(formData.end).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
-      //   Colour: formData.color,
-      //   Banner: formData.Banner,
-      //   Description: formData.Description,
-      // };
-      // console.log(recordData)
-      // ZOHO.CRM.API.insertRecord({
-      //   Entity: "Events",
-      //   APIData: recordData,
-      //   Trigger: ["workflow"],
-      // }).then(function (data) {
-      //   // console.log("tazwer", data);
-      //   handleInputChange('id',data?.data[0].details?.id)
-
-      //   setEvents((prev) => [...prev, formData]);
-      //   setOpen(false);
-      // });
     }
   };
 
@@ -237,10 +265,7 @@ const EventForm = ({
       <Box height={15}>
         <IconButton
           aria-label="close"
-          onClick={() => {
-            onClose();
-            setOpen(false);
-          }}
+          onClick={() => handleClose()}
           sx={{
             position: "absolute",
             right: 8,
@@ -267,6 +292,8 @@ const EventForm = ({
           formData={formData}
           handleInputChange={handleInputChange}
           selectedDate={selectedDate}
+          activityType={activityType}
+          setActivityType={setActivityType}
         />
         <Box display="flex" justifyContent="space-between" mt={2}>
           <Button size="small" disabled>

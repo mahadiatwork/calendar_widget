@@ -77,7 +77,7 @@ export default function AccountField({
           (option) =>
             typeof option === "string" ? option : option.Account_Name // Assuming accounts have an 'Account_Name' property
         }
-        value={value.name || selectedRowData?.What_Id.name || null} // Set default value based on selectedRowData What_Id
+        value={value?.name || selectedRowData?.What_Id.name || null} // Set default value based on selectedRowData What_Id
         onChange={(event, newValue) => {
           handleInputChange("associateWith", newValue); // Handle the selected value
         }}

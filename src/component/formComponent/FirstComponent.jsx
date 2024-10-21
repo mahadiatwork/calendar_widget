@@ -20,35 +20,29 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import AccountField from "../atom/AccountField";
 
-const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
+const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType,setActivityType }) => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
-  const [activityType, setActivityType] = useState([
-    { type: "meeting", resource: 1 },
-    { type: "todo", resource: 2 },
-    { type: "appointment", resource: 3 },
-    { type: "boardroom", resource: 4 },
-    { type: "call_billing", resource: 5 },
-    { type: "email_billing", resource: 6 },
-    { type: "initial_consultation", resource: 7 },
-    { type: "call", resource: 8 },
-    { type: "mail", resource: 9 },
-    { type: "meeting_billing", resource: 10 },
-    { type: "personal_activity", resource: 11 },
-    { type: "room_1", resource: 12 },
-    { type: "room_2", resource: 13 },
-    { type: "room_3", resource: 14 },
-    { type: "todo_billing", resource: 15 },
-    { type: "vacation", resource: 16 },
-  ]);
-  const [associateWith, setAssociateWith] = useState([
-    "mark",
-    "tony",
-    "mahadi",
-    "fahim",
-  ]);
+  // const [activityType, setActivityType] = useState([
+  //   { type: "meeting", resource: 1 },
+  //   { type: "todo", resource: 2 },
+  //   { type: "appointment", resource: 3 },
+  //   { type: "boardroom", resource: 4 },
+  //   { type: "call_billing", resource: 5 },
+  //   { type: "email_billing", resource: 6 },
+  //   { type: "initial_consultation", resource: 7 },
+  //   { type: "call", resource: 8 },
+  //   { type: "mail", resource: 9 },
+  //   { type: "meeting_billing", resource: 10 },
+  //   { type: "personal_activity", resource: 11 },
+  //   { type: "room_1", resource: 12 },
+  //   { type: "room_2", resource: 13 },
+  //   { type: "room_3", resource: 14 },
+  //   { type: "todo_billing", resource: 15 },
+  //   { type: "vacation", resource: 16 },
+  // ]);
   const [openDatepicker, setOpenDatepicker] = useState(false);
   const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
 
@@ -102,6 +96,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
         variant="outlined"
         value={( formData[field] !== "")?dayjs(formData[field]).format('YYYY-MM-DDTHH:mm'):null}
         onClick={() => openDatepickerState(true)}
+        
       />
     );
   };
@@ -138,6 +133,25 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
       handleInputChange("end", timeAt7AM);
     }
   };
+
+  function getTimeDifference(end) {
+    const startDate = new Date(formData.start);
+    const endDate = new Date(end);
+    const diffInMs = endDate - startDate;
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    return diffInMinutes
+  }
+
+  const handleEndDateChange = (e)=>{
+    handleInputChange("end", e.value)
+    console.log('end',e.value)
+    const getDiffInMinutes = getTimeDifference(e.value)
+    handleInputChange("duration", getDiffInMinutes)
+    console.log({getDiffInMinutes})
+    // if (formData.end ) {
+    //   console.log('hello')
+    // }
+  }
 
   return (
     <Box>
@@ -231,7 +245,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate }) => {
             }
             returnFormat="iso8601"
             onClose={() => setOpenEndDatepicker(false)}
-            onChange={(e) => handleInputChange("end", e.value)}
+            onChange={(e) => handleEndDateChange(e)}
             isOpen={openEndDatepicker}
           />
         </Grid>

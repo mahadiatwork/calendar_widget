@@ -23,8 +23,13 @@ import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import "./test.css";
 import EventForm from "./formComponent/EventForm";
 import { Box, Button, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Modal, OutlinedInput, TextField } from "@mui/material";
-import CustomTextField from "./atom/CustomTextField";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import DrawerComponent from "./DrawerComponent";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 setOptions({
   theme: "ios",
@@ -38,14 +43,8 @@ const formatTime = (date, hour) => {
 };
 
 const now = new Date();
-const startTime = formatTime(now, 6); // Get 6 AM
-const endTime = formatTime(now, 8); // Get 7 AM
 const today = now.toISOString().slice(0, 16);
-const yesterday = new Date(
-  now.getFullYear(),
-  now.getMonth(),
-  now.getDate() - 1
-);
+
 
 const Appointment = (props) => {
   const [draggable, setDraggable] = useState();
@@ -81,225 +80,27 @@ Appointment.propTypes = {
 };
 
 const TaskScheduler = ({myEvents,setEvents}) => {
-  // const [myEvents, setEvents] = useState([
-  //   {
-  //     id: "job1",
-  //     title: "hello 1",
-  //     startTime: "2024-10-16T09:51:41.349Z",
-  //     endTime: "2024-10-16T10:51:33.490Z",
-  //     duration: 120,
-  //     associateWith: "mark",
-  //     Type_of_Activity: "room_1",
-  //     resource: 12,
-  //     scheduleFor: 19,
-  //     scheduleWith: ["tony", "mahadi", "fahim"],
-  //     location: "halishahar,ctg",
-  //     priority: 'low',
-  //     Remind_At: "2024-10-16T15:50",
-  //     occurrence: "monthly",
-  //     start: "2024-10-16T08:35:11.320Z",
-  //     end: "2024-10-16T12:22:24.587Z",
-  //     noEndDate: false,
-  //     color: "#3498db",
-  //     Banner: false,
-  //     editable: false,
-  //   },
-  //   {
-  //     id: "job2",
-  //     title: "hello 2",
-  //     startTime: "2024-10-16T14:33:50.110Z",
-  //     endTime: "2024-10-16T15:33:07.297Z",
-  //     duration: 60,
-  //     associateWith: "mark",
-  //     Type_of_Activity: "todo_billing",
-  //     resource: 15,
-  //     scheduleFor: 21,
-  //     scheduleWith: ["tony", "mahadi", "fahim"],
-  //     location: "uttara,dhaka",
-  //     priority: 'medium',
-  //     Remind_At: "2024-10-16T05:10",
-  //     occurrence: "daily",
-  //     start: "2024-10-16T13:43:33.144Z",
-  //     end: "2024-10-16T08:11:21.703Z",
-  //     noEndDate: false,
-  //     color: "#8c225a",
-  //     Banner: false,
-  //     editable: false,
-  //   },
-  //   {
-  //     id: "job3",
-  //     title: "hello 3",
-  //     startTime: "2024-10-16T17:58:01.234Z",
-  //     endTime: "2024-10-16T18:58:57.743Z",
-  //     duration: 30,
-  //     associateWith: "mark",
-  //     Type_of_Activity: "initial_consultation",
-  //     resource: 7,
-  //     scheduleFor: 17,
-  //     scheduleWith: ["tony", "mahadi", "fahim"],
-  //     location: "uttara,dhaka",
-  //     priority: 'high',
-  //     Remind_At: "2024-10-16T11:59",
-  //     occurrence: "weekly",
-  //     start: "2024-10-16T16:52:57.099Z",
-  //     end: "2024-10-16T18:39:17.269Z",
-  //     noEndDate: false,
-  //     color: "#8c225a",
-  //     Banner: false,
-  //     editable: false,
-  //   },
-  //   {
-  //     id: "job4",
-  //     title: "hello 4",
-  //     startTime: "2024-10-16T20:00:40.999Z",
-  //     endTime: "2024-10-16T20:49:18.953Z",
-  //     duration: 60,
-  //     associateWith: "mark",
-  //     Type_of_Activity: "meeting",
-  //     resource: 1,
-  //     scheduleFor: 26,
-  //     scheduleWith: ["tony", "mahadi", "fahim"],
-  //     location: "halishahar,ctg",
-  //     priority: 'low',
-  //     Remind_At: "2024-10-16T14:58",
-  //     occurrence: "monthly",
-  //     start: "2024-10-16T03:00:41.929Z",
-  //     end: "2024-10-16T08:22:47.996Z",
-  //     noEndDate: false,
-  //     color: "#2ecc71",
-  //     Banner: false,
-  //     editable: false,
-  //   },
-  //   {
-  //     id: "job5",
-  //     title: "hello 5",
-  //     startTime: "2024-10-16T08:02:52.513Z",
-  //     endTime: "2024-10-16T08:26:15.556Z",
-  //     duration: 30,
-  //     associateWith: "mark",
-  //     Type_of_Activity: "meeting",
-  //     resource: 1,
-  //     scheduleFor: 21,
-  //     scheduleWith: ["tony", "mahadi", "fahim"],
-  //     location: "agrabad,ctg",
-  //     priority: 'medium',
-  //     Remind_At: "2024-10-16T16:00",
-  //     occurrence: "daily",
-  //     start: "2024-10-16T02:51:29.625Z",
-  //     end: "2024-10-16T17:27:37.238Z",
-  //     noEndDate: false,
-  //     color: "#3498db",
-  //     Banner: false,
-  //     editable: false,
-  //   },
-  //   {
-  //     id: "job6",
-  //     title: "hello 6",
-  //     startTime: "2024-10-16T07:15:21.123Z",
-  //     endTime: "2024-10-16T07:45:21.123Z",
-  //     duration: 30,
-  //     associateWith: "tony",
-  //     Type_of_Activity: "mail",
-  //     resource: 9,
-  //     scheduleFor: 15,
-  //     scheduleWith: ["tony", "mahadi", "fahim"],
-  //     location: "uttara,dhaka",
-  //     priority: 'high',
-  //     Remind_At: "2024-10-16T07:00",
-  //     occurrence: "daily",
-  //     start: "2024-10-16T07:15:00.000Z",
-  //     end: "2024-10-16T07:45:00.000Z",
-  //     noEndDate: false,
-  //     color: "#e74c3c",
-  //     Banner: false,
-  //     editable: false,
-  //   },
-  //   {
-  //     id: "job7",
-  //     title: "hello 7",
-  //     startTime: "2024-10-16T10:05:10.321Z",
-  //     endTime: "2024-10-16T10:35:10.321Z",
-  //     duration: 30,
-  //     associateWith: "mahadi",
-  //     Type_of_Activity: "room_3",
-  //     resource: 14,
-  //     scheduleFor: 25,
-  //     scheduleWith: ["tony", "mahadi", "fahim"],
-  //     location: "halishahar,ctg",
-  //     priority: 'low',
-  //     Remind_At: "2024-10-16T10:00",
-  //     occurrence: "weekly",
-  //     start: "2024-10-16T10:05:00.000Z",
-  //     end: "2024-10-16T10:35:00.000Z",
-  //     noEndDate: false,
-  //     color: "#f39c12",
-  //     Banner: false,
-  //     editable: false,
-  //   },
-  //   {
-  //     id: "job8",
-  //     title: "hello 8",
-  //     startTime: "2024-10-16T11:45:22.012Z",
-  //     endTime: "2024-10-16T12:15:22.012Z",
-  //     duration: 30,
-  //     associateWith: "fahim",
-  //     Type_of_Activity: "todo",
-  //     resource: 2,
-  //     scheduleFor: 20,
-  //     scheduleWith: ["tony", "mahadi", "fahim"],
-  //     location: "uttara,dhaka",
-  //     priority: 'medium',
-  //     Remind_At: "2024-10-16T11:40",
-  //     occurrence: "daily",
-  //     start: "2024-10-16T11:45:00.000Z",
-  //     end: "2024-10-16T12:15:00.000Z",
-  //     noEndDate: false,
-  //     color: "#16a085",
-  //     Banner: false,
-  //     editable: false,
-  //   },
-  // ]);
   const [clickedEvent, setClickedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState();
   const [priorityFilter,setPriorityFilter] = useState([])
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
-  const [appointments, setAppointments] = useState([
-    {
-      id: "d1",
-      title: "Winfred Lesley",
-      job: "Teeth whitening",
-      color: "#d1891f",
-      start: "2024-09-27T08:00",
-      end: "2024-09-27T09:30",
-      unscheduled: true,
-    },
-    {
-      id: "d2",
-      title: "Rosalin Delice",
-      job: "Crown and bridge",
-      color: "#1ca11a",
-      start: "2024-09-27T08:00",
-      end: "2024-09-27T10:00",
-      unscheduled: true,
-    },
-    {
-      id: "d3",
-      title: "Macy Steven",
-      job: "Root canal treatment",
-      color: "#cb3939",
-      start: "2024-09-27T10:00",
-      end: "2024-09-27T12:30",
-      unscheduled: true,
-    },
-    {
-      id: "d4",
-      title: "Lavern Cameron",
-      job: "Tartar removal",
-      color: "#a446b5",
-      start: "2024-09-27T12:00",
-      end: "2024-09-27T13:00",
-      unscheduled: true,
-    },
+  const [activityType, setActivityType] = useState([
+    { type: "meeting", resource: 1 },
+    { type: "todo", resource: 2 },
+    { type: "appointment", resource: 3 },
+    { type: "boardroom", resource: 4 },
+    { type: "call_billing", resource: 5 },
+    { type: "email_billing", resource: 6 },
+    { type: "initial_consultation", resource: 7 },
+    { type: "call", resource: 8 },
+    { type: "mail", resource: 9 },
+    { type: "meeting_billing", resource: 10 },
+    { type: "personal_activity", resource: 11 },
+    { type: "room_1", resource: 12 },
+    { type: "room_2", resource: 13 },
+    { type: "room_3", resource: 14 },
+    { type: "todo_billing", resource: 15 },
+    { type: "vacation", resource: 16 },
   ]);
 
   const [myColors, setColors] = useState([]);
@@ -317,7 +118,30 @@ const TaskScheduler = ({myEvents,setEvents}) => {
       allDay: false,
     },
   });
-
+  const newEvent = clickedEvent?.event;
+  
+  const [formData, setFormData] = useState({
+    id: newEvent?.id || "",
+    title: newEvent?.title || "",
+    startTime: "",
+    endTime: "",
+    duration: parseInt(newEvent?.duration) || 0,
+    associateWith: newEvent?.associateWith || null,
+    Type_of_Activity: newEvent?.Type_of_Activity?.toLowerCase() || "",
+    resource: newEvent?.resource || 0,
+    scheduleFor: newEvent?.scheduleFor || "",
+    scheduleWith: newEvent?.scheduleWith || [],
+    location: newEvent?.location || "",
+    priority: newEvent?.priority?.toLowerCase() || "",
+    Remind_At: newEvent?.ringAlarm || "",
+    occurrence: newEvent?.occurrence || "once",
+    start: newEvent?.start || '',
+    end: newEvent?.end || "",
+    noEndDate: false,
+    color: newEvent?.color || "#d1891f",
+    Banner: newEvent?.Banner || false,
+    Description: newEvent?.Description || "",
+  });
  const priority= ['low','medium','high']
   // const myView = useMemo(
   //   () => ({
@@ -475,9 +299,6 @@ const TaskScheduler = ({myEvents,setEvents}) => {
     setToastMessage(args.event.title + " added");
     setToastOpen(true);
     setEvents((prevEvents) => [...prevEvents, args.event]);
-    setAppointments((prevAppointments) =>
-      prevAppointments.filter((item) => item.id !== args.event.id)
-    );
   }, []);
 
   const handleFailed = useCallback((event) => {
@@ -532,6 +353,40 @@ const TaskScheduler = ({myEvents,setEvents}) => {
     setToastOpen(false);
   }, []);
 
+  ////my code
+  const handleInputChange = (field, value) => {
+    if (field === "resource") {
+      value = parseInt(value, 10); // Convert the input to an integer
+    }
+
+    if (field === "scheduleWith") {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: Array.isArray(value) ? [...value] : value, // Spread array values for multiple selections
+      }));
+    }
+    setFormData((prevState) => ({
+      ...prevState,
+      [field]: value,
+    }));
+  };
+
+  const handleCellDoubleClick = (args) =>{
+    console.log(args)
+    handleInputChange('start',args.date)
+    const selectedActivity = activityType.find(
+      (item) => item.resource === args.resource
+    );
+
+    if (selectedActivity) {
+      // Update both the activity type and the resource
+      handleInputChange("Type_of_Activity", selectedActivity.type);
+      handleInputChange("resource", selectedActivity.resource);
+    }
+    setOpen(true)
+  }
+
+  
   // Call handleFilterEvents when priorityFilter or myEvents change
   useEffect(() => {
     let filtered = myEvents;
@@ -597,7 +452,31 @@ const TaskScheduler = ({myEvents,setEvents}) => {
   const handleEventClick = (args) => {
     console.log({ args });
     setClickedEvent(args);
-    setOpen(true);
+    setFormData({
+      id: args?.event?.id ,
+      title: args?.event?.title ,
+      startTime: "",
+      endTime: "",
+      duration: parseInt(args?.event?.duration),
+      associateWith: args?.event?.associateWith,
+      Type_of_Activity: args?.event?.Type_of_Activity?.toLowerCase() ,
+      resource: args?.event?.resource,
+      scheduleFor: args?.event?.scheduleFor ,
+      scheduleWith: args?.event?.scheduleWith,
+      location: args?.event?.location ,
+      priority: args?.event?.priority?.toLowerCase() ,
+      Remind_At: args?.event?.ringAlarm ,
+      occurrence: args?.event?.occurrence,
+      start:dayjs(args?.event?.start).format('YYYY-MM-DDTHH:mm'),
+      end: dayjs(args?.event?.end).format('YYYY-MM-DDTHH:mm'),
+      noEndDate: false,
+      color: args?.event?.color,
+      Banner: args?.event?.Banner,
+      Description: args?.event?.Description ,
+    })
+    setOpen(true)
+    // setTimeout(setOpen(true), 500)
+    
   };
 
   console.log({ clickedEvent });
@@ -621,7 +500,7 @@ const TaskScheduler = ({myEvents,setEvents}) => {
             // height={"500px"}
             selectedDate={selectedDate}
             colors={myColors}
-            onCellDoubleClick={() => setOpen(true)}
+            onCellDoubleClick={handleCellDoubleClick}
             onEventClick={handleEventClick}
             renderHeader={customWithNavButtons}
             onEventCreate={handleEventCreate}
@@ -651,10 +530,13 @@ const TaskScheduler = ({myEvents,setEvents}) => {
             setEvents={setEvents}
             setOpen={setOpen}
             onClose={onClose}
-            clickedEvent={clickedEvent}
+            activityType={activityType}
+            setActivityType={setActivityType}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
-
+            formData={formData}
+            handleInputChange={handleInputChange}
+            setFormData={setFormData}
           />
         </Modal>
       </div>
