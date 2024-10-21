@@ -146,35 +146,16 @@ const EventForm = ({
     // Add your submit logic here (e.g., send data to the backend)
     // setEvents((prev) => [...prev, formData]);
     if (formData.id !== "") {
+      const transformedData = transformFormSubmission(formData);
       var config = {
         Entity: "Events",
-        APIData: {
-          id: formData.id,
-          Event_Title: formData.title,
-          Duration_Min: formData.duration.toString(),
-          Type_of_Activity: formData.Type_of_Activity,
-          resource: formData.resource,
-          Venue: formData.location,
-          Event_Priority: formData.priority,
-          Remind_At: dayjs(formData.Remind_At)
-            .tz("Australia/Adelaide")
-            .format("YYYY-MM-DDTHH:mm:ssZ"),
-          // Recurring_Activity: formData.occurrence,
-          Start_DateTime: dayjs(formData.start)
-            .tz("Australia/Adelaide")
-            .format("YYYY-MM-DDTHH:mm:ssZ"),
-          End_DateTime: dayjs(formData.end)
-            .tz("Australia/Adelaide")
-            .format("YYYY-MM-DDTHH:mm:ssZ"),
-          Colour: formData.color,
-          Banner: formData.Banner,
-          Description: formData.Description,
-        },
+        APIData: transformedData,
         Trigger: ["workflow"],
       };
       ZOHO.CRM.API.updateRecord(config).then(function (data) {
         console.log("tazwer", data);
         if (data.data[0].code === "SUCCESS") {
+          alert("Event Updated Successfully")
           setEvents((prevEvents) =>
             prevEvents.map((event) =>
               event.id === formData.id ? formData : event
