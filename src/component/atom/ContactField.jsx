@@ -1,10 +1,20 @@
-import { Autocomplete, TextField, Button, Box, Typography } from "@mui/material";
+import {
+  Autocomplete,
+  TextField,
+  Button,
+  Box,
+  Typography,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 const ZOHO = window.ZOHO;
 
-export default function ContactField({ value, handleInputChange,  selectedRowData }) {
+export default function ContactField({
+  value,
+  handleInputChange,
+  selectedRowData,
+}) {
   const [contacts, setContacts] = useState([]); // Contacts fetched from Zoho
   const [selectedParticipants, setSelectedParticipants] = useState([]); // Selected values in autocomplete
   const [inputValue, setInputValue] = useState(""); // Store the input text
@@ -69,7 +79,9 @@ export default function ContactField({ value, handleInputChange,  selectedRowDat
         }
       } catch (error) {
         console.error("Error during advanced search:", error);
-        setNotFoundMessage("An error occurred while searching. Please try again.");
+        setNotFoundMessage(
+          "An error occurred while searching. Please try again."
+        );
       }
     } else {
       setNotFoundMessage("Please enter a valid search term.");
@@ -84,7 +96,7 @@ export default function ContactField({ value, handleInputChange,  selectedRowDat
       newValue.map((contact) => ({
         name: contact.Full_Name,
         participant: contact.id,
-        type: contact.type
+        type: contact.type,
       }))
     );
   };
@@ -125,7 +137,26 @@ export default function ContactField({ value, handleInputChange,  selectedRowDat
             fullWidth
             size="small"
             variant="outlined"
-            label="Scheduled with"
+            placeholder="Scheduled with"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                padding: "0px", // Reduce padding inside the input field
+                minHeight: "30px", // Adjust the height of the input box
+                height:"30px"
+              },
+              "& .MuiInputBase-input": {
+                padding: "0px 8px", // Adjust the inner input padding
+                minHeight: "30px", // Match the input height
+                height:'30px',
+                display: "flex",
+                alignItems: "center",
+              },
+              "& .MuiChip-root": {
+                height: "20px", // Reduce the size of selected option chips
+                margin: "0px", // Adjust margin between chips
+                fontSize: "10px", // Reduce chip text size
+              },
+            }}
           />
         )}
       />

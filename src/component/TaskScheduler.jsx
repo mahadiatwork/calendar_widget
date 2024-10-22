@@ -85,22 +85,22 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
   const [priorityFilter,setPriorityFilter] = useState([])
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
   const [activityType, setActivityType] = useState([
-    { type: "meeting", resource: 1 },
-    { type: "todo", resource: 2 },
-    { type: "appointment", resource: 3 },
-    { type: "boardroom", resource: 4 },
-    { type: "call_billing", resource: 5 },
-    { type: "email_billing", resource: 6 },
-    { type: "initial_consultation", resource: 7 },
-    { type: "call", resource: 8 },
-    { type: "mail", resource: 9 },
-    { type: "meeting_billing", resource: 10 },
-    { type: "personal_activity", resource: 11 },
-    { type: "room_1", resource: 12 },
-    { type: "room_2", resource: 13 },
-    { type: "room_3", resource: 14 },
-    { type: "todo_billing", resource: 15 },
-    { type: "vacation", resource: 16 },
+    { type: "Meeting", resource: 1 },
+    { type: "To-Do", resource: 2 },
+    { type: "Appointment", resource: 3 },
+    { type: "Boardroom", resource: 4 },
+    { type: "Call Billing", resource: 5 },
+    { type: "Email Billing", resource: 6 },
+    { type: "Initial Consultation", resource: 7 },
+    { type: "Call", resource: 8 },
+    { type: "Mail", resource: 9 },
+    { type: "Meeting Billing", resource: 10 },
+    { type: "Personal Activity", resource: 11 },
+    { type: "Room 1", resource: 12 },
+    { type: "Room 2", resource: 13 },
+    { type: "Room 3", resource: 14 },
+    { type: "To Do Billing", resource: 15 },
+    { type: "Vacation", resource: 16 },
   ]);
 
   const [myColors, setColors] = useState([]);

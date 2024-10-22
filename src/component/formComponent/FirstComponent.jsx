@@ -21,7 +21,14 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import AccountField from "../atom/AccountField";
 
-const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType,setActivityType,users }) => {
+const FirstComponent = ({
+  formData,
+  handleInputChange,
+  selectedDate,
+  activityType,
+  setActivityType,
+  users,
+}) => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
@@ -47,32 +54,34 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
   const [openDatepicker, setOpenDatepicker] = useState(false);
   const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
 
-  function addMinutesToDateTime(formatType,durationInMinutes) {
+  function addMinutesToDateTime(formatType, durationInMinutes) {
     // // Create a new Date object using the start time from formData
     // console.log(formatType,durationInMinutes)
     if (formatType === "duration") {
       let date = new Date(formData.start);
-  
-      date.setMinutes(date.getMinutes() + parseInt(durationInMinutes, 10)); 
-      const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  
-      const modifiedDate = localDate.toISOString().slice(0, 16); 
+
+      date.setMinutes(date.getMinutes() + parseInt(durationInMinutes, 10));
+      const localDate = new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      );
+
+      const modifiedDate = localDate.toISOString().slice(0, 16);
 
       handleInputChange("end", modifiedDate);
-    }else{
+    } else {
       let date = new Date(formData.start);
 
-      date.setMinutes(date.getMinutes() - parseInt(durationInMinutes, 10)); 
+      date.setMinutes(date.getMinutes() - parseInt(durationInMinutes, 10));
 
-      const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      const localDate = new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      );
 
-      const modifiedDate = localDate.toISOString().slice(0, 16); 
+      const modifiedDate = localDate.toISOString().slice(0, 16);
 
       handleInputChange("Remind_At", modifiedDate);
     }
-   
-}
-
+  }
 
   const handleActivityChange = (event) => {
     const selectedType = event.target.value;
@@ -91,13 +100,16 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
     return (
       <CustomTextField
         fullWidth
-        disabled={formData.Banner ? true :false }
+        disabled={formData.Banner ? true : false}
         size="small"
         placeholder={placeholder}
         variant="outlined"
-        value={( formData[field] !== "")?dayjs(formData[field]).format('DD/MM/YYYY h:mm A'):null}
+        value={
+          formData[field] !== ""
+            ? dayjs(formData[field]).format("DD/MM/YYYY h:mm A")
+            : null
+        }
         onClick={() => openDatepickerState(true)}
-        
       />
     );
   };
@@ -140,19 +152,19 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
     const endDate = new Date(end);
     const diffInMs = endDate - startDate;
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    return diffInMinutes
+    return diffInMinutes;
   }
 
-  const handleEndDateChange = (e)=>{
-    handleInputChange("end", e.value)
-    console.log('end',e.value)
-    const getDiffInMinutes = getTimeDifference(e.value)
-    handleInputChange("duration", getDiffInMinutes)
-    console.log({getDiffInMinutes})
+  const handleEndDateChange = (e) => {
+    handleInputChange("end", e.value);
+    console.log("end", e.value);
+    const getDiffInMinutes = getTimeDifference(e.value);
+    handleInputChange("duration", getDiffInMinutes);
+    console.log({ getDiffInMinutes });
     // if (formData.end ) {
     //   console.log('hello')
     // }
-  }
+  };
 
   return (
     <Box>
@@ -264,7 +276,10 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
               label="Duration"
               fullWidth
               value={formData.duration}
-              onChange={(e) => {handleInputChange("duration", e.target.value); addMinutesToDateTime("duration",e.target.value)}}
+              onChange={(e) => {
+                handleInputChange("duration", e.target.value);
+                addMinutesToDateTime("duration", e.target.value);
+              }}
               sx={{
                 "& .MuiSelect-select": {
                   padding: "3px 10px", // Adjust the padding to shrink the Select content
@@ -279,8 +294,10 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
                 },
               }}
             >
-              {durations.map((minute,index)=>(
-              <MenuItem key={index} value={minute}>{minute} minutes</MenuItem>
+              {durations.map((minute, index) => (
+                <MenuItem key={index} value={minute}>
+                  {minute} minutes
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -392,7 +409,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
 
         <Grid size={6}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
-          <Autocomplete
+            <Autocomplete
               id="schedule-for-autocomplete"
               size="small"
               options={
@@ -409,15 +426,19 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
                 <TextField
                   size="small"
                   {...params}
-                  label="Schedule for ..."
+                  placeholder="Schedule for ..."
                   sx={{
                     "& .MuiOutlinedInput-root": {
-                      padding: 0,
+                      padding: "0px", // Remove padding around the input
+                      minHeight: "28px", // Set a minimum height for the input field
+                      height: "28px", // Set the desired height
                     },
                     "& .MuiInputBase-input": {
-                      padding: "3px 10px",
+                      padding: "1px 6px", // Adjust padding inside the input
+                      minHeight: "30px", // Match the input's height
                       display: "flex",
                       alignItems: "center",
+                      fontSize: "14px", // Optionally reduce the font size for more compact design
                     },
                   }}
                 />
@@ -465,8 +486,8 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
                 },
               }}
             >
-              <MenuItem value={'low'}>Low</MenuItem>
-              <MenuItem value={'medium'}>Medium</MenuItem>
+              <MenuItem value={"low"}>Low</MenuItem>
+              <MenuItem value={"medium"}>Medium</MenuItem>
               <MenuItem value={"high"}>High</MenuItem>
             </Select>
           </FormControl>
@@ -485,7 +506,7 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
               label="Ring Alarm"
               fullWidth
               value={formData.ringAlarm}
-              onChange={(e) =>addMinutesToDateTime("remindAt",e.target.value)}
+              onChange={(e) => addMinutesToDateTime("remindAt", e.target.value)}
               sx={{
                 "& .MuiSelect-select": {
                   padding: "3px 10px", // Adjust the padding to shrink the Select content
@@ -500,8 +521,10 @@ const FirstComponent = ({ formData, handleInputChange, selectedDate,activityType
                 },
               }}
             >
-              {[5,10,15,20,25,30].map((ring,index)=>(
-                <MenuItem key={index} value={ring}>{ring} minutes</MenuItem>
+              {[5, 10, 15, 20, 25, 30].map((ring, index) => (
+                <MenuItem key={index} value={ring}>
+                  {ring} minutes
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
