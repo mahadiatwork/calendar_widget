@@ -52,7 +52,7 @@ function App() {
                 scheduleWith:item.Participants,
                 location: item.Venue,
                 priority: item.Event_Priority,
-                ringAlarm: item.Remind_At,
+                ringAlarm: item.Reminder_at,
                 occurrence: item.Recurring_Activity,
                 start: item.Start_DateTime,
                 end: item.End_DateTime,

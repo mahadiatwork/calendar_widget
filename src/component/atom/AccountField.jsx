@@ -102,6 +102,7 @@ export default function AccountField({
             </Typography>
           )
         }
+        limitTags={2}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -109,18 +110,18 @@ export default function AccountField({
             size="small"
             variant="outlined"
             placeholder="Associate with"
-            InputProps={{
-              ...params.InputProps,
-              sx: {
-                height: "32px", // You can adjust this height value as needed
-                padding: "0", // Reduce padding inside the input
-                fontSize: "14px", // Adjust font size if necessary
-              },
-            }}
             sx={{
               "& .MuiOutlinedInput-root": {
-                height: "32px", // Adjust the height of the input box
-                minHeight: "32px", // Optional: to ensure consistent height
+                padding: "0px", // Remove padding around the input
+                minHeight: "28px", // Set a minimum height for the input field
+                height: "28px", // Set the desired height
+              },
+              "& .MuiInputBase-input": {
+                padding: "1px 6px", // Adjust padding inside the input
+                minHeight: "30px", // Match the input's height
+                display: "flex",
+                alignItems: "center",
+                fontSize: "14px", // Optionally reduce the font size for more compact design
               },
             }}
           />

@@ -303,6 +303,20 @@ const FirstComponent = ({
           </FormControl>
         </Grid>
 
+        <Grid size={12} alignItems={"center"}>
+          <FormControlLabel
+          sx={{height:'35px'}}
+            control={
+              <Checkbox
+              size="small"
+                checked={formData.Banner}
+                onChange={handleBannerChecked}
+              />
+            }
+            label="Banner/Timeless"
+          />
+        </Grid>
+
         <Grid size={12}>
           {/* <FormControl fullWidth size="small">
             <InputLabel
@@ -457,7 +471,7 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={3}>
+        <Grid size={4}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -492,7 +506,7 @@ const FirstComponent = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={3}>
+        <Grid size={4}>
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -529,7 +543,7 @@ const FirstComponent = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={3}>
+        <Grid size={4}>
           <CustomTextField
             type="color"
             label="color"
@@ -538,7 +552,7 @@ const FirstComponent = ({
             onChange={(e) => handleInputChange("color", e.target.value)}
           />
         </Grid>
-        <Grid size={3} alignItems={"center"}>
+        {/* <Grid size={3} alignItems={"center"}>
           <FormControlLabel
             control={
               <Checkbox
@@ -548,7 +562,7 @@ const FirstComponent = ({
             }
             label="Banner"
           />
-        </Grid>
+        </Grid> */}
       </Grid>
 
       <FormControlLabel

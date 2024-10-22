@@ -100,6 +100,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
               controls={["calendar",'time']}
               calendarType="month"
               display="center"
+              disabled
               calendarScroll={"vertical"}
               inputComponent={() => (
                 <CustomInputComponent field="endTime" />
