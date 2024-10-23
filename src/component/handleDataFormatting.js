@@ -4,7 +4,7 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export function transformFormSubmission(data) {
+export function transformFormSubmission(data,individualParticipant = null) {
   const transformScheduleWithToParticipants = (scheduleWith) => {
     return scheduleWith.map((contact) => ({
       name: contact?.name || null,
@@ -16,8 +16,16 @@ export function transformFormSubmission(data) {
   const participantsFromScheduleWith = data.scheduleWith
     ? transformScheduleWithToParticipants(data.scheduleWith)
     : [];
+    const participants = individualParticipant
+    ? [
+        {
+          name: individualParticipant.Full_Name || null,
+          type: "contact",
+          participant: individualParticipant.participant || null,
+        },
+      ]
+    : transformScheduleWithToParticipants(data.scheduledWith || []);
 
-    console.log({participantsFromScheduleWith})
   let transformedData = {
     ...data,
     Event_Title:data.title,

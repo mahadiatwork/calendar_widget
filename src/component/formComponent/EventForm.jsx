@@ -200,51 +200,100 @@ const EventForm = ({
         }
       });
     } else {
-      const transformedData = transformFormSubmission(formData);
-      console.log({ transformedData });
-      ZOHO.CRM.API.insertRecord({
-        Entity: "Events",
-        APIData: transformedData,
-        Trigger: ["workflow"],
-      })
-        .then((data) => {
-          if (
-            data.data &&
-            data.data.length > 0 &&
-            data.data[0].code === "SUCCESS"
-          ) {
-            alert("Event Created Successfully");
-            handleInputChange("id", data?.data[0].details?.id);
-
-            setEvents((prev) => [...prev, formData]);
-            setFormData({
-              id: "",
-              title: "",
-              startTime: "",
-              endTime: "",
-              duration: 0,
-              associateWith: null,
-              Type_of_Activity: "",
-              resource: 0,
-              scheduleFor: "",
-              scheduleWith: [],
-              location: "",
-              priority: "",
-              Remind_At: "",
-              occurrence: "once",
-              start: "",
-              end: "",
-              noEndDate: false,
-              color: "#d1891f",
-              Banner: false,
-              Description: "",
+      if (formData.create_sperate_contact) {
+        for (let participant of formData?.scheduleWith) {
+          const transformedData = transformFormSubmission(formData,participant);
+          ZOHO.CRM.API.insertRecord({
+            Entity: "Events",
+            APIData: transformedData,
+            Trigger: ["workflow"],
+          })
+            .then((data) => {
+              if (
+                data.data &&
+                data.data.length > 0 &&
+                data.data[0].code === "SUCCESS"
+              ) {
+                alert("Event Created Successfully");
+                handleInputChange("id", data?.data[0].details?.id);
+    
+                setEvents((prev) => [...prev, formData]);
+                setFormData({
+                  id: "",
+                  title: "",
+                  startTime: "",
+                  endTime: "",
+                  duration: 0,
+                  associateWith: null,
+                  Type_of_Activity: "",
+                  resource: 0,
+                  scheduleFor: "",
+                  scheduleWith: [],
+                  location: "",
+                  priority: "",
+                  Remind_At: "",
+                  occurrence: "once",
+                  start: "",
+                  end: "",
+                  noEndDate: false,
+                  color: "#d1891f",
+                  Banner: false,
+                  Description: "",
+                });
+                setOpen(false);
+              }
+            })
+            .catch((error) => {
+              console.error("Error submitting the form:", error);
             });
-            setOpen(false);
-          }
-        })
-        .catch((error) => {
-          console.error("Error submitting the form:", error);
-        });
+        }
+      }else{
+        const transformedData = transformFormSubmission(formData);
+          ZOHO.CRM.API.insertRecord({
+            Entity: "Events",
+            APIData: transformedData,
+            Trigger: ["workflow"],
+          })
+            .then((data) => {
+              if (
+                data.data &&
+                data.data.length > 0 &&
+                data.data[0].code === "SUCCESS"
+              ) {
+                alert("Event Created Successfully");
+                handleInputChange("id", data?.data[0].details?.id);
+    
+                setEvents((prev) => [...prev, formData]);
+                setFormData({
+                  id: "",
+                  title: "",
+                  startTime: "",
+                  endTime: "",
+                  duration: 0,
+                  associateWith: null,
+                  Type_of_Activity: "",
+                  resource: 0,
+                  scheduleFor: "",
+                  scheduleWith: [],
+                  location: "",
+                  priority: "",
+                  Remind_At: "",
+                  occurrence: "once",
+                  start: "",
+                  end: "",
+                  noEndDate: false,
+                  color: "#d1891f",
+                  Banner: false,
+                  Description: "",
+                });
+                setOpen(false);
+              }
+            })
+            .catch((error) => {
+              console.error("Error submitting the form:", error);
+            });
+      }
+     
     }
   };
 
@@ -302,14 +351,25 @@ const EventForm = ({
             Back
           </Button>{" "}
           {/* Back is disabled on first tab */}
+          <Box>
           <Button
             size="small"
             variant="contained"
             color="primary"
             onClick={handleNext}
+            sx={{mr:2}}
           >
             Next
           </Button>
+          <Button
+            size="small"
+            variant="contained"
+            color="secondary"
+            onClick={handleSubmit}
+          >
+            Submit
+          </Button>
+          </Box>
         </Box>
       </TabPanel>
       <TabPanel value={value} index={1}>
@@ -338,14 +398,25 @@ const EventForm = ({
           >
             Back
           </Button>
+          <Box>
           <Button
             size="small"
             variant="contained"
             color="primary"
             onClick={handleNext}
+            sx={{mr:2}}
           >
             Next
           </Button>
+          <Button
+            size="small"
+            variant="contained"
+            color="secondary"
+            onClick={handleSubmit}
+          >
+            Submit
+          </Button>
+          </Box>
         </Box>
       </TabPanel>
       <TabPanel value={value} index={2}>

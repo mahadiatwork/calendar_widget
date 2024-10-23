@@ -567,7 +567,7 @@ const FirstComponent = ({
         </Grid> */}
         <Grid size={8}>
           <FormControlLabel
-            control={<Checkbox />}
+            control={<Checkbox checked={formData.create_sperate_contact} onChange={(e)=>handleInputChange("create_sperate_contact",e.target.value)}/>}
             label="Create separate activity for each contact"
           />
         </Grid>

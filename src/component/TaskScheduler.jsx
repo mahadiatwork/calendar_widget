@@ -141,6 +141,7 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     color: newEvent?.color || "#d1891f",
     Banner: newEvent?.Banner || false,
     Description: newEvent?.Description || "",
+    create_sperate_contact:false
   });
  const priority= ['low','medium','high']
   // const myView = useMemo(
@@ -461,7 +462,7 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
       endTime: "",
       duration: parseInt(args?.event?.duration),
       associateWith: args?.event?.associateWith,
-      Type_of_Activity: args?.event?.Type_of_Activity?.toLowerCase() ,
+      Type_of_Activity: args?.event?.Type_of_Activity ,
       resource: args?.event?.resource,
       scheduleFor: args?.event?.scheduleFor ,
       scheduleWith: args?.event?.scheduleWith,
