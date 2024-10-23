@@ -133,7 +133,7 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     scheduleWith: newEvent?.scheduleWith || [],
     location: newEvent?.location || "",
     priority: newEvent?.priority?.toLowerCase() || "",
-    Remind_At: newEvent?.ringAlarm || "",
+    Reminder_at: newEvent?.ringAlarm || "",
     occurrence: newEvent?.occurrence || "once",
     start: newEvent?.start || '',
     end: newEvent?.end || "",

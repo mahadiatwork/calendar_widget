@@ -14,9 +14,10 @@ export default function ContactField({
   value,
   handleInputChange,
   selectedRowData,
+  formData
 }) {
   const [contacts, setContacts] = useState([]); // Contacts fetched from Zoho
-  const [selectedParticipants, setSelectedParticipants] = useState([]); // Selected values in autocomplete
+  const [selectedParticipants, setSelectedParticipants] = useState( formData?.scheduleWith||[]); // Selected values in autocomplete
   const [inputValue, setInputValue] = useState(""); // Store the input text
   const [notFoundMessage, setNotFoundMessage] = useState("");
 

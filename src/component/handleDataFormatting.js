@@ -7,18 +7,17 @@ dayjs.extend(timezone);
 export function transformFormSubmission(data) {
   const transformScheduleWithToParticipants = (scheduleWith) => {
     return scheduleWith.map((contact) => ({
-      Email: contact.Email || null,
-      name: contact.Full_Name || null,
-      invited: false,
+      name: contact?.name || null,
       type: "contact",
-      participant: contact.id || null,
-      status: "not_known",
+      participant: contact?.participant || null,
     }));
   };
 
   const participantsFromScheduleWith = data.scheduleWith
     ? transformScheduleWithToParticipants(data.scheduleWith)
     : [];
+
+    console.log({participantsFromScheduleWith})
   let transformedData = {
     ...data,
     Event_Title:data.title,
@@ -37,7 +36,7 @@ export function transformFormSubmission(data) {
     se_module: "Accounts",
 
     // Combine the manually set participants and those from `scheduleWith`
-    Participants: data.scheduledWith,
+    Participants: participantsFromScheduleWith,
     Duration_Min: data.duration.toString(),
     Venue:data.location,
     Colour:data.color

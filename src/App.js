@@ -8,7 +8,7 @@ const ZOHO = window.ZOHO;
 function App() {
   const [myEvents, setEvents] = useState([]);
   const [zohoLoaded, setZohoLoaded] = useState(false);
-  const [users, setUsers] = useState();
+  const [users, setUsers] = useState([]);
 
   async function initZoho() {
     ZOHO.embeddedApp.on("PageLoad", async function (data) {
@@ -49,10 +49,10 @@ function App() {
                 Type_of_Activity: item.Type_of_Activity,
                 resource: item.resource,
                 scheduleFor:'',
-                scheduleWith:item.Participants,
+                scheduleWith:[...item.Participants],
                 location: item.Venue,
                 priority: item.Event_Priority,
-                ringAlarm: item.Reminder_at,
+                Reminder_at: item.Reminder_at,
                 occurrence: item.Recurring_Activity,
                 start: item.Start_DateTime,
                 end: item.End_DateTime,
@@ -62,6 +62,7 @@ function App() {
                 Description:item?.Description
               }
             })
+            console.log({x})
             setEvents(x)
         }
         // setEvents(d?.data)
@@ -73,7 +74,12 @@ function App() {
         per_page: 100,
         page: 1,
       }).then((usersResponse)=>{
-        setUsers(usersResponse.users)
+        console.log({usersResponse})
+        usersResponse?.users?.map((user,index)=>{
+          if (user.status === "active") {
+            setUsers((prev)=>[...prev,user])
+          }
+        })
       })
     }
   }, [zohoLoaded]);
