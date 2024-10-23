@@ -10,6 +10,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Typography,
 } from "@mui/material";
 import React from "react";
 import CustomTextField from "../atom/CustomTextField";
@@ -305,10 +306,10 @@ const FirstComponent = ({
 
         <Grid size={12} alignItems={"center"}>
           <FormControlLabel
-          sx={{height:'35px'}}
+            sx={{ height: "35px" }}
             control={
               <Checkbox
-              size="small"
+                size="small"
                 checked={formData.Banner}
                 onChange={handleBannerChecked}
               />
@@ -421,7 +422,7 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={6}>
+        <Grid size={12}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <Autocomplete
               id="schedule-for-autocomplete"
@@ -460,18 +461,11 @@ const FirstComponent = ({
             />
           </FormControl>
         </Grid>
-        <Grid size={6}>
-          <CustomTextField
-            fullWidth
-            size="small"
-            placeholder="Location"
-            variant="outlined"
-            value={formData.location}
-            onChange={(e) => handleInputChange("location", e.target.value)}
-          />
-        </Grid>
+        {/* <Grid size={6}>
+          
+        </Grid> */}
 
-        <Grid size={4}>
+        <Grid size={3}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -506,7 +500,7 @@ const FirstComponent = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={4}>
+        <Grid size={3}>
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -543,13 +537,21 @@ const FirstComponent = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={4}>
-          <CustomTextField
+        <Grid size={6}>
+          {/* <CustomTextField
             type="color"
             label="color"
             fullWidth
             value={formData.color}
             onChange={(e) => handleInputChange("color", e.target.value)}
+          /> */}
+          <CustomTextField
+            fullWidth
+            size="small"
+            placeholder="Location"
+            variant="outlined"
+            value={formData.location}
+            onChange={(e) => handleInputChange("location", e.target.value)}
           />
         </Grid>
         {/* <Grid size={3} alignItems={"center"}>
@@ -563,12 +565,30 @@ const FirstComponent = ({
             label="Banner"
           />
         </Grid> */}
-      </Grid>
+        <Grid size={8}>
+          <FormControlLabel
+            control={<Checkbox />}
+            label="Create separate activity for each contact"
+          />
+        </Grid>
 
-      <FormControlLabel
-        control={<Checkbox />}
-        label="Create separate activity for each contact"
-      />
+        <Grid size={4} sx={{display:'flex',alignItems:'center'}}>
+          <Box display="flex" alignItems="center"  p={0} >
+            <Typography
+              variant="body1"
+              sx={{ minWidth: "60px", fontWeight: "bold" }}
+            >
+              Color
+            </Typography>
+            <input
+              type="color"
+              name="color"
+              value={formData.color}
+              onChange={(e) => handleInputChange("color", e.target.value)}
+            />
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

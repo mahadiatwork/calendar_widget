@@ -39,6 +39,8 @@ export function transformFormSubmission(data) {
     // Combine the manually set participants and those from `scheduleWith`
     Participants: data.scheduledWith,
     Duration_Min: data.duration.toString(),
+    Venue:data.location,
+    Colour:data.color
   };
 //   delete transformedData.scheduleWith;
 //   delete transformedData.scheduleFor;
