@@ -110,6 +110,7 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [view, setView] = useState("day");
   const [filteredEvents, setFilteredEvents] = useState(myEvents);
+  const [userFilter, setUserFilter] = useState([]);
   const [myView, setMyView] = useState({
     schedule: {
       type: "day",
@@ -141,20 +142,10 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     color: newEvent?.color || "#d1891f",
     Banner: newEvent?.Banner || false,
     Description: newEvent?.Description || "",
-    create_sperate_contact:false
+    create_sperate_contact:false,
+    Regarding:newEvent?.Regarding||""
   });
  const priority= ['low','medium','high']
-  // const myView = useMemo(
-  //   () => ({
-  //     schedule: {
-  //       type: "day",
-  //       startTime: "08:00",
-  //       endTime: "20:00",
-  //       allDay: false,
-  //     },
-  //   }),
-  //   []
-  // );
 
   const changeView = useCallback((event) => {
     let myView;
@@ -482,7 +473,7 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     
   };
 
-  console.log({ clickedEvent });
+  console.log(formData.Reminder_at);
 
   return (
     <div className="mbsc-grid mbsc-no-padding">

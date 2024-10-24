@@ -19,7 +19,7 @@ export function transformFormSubmission(data,individualParticipant = null) {
     const participants = individualParticipant
     ? [
         {
-          name: individualParticipant.Full_Name || null,
+          name: individualParticipant.name || null,
           type: "contact",
           participant: individualParticipant.participant || null,
         },
@@ -44,7 +44,7 @@ export function transformFormSubmission(data,individualParticipant = null) {
     se_module: "Accounts",
 
     // Combine the manually set participants and those from `scheduleWith`
-    Participants: participantsFromScheduleWith,
+    Participants: participants,
     Duration_Min: data.duration.toString(),
     Venue:data.location,
     Colour:data.color

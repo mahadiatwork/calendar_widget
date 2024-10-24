@@ -1,5 +1,5 @@
-import React from 'react';
-import { TextField } from '@mui/material';
+import React from "react";
+import { TextField } from "@mui/material";
 
 const CustomTextField = ({ onChange, value, ...props }) => {
   return (
@@ -7,15 +7,16 @@ const CustomTextField = ({ onChange, value, ...props }) => {
       variant="outlined"
       size="small"
       fullWidth
-      autoComplete='off'
+      autoComplete="off"
       value={value}
+      InputLabelProps={{ shrink: true }}
       onChange={onChange}
-      {...props} 
+      {...props}
       sx={{
-        '& .MuiOutlinedInput-root': {
-          padding: '2px', 
-          '& input': {
-            padding: '0px 10px',
+        "& .MuiOutlinedInput-root": {
+          padding: "2px",
+          "& input": {
+            padding: "0px 10px",
           },
         },
       }}

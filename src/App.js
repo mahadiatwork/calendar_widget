@@ -59,7 +59,8 @@ function App() {
                 noEndDate: false,
                 color: item.Colour,
                 Banner:item.Banner,
-                Description:item?.Description
+                Description:item?.Description,
+                Regarding:item?.Regarding
               }
             })
             console.log({x})

@@ -17,63 +17,70 @@ export default function ContactField({
   formData
 }) {
   const [contacts, setContacts] = useState([]); // Contacts fetched from Zoho
-  const [selectedParticipants, setSelectedParticipants] = useState( formData?.scheduleWith||[]); // Selected values in autocomplete
+  const [selectedParticipants, setSelectedParticipants] = useState(
+    selectedRowData?.Participants || []
+  ); // Selected values in autocomplete
   const [inputValue, setInputValue] = useState(""); // Store the input text
   const [notFoundMessage, setNotFoundMessage] = useState("");
 
-  // Extract participants from selectedRowData and set them as the default value
-  useEffect(() => {
-    if (value) {
-      const defaultParticipants = value.map((participant) => ({
-        Full_Name: participant.name, // Use Full_Name to match contacts
-        id: participant.participant,
-      }));
+  // Sync selectedParticipants with value and selectedRowData
+  React.useEffect(() => {
+    if (selectedRowData?.Participants?.length > 0) {
+      // Otherwise, if selectedRowData is available, use it as the default
+      const defaultParticipants = selectedRowData.Participants.map(
+        (participant) => ({
+          Full_Name: participant.name, // Match with Full_Name for Autocomplete
+          id: participant.participant,
+        })
+      );
       setSelectedParticipants(defaultParticipants);
     }
-  }, [selectedRowData]);
+  }, [selectedRowData, contacts]);
 
-  // Fetch contacts from Zoho CRM
-  useEffect(() => {
-    async function getData() {
-      if (ZOHO) {
-        const usersResponse = await ZOHO.CRM.API.getAllRecords({
-          Entity: "Contacts",
-          sort_order: "asc",
-          per_page: 100,
-          page: 1,
-        });
-        // Assuming Zoho returns contacts with Full_Name, map the result correctly
-        if (usersResponse?.data) {
-          const formattedContacts = usersResponse.data.map((contact) => ({
-            Full_Name: contact.Full_Name,
-            id: contact.id,
-          }));
-          setContacts(formattedContacts); // Store contacts in correct structure
-        }
-      }
-    }
-    getData();
-  }, [ZOHO]);
-
-  const handleAdvancedSearch = async () => {
+  const handleSearch = async (searchType) => {
     setNotFoundMessage(""); // Reset the message
 
-    // Perform advanced search using inputValue
     if (ZOHO && inputValue) {
       try {
-        const searchCriteria = `(First_Name:equals:${inputValue})`; // Search criteria
-        const searchResults = await ZOHO.CRM.API.searchRecord({
-          Entity: "Contacts",
-          Type: "criteria",
-          Query: searchCriteria,
-        });
+        let searchResults;
+
+        // Set the search method based on the search type
+        if (searchType === "firstName") {
+          // Search by first name using criteria
+          const searchCriteria = `(First_Name:equals:${inputValue})`;
+          searchResults = await ZOHO.CRM.API.searchRecord({
+            Entity: "Contacts",
+            Type: "criteria",
+            Query: searchCriteria,
+          });
+        } else if (searchType === "fullName") {
+          // Search by full name using "word" type, which performs a full-text search
+          searchResults = await ZOHO.CRM.API.searchRecord({
+            Entity: "Contacts",
+            Type: "word", // Full-text search
+            Query: inputValue,
+          });
+        }
 
         if (searchResults.data && searchResults.data.length > 0) {
           const formattedContacts = searchResults.data.map((contact) => ({
             Full_Name: contact.Full_Name,
             id: contact.id,
           }));
-          setContacts(formattedContacts); // Update contacts list with search results
+
+          // Merge new search results with the previously selected participants
+          const mergedContacts = [
+            ...formattedContacts,
+            ...selectedParticipants,
+          ];
+
+          // Remove duplicates (in case the search result includes already selected contacts)
+          const uniqueContacts = mergedContacts.filter(
+            (contact, index, self) =>
+              index === self.findIndex((c) => c.id === contact.id)
+          );
+
+          setContacts(uniqueContacts); // Update contacts list with merged data
           setNotFoundMessage(""); // Clear the "Not Found" message
         } else {
           setNotFoundMessage(`"${inputValue}" not found in the database`); // Show "Not Found" message
@@ -98,9 +105,12 @@ export default function ContactField({
         name: contact.Full_Name,
         participant: contact.id,
         type: contact.type,
+        // type: "contact",
       }))
     );
   };
+
+  console.log({ data: selectedRowData?.Participants });
 
   return (
     <Box>
@@ -126,7 +136,7 @@ export default function ContactField({
             <Button
               variant="text"
               startIcon={<SearchIcon />}
-              onClick={handleAdvancedSearch}
+              onClick={()=> handleSearch("fullName")}
               sx={{ color: "#1976d2", textTransform: "none" }}
             >
               Search First Name

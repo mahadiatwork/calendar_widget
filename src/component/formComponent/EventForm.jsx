@@ -367,7 +367,8 @@ const EventForm = ({
             color="secondary"
             onClick={handleSubmit}
           >
-            Submit
+            {formData.id !== ""? 'Update': "Submit"}
+            {/* Submit */}
           </Button>
           </Box>
         </Box>
@@ -414,7 +415,8 @@ const EventForm = ({
             color="secondary"
             onClick={handleSubmit}
           >
-            Submit
+            {formData.id !== ""? 'Update': "Submit"}
+            {/* Submit */}
           </Button>
           </Box>
         </Box>
@@ -439,7 +441,8 @@ const EventForm = ({
             color="secondary"
             onClick={handleSubmit}
           >
-            Submit
+            {formData.id !== ""? 'Update': "Submit"}
+            {/* Submit */}
           </Button>{" "}
           {/* Next is disabled on the last tab */}
         </Box>

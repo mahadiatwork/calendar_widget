@@ -21,6 +21,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import AccountField from "../atom/AccountField";
+import RegardingField from "../atom/RegardingField";
 
 const FirstComponent = ({
   formData,
@@ -97,13 +98,13 @@ const FirstComponent = ({
     }
   };
 
-  const customInputComponent = (field, placeholder, openDatepickerState) => {
+  const customInputComponent = (field, label, openDatepickerState) => {
     return (
       <CustomTextField
         fullWidth
         disabled={formData.Banner ? true : false}
         size="small"
-        placeholder={placeholder}
+        label={label}
         variant="outlined"
         value={
           formData[field] !== ""
@@ -174,7 +175,7 @@ const FirstComponent = ({
           <CustomTextField
             fullWidth
             size="small"
-            placeholder="Event_title"
+            label="Event_title"
             variant="outlined"
             value={formData.title}
             onChange={(e) => handleInputChange("title", e.target.value)}
@@ -277,6 +278,7 @@ const FirstComponent = ({
               label="Duration"
               fullWidth
               value={formData.duration}
+              disabled={formData.Banner? true :false}
               onChange={(e) => {
                 handleInputChange("duration", e.target.value);
                 addMinutesToDateTime("duration", e.target.value);
@@ -371,50 +373,6 @@ const FirstComponent = ({
         </Grid>
 
         <Grid size={12}>
-          {/* <FormControl fullWidth size="small">
-            <InputLabel
-              id="demo-simple-select-standard-label"
-              sx={{ top: "-5px" }}
-            >
-              Schedule with
-            </InputLabel>
-            <Select
-              labelId="demo-simple-select-standard-label"
-              id="demo-simple-select-standard"
-              label="Schedule with"
-              fullWidth
-              multiple
-              value={formData.scheduleWith} // Use formData.scheduleWith, which is an array
-              onChange={
-                (e) => handleInputChange("scheduleWith", e.target.value) // Ensure this updates as an array
-              }
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    zIndex: 1300, // Increase this if necessary, depending on the z-index of your popup
-                  },
-                },
-              }}
-              sx={{
-                "& .MuiSelect-select": {
-                  padding: "3px 10px", // Adjust the padding to shrink the Select content
-                },
-                "& .MuiOutlinedInput-root": {
-                  padding: 0, // Ensure no extra padding
-                },
-                "& .MuiInputBase-input": {
-                  display: "flex",
-                  alignItems: "center", // Align the content vertically
-                },
-              }}
-            >
-              {associateWith.map((item, index) => (
-                <MenuItem value={item} key={index}>
-                  {item}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl> */}
           <ContactField
             value={formData.scheduleWith} // Use formData
             handleInputChange={handleInputChange}
@@ -441,7 +399,8 @@ const FirstComponent = ({
                 <TextField
                   size="small"
                   {...params}
-                  placeholder="Schedule for ..."
+                  label="Schedule for ..."
+                  InputLabelProps={{ shrink: true }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       padding: "0px", // Remove padding around the input
@@ -461,9 +420,10 @@ const FirstComponent = ({
             />
           </FormControl>
         </Grid>
-        {/* <Grid size={6}>
-          
-        </Grid> */}
+
+        <Grid size={12}>
+          <RegardingField formData={formData} handleInputChange={handleInputChange} />
+        </Grid>
 
         <Grid size={3}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
@@ -548,7 +508,7 @@ const FirstComponent = ({
           <CustomTextField
             fullWidth
             size="small"
-            placeholder="Location"
+            label="Location"
             variant="outlined"
             value={formData.location}
             onChange={(e) => handleInputChange("location", e.target.value)}
@@ -567,7 +527,7 @@ const FirstComponent = ({
         </Grid> */}
         <Grid size={8}>
           <FormControlLabel
-            control={<Checkbox checked={formData.create_sperate_contact} onChange={(e)=>handleInputChange("create_sperate_contact",e.target.value)}/>}
+            control={<Checkbox checked={formData.create_sperate_contact} disabled={formData.id !== ""? true: false} onChange={(e)=>handleInputChange("create_sperate_contact",e.target.value)}/>}
             label="Create separate activity for each contact"
           />
         </Grid>
