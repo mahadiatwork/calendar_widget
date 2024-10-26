@@ -48,11 +48,11 @@ function App() {
                 associateWith: item.What_Id,
                 Type_of_Activity: item.Type_of_Activity,
                 resource: item.resource,
-                scheduleFor:'',
+                scheduleFor:item.Owner,
                 scheduleWith:[...item.Participants],
                 location: item.Venue,
                 priority: item.Event_Priority,
-                Reminder_at: item.Reminder_at,
+                Remind_At: item.Remind_At,
                 occurrence: item.Recurring_Activity,
                 start: item.Start_DateTime,
                 end: item.End_DateTime,
@@ -60,7 +60,8 @@ function App() {
                 color: item.Colour,
                 Banner:item.Banner,
                 Description:item?.Description,
-                Regarding:item?.Regarding
+                Regarding:item?.Regarding,
+                Reminder_Text:item?.Reminder_Text
               }
             })
             console.log({x})

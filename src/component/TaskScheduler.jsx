@@ -22,7 +22,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import "./test.css";
 import EventForm from "./formComponent/EventForm";
-import { Box, Button, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Modal, OutlinedInput, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Modal,
+  OutlinedInput,
+  TextField,
+} from "@mui/material";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -44,7 +55,6 @@ const formatTime = (date, hour) => {
 
 const now = new Date();
 const today = now.toISOString().slice(0, 16);
-
 
 const Appointment = (props) => {
   const [draggable, setDraggable] = useState();
@@ -79,10 +89,10 @@ Appointment.propTypes = {
   data: PropTypes.object.isRequired,
 };
 
-const TaskScheduler = ({myEvents,setEvents,users}) => {
+const TaskScheduler = ({ myEvents, setEvents, users }) => {
   const [clickedEvent, setClickedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState();
-  const [priorityFilter,setPriorityFilter] = useState([])
+  const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
   const [activityType, setActivityType] = useState([
     { type: "Meeting", resource: 1 },
@@ -120,7 +130,7 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     },
   });
   const newEvent = clickedEvent?.event;
-  
+
   const [formData, setFormData] = useState({
     id: newEvent?.id || "",
     title: newEvent?.title || "",
@@ -134,18 +144,18 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     scheduleWith: newEvent?.scheduleWith || [],
     location: newEvent?.location || "",
     priority: newEvent?.priority?.toLowerCase() || "",
-    Reminder_at: newEvent?.ringAlarm || "",
+    Remind_At: newEvent?.Remind_At || "",
     occurrence: newEvent?.occurrence || "once",
-    start: newEvent?.start || '',
+    start: newEvent?.start || "",
     end: newEvent?.end || "",
     noEndDate: false,
     color: newEvent?.color || "#d1891f",
     Banner: newEvent?.Banner || false,
     Description: newEvent?.Description || "",
-    create_sperate_contact:false,
-    Regarding:newEvent?.Regarding||""
+    create_sperate_contact: false,
+    Regarding: newEvent?.Regarding || "",
+    Reminder_Text: newEvent?.Reminder_Text || "",
   });
- const priority= ['low','medium','high']
 
   const changeView = useCallback((event) => {
     let myView;
@@ -153,7 +163,7 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     switch (event.target.value) {
       case "month":
         myView = {
-          calendar: { labels: true,type: 'month' },
+          calendar: { labels: true, type: "month" },
         };
         break;
       case "week":
@@ -363,11 +373,11 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     }));
   };
 
-  const handleCellDoubleClick = (args) =>{
-    console.log(args)
-    handleInputChange('start',args.date)
-    handleInputChange('end', dayjs(args.date).add(1, 'hour'))
-    handleInputChange('duration', 60)
+  const handleCellDoubleClick = (args) => {
+    console.log(args);
+    handleInputChange("start", args.date);
+    handleInputChange("end", dayjs(args.date).add(1, "hour"));
+    handleInputChange("duration", 60);
     const selectedActivity = activityType.find(
       (item) => item.resource === args.resource
     );
@@ -377,26 +387,35 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
       handleInputChange("Type_of_Activity", selectedActivity.type);
       handleInputChange("resource", selectedActivity.resource);
     }
-    setOpen(true)
-  }
+    setOpen(true);
+  };
 
-  
   // Call handleFilterEvents when priorityFilter or myEvents change
   useEffect(() => {
     let filtered = myEvents;
+    console.log({filtered})
 
     if (priorityFilter.length > 0) {
-      filtered = filtered.filter((event) => priorityFilter.includes(event.priority));
+      filtered = filtered.filter((event) =>
+        priorityFilter.includes(event.priority)
+      );
     }
 
     if (activityTypeFilter.length > 0) {
-      filtered = filtered.filter((event) => activityTypeFilter.includes(event.Type_of_Activity));
+      filtered = filtered.filter((event) =>
+        activityTypeFilter.includes(event.Type_of_Activity)
+      );
+    }
+
+    if (userFilter.length > 0) {
+      filtered = filtered.filter((event) =>
+        userFilter.includes(event.scheduleFor.name)
+      );
     }
 
     setFilteredEvents(filtered);
-  }, [priorityFilter, activityTypeFilter, myEvents]);
-  
-  
+  }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
+
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
     return (
@@ -412,7 +431,7 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
         <CalendarPrev className="cal-header-prev" />
         <CalendarToday className="cal-header-today" />
         <CalendarNext className="cal-header-next" />
-  
+
         <Datepicker
           controls={["calendar"]}
           calendarType="month"
@@ -423,9 +442,16 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
           inputProps={props}
           onChange={(e) => setSelectedDate(e.value)}
         />
-  
+
         <Box display={"flex"}>
-          <Button variant="contained" size="small" onClick={()=>setDrawerOpen(true)} sx={{right:8}}>Filter</Button>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => setDrawerOpen(true)}
+            sx={{ right: 8 }}
+          >
+            Filter
+          </Button>
         </Box>
       </>
     );
@@ -447,33 +473,32 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
     console.log({ args });
     setClickedEvent(args);
     setFormData({
-      id: args?.event?.id ,
-      title: args?.event?.title ,
+      id: args?.event?.id,
+      title: args?.event?.title,
       startTime: "",
       endTime: "",
       duration: parseInt(args?.event?.duration),
       associateWith: args?.event?.associateWith,
-      Type_of_Activity: args?.event?.Type_of_Activity ,
+      Type_of_Activity: args?.event?.Type_of_Activity,
       resource: args?.event?.resource,
-      scheduleFor: args?.event?.scheduleFor ,
+      scheduleFor: args?.event?.scheduleFor,
       scheduleWith: args?.event?.scheduleWith,
-      location: args?.event?.location ,
-      priority: args?.event?.priority?.toLowerCase() ,
-      Remind_At: args?.event?.ringAlarm ,
+      location: args?.event?.location,
+      priority: args?.event?.priority?.toLowerCase(),
+      Remind_At: args?.event?.Remind_At,
       occurrence: args?.event?.occurrence,
-      start:dayjs(args?.event?.start).format('YYYY-MM-DDTHH:mm'),
-      end: dayjs(args?.event?.end).format('YYYY-MM-DDTHH:mm'),
+      start: dayjs(args?.event?.start).format("YYYY-MM-DDTHH:mm"),
+      end: dayjs(args?.event?.end).format("YYYY-MM-DDTHH:mm"),
       noEndDate: false,
       color: args?.event?.color,
       Banner: args?.event?.Banner,
-      Description: args?.event?.Description ,
-    })
-    setOpen(true)
-    // setTimeout(setOpen(true), 500)
-    
+      Description: args?.event?.Description,
+      Reminder_Text: args?.event?.Reminder_Text,
+    });
+    setOpen(true);
   };
 
-  console.log(formData.Reminder_at);
+  console.log(formData.Remind_At);
 
   return (
     <div className="mbsc-grid mbsc-no-padding">
@@ -511,7 +536,17 @@ const TaskScheduler = ({myEvents,setEvents,users}) => {
             onClose={handleCloseToast}
           />
         </div>
-        <DrawerComponent open={drawerOpen} setOpen={setDrawerOpen} priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter} activityTypeFilter={activityTypeFilter} setActivityTypeFilter={setActivityTypeFilter}/>
+        <DrawerComponent
+          open={drawerOpen}
+          setOpen={setDrawerOpen}
+          priorityFilter={priorityFilter}
+          setPriorityFilter={setPriorityFilter}
+          activityTypeFilter={activityTypeFilter}
+          setActivityTypeFilter={setActivityTypeFilter}
+          users={users} // Pass users list here
+          userFilter={userFilter} // Pass user filter state
+          setUserFilter={setUserFilter} // Pass user filter setter
+        />
 
         <Modal
           open={open}

@@ -54,6 +54,17 @@ const FirstComponent = ({
   //   { type: "vacation", resource: 16 },
   // ]);
   const [openDatepicker, setOpenDatepicker] = useState(false);
+  const ringAlarm = [
+    { name: "At time of meeting", value: 0 },
+    { name: "5 minutes before", value: 5 },
+    { name: "10 minutes before", value: 10 },
+    { name: "15 minutes before", value: 15 },
+    { name: "30 minutes before", value: 30 },
+    { name: "1 hour before", value: 60 },
+    { name: "2 hours before", value: 120 },
+    { name: "1 day before", value: 1440 },
+    { name: "2 day before", value: 2880 },
+  ];
   const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
 
   function addMinutesToDateTime(formatType, durationInMinutes) {
@@ -73,7 +84,9 @@ const FirstComponent = ({
     } else {
       let date = new Date(formData.start);
 
-      date.setMinutes(date.getMinutes() - parseInt(durationInMinutes, 10));
+      date.setMinutes(
+        date.getMinutes() - parseInt(durationInMinutes.value, 10)
+      );
 
       const localDate = new Date(
         date.getTime() - date.getTimezoneOffset() * 60000
@@ -81,7 +94,8 @@ const FirstComponent = ({
 
       const modifiedDate = localDate.toISOString().slice(0, 16);
 
-      handleInputChange("Reminder_at", modifiedDate);
+      handleInputChange("Remind_At", modifiedDate);
+      handleInputChange("Reminder_Text", durationInMinutes.name);
     }
   }
 
@@ -278,7 +292,7 @@ const FirstComponent = ({
               label="Duration"
               fullWidth
               value={formData.duration}
-              disabled={formData.Banner? true :false}
+              disabled={formData.Banner ? true : false}
               onChange={(e) => {
                 handleInputChange("duration", e.target.value);
                 addMinutesToDateTime("duration", e.target.value);
@@ -385,12 +399,8 @@ const FirstComponent = ({
             <Autocomplete
               id="schedule-for-autocomplete"
               size="small"
-              options={
-                users && users.length > 0
-                  ? users.map((user) => user.full_name)
-                  : []
-              }
-              getOptionLabel={(option) => option || ""}
+              options={users}
+              getOptionLabel={(option) => option.full_name || ""} 
               value={formData.scheduleFor || ""} // Use formData
               onChange={(event, newValue) => {
                 handleInputChange("scheduleFor", newValue || "");
@@ -422,7 +432,10 @@ const FirstComponent = ({
         </Grid>
 
         <Grid size={12}>
-          <RegardingField formData={formData} handleInputChange={handleInputChange} />
+          <RegardingField
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
         </Grid>
 
         <Grid size={3}>
@@ -460,7 +473,7 @@ const FirstComponent = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={3}>
+        <Grid size={4}>
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -473,14 +486,25 @@ const FirstComponent = ({
               id="demo-simple-select-standard"
               label="Ring Alarm"
               fullWidth
-              value={formData.ringAlarm}
-              onChange={(e) => addMinutesToDateTime("remindAt", e.target.value)}
+              value={formData.Reminder_Text || ""} // Use `Reminder_Text` to display selected text
+              onChange={(e) => {
+                // Find the selected ring object
+                const selectedRing = ringAlarm.find(
+                  (ring) => ring.name === e.target.value
+                );
+
+                if (selectedRing) {
+                  // Update the `Remind_At` with the calculated date/time
+                  addMinutesToDateTime("remindAt", selectedRing);
+                  // Update the `Reminder_Text` with the selected reminder text
+                  handleInputChange("Reminder_Text", selectedRing.name);
+                }
+              }}
               sx={{
                 "& .MuiSelect-select": {
                   padding: "3px 10px", // Adjust the padding to shrink the Select content
                 },
                 "& .MuiOutlinedInput-root": {
-                  // height: '40px', // Set a consistent height
                   padding: 0, // Ensure no extra padding
                 },
                 "& .MuiInputBase-input": {
@@ -489,15 +513,16 @@ const FirstComponent = ({
                 },
               }}
             >
-              {[5, 10, 15, 20, 25, 30].map((ring, index) => (
-                <MenuItem key={index} value={ring}>
-                  {ring} minutes
+              {ringAlarm.map((ring, index) => (
+                <MenuItem key={index} value={ring.name}>
+                  {ring.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={6}>
+
+        <Grid size={5}>
           {/* <CustomTextField
             type="color"
             label="color"
@@ -514,26 +539,24 @@ const FirstComponent = ({
             onChange={(e) => handleInputChange("location", e.target.value)}
           />
         </Grid>
-        {/* <Grid size={3} alignItems={"center"}>
+
+        <Grid size={8}>
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.Banner}
-                onChange={handleBannerChecked}
+                checked={formData.create_sperate_contact}
+                disabled={formData.id !== "" ? true : false}
+                onChange={(e) =>
+                  handleInputChange("create_sperate_contact", e.target.value)
+                }
               />
             }
-            label="Banner"
-          />
-        </Grid> */}
-        <Grid size={8}>
-          <FormControlLabel
-            control={<Checkbox checked={formData.create_sperate_contact} disabled={formData.id !== ""? true: false} onChange={(e)=>handleInputChange("create_sperate_contact",e.target.value)}/>}
             label="Create separate activity for each contact"
           />
         </Grid>
 
-        <Grid size={4} sx={{display:'flex',alignItems:'center'}}>
-          <Box display="flex" alignItems="center"  p={0} >
+        <Grid size={4} sx={{ display: "flex", alignItems: "center" }}>
+          <Box display="flex" alignItems="center" p={0}>
             <Typography
               variant="body1"
               sx={{ minWidth: "60px", fontWeight: "bold" }}

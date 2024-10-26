@@ -29,11 +29,14 @@ export function transformFormSubmission(data,individualParticipant = null) {
   let transformedData = {
     ...data,
     Event_Title:data.title,
-    Reminder_at: dayjs(data.Remind_At).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
+    Remind_At: dayjs(data.Remind_At).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
     Start_DateTime:dayjs(data.start).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'), // Format `start` to ISO with timezone
     End_DateTime: dayjs(data.end).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'), // Format `end` to ISO with timezone
     Description: data.Description, // Map `description` to `Description`
     Event_Priority: data.priority, // Map `priority` to `Event_Priority`
+    Owner: {
+      id: data.scheduleFor.id,
+    },
 
     // Updated `What_Id` with both name and id from `associateWith`
     What_Id: data.associateWith

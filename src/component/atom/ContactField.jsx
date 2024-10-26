@@ -18,7 +18,7 @@ export default function ContactField({
 }) {
   const [contacts, setContacts] = useState([]); // Contacts fetched from Zoho
   const [selectedParticipants, setSelectedParticipants] = useState(
-    selectedRowData?.Participants || []
+    formData.scheduleWith || []
   ); // Selected values in autocomplete
   const [inputValue, setInputValue] = useState(""); // Store the input text
   const [notFoundMessage, setNotFoundMessage] = useState("");
@@ -53,6 +53,7 @@ export default function ContactField({
             Type: "criteria",
             Query: searchCriteria,
           });
+          console.log({searchResults})
         } else if (searchType === "fullName") {
           // Search by full name using "word" type, which performs a full-text search
           searchResults = await ZOHO.CRM.API.searchRecord({
@@ -60,6 +61,7 @@ export default function ContactField({
             Type: "word", // Full-text search
             Query: inputValue,
           });
+          console.log({searchResults})
         }
 
         if (searchResults.data && searchResults.data.length > 0) {
@@ -117,7 +119,7 @@ export default function ContactField({
       <Autocomplete
         multiple
         options={contacts}
-        getOptionLabel={(option) => option.Full_Name || ""}
+        getOptionLabel={(option) => option.name || ""}
         value={selectedParticipants} // Control the selected values
         onChange={handleSelectionChange} // Handle the selection of new values
         inputValue={inputValue} // Display input text
@@ -167,7 +169,7 @@ export default function ContactField({
               "& .MuiChip-root": {
                 height: '1.5rem', // Reduce the size of selected option chips
                 margin: "1px", // Adjust margin between chips
-                fontSize: "10px", // Reduce chip text size
+                fontSize: "12px", // Reduce chip text size
               },
               "& input":{
                 py:'0 !important'

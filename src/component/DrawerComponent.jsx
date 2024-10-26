@@ -24,6 +24,9 @@ const DrawerComponent = ({
   setPriorityFilter,
   activityTypeFilter,
   setActivityTypeFilter,
+  users,
+  userFilter,
+  setUserFilter
 }) => {
   const theme = useTheme();
   const MenuProps = {
@@ -66,6 +69,13 @@ const DrawerComponent = ({
       target: { value },
     } = event;
     setActivityTypeFilter(typeof value === "string" ? value.split(",") : value);
+  };
+
+  const handleUserChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setUserFilter(typeof value === "string" ? value.split(",") : value);
   };
   return (
     <Drawer
@@ -143,6 +153,26 @@ const DrawerComponent = ({
               <MenuItem value={activity.type} key={index}>
                 <Checkbox checked={activityTypeFilter.includes(activity.type)} />
                 <ListItemText primary={activity.type} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+         {/* User Filter */}
+         <FormControl fullWidth size="small" sx={{ mt: 3 }}>
+          <InputLabel>Schedule For</InputLabel>
+          <Select
+            multiple
+            value={userFilter}
+            onChange={handleUserChange}
+            MenuProps={MenuProps}
+            input={<OutlinedInput label="Schedule For" />}
+            renderValue={(selected) => selected.join(", ")}
+          >
+            {users.map((user, index) => (
+              <MenuItem key={index} value={user.full_name}>
+                <Checkbox checked={userFilter.includes(user.full_name)} />
+                <ListItemText primary={user.full_name} />
               </MenuItem>
             ))}
           </Select>
