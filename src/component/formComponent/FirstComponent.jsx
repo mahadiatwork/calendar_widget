@@ -35,25 +35,6 @@ const FirstComponent = ({
   dayjs.extend(timezone);
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
-  // const [activityType, setActivityType] = useState([
-  //   { type: "meeting", resource: 1 },
-  //   { type: "todo", resource: 2 },
-  //   { type: "appointment", resource: 3 },
-  //   { type: "boardroom", resource: 4 },
-  //   { type: "call_billing", resource: 5 },
-  //   { type: "email_billing", resource: 6 },
-  //   { type: "initial_consultation", resource: 7 },
-  //   { type: "call", resource: 8 },
-  //   { type: "mail", resource: 9 },
-  //   { type: "meeting_billing", resource: 10 },
-  //   { type: "personal_activity", resource: 11 },
-  //   { type: "room_1", resource: 12 },
-  //   { type: "room_2", resource: 13 },
-  //   { type: "room_3", resource: 14 },
-  //   { type: "todo_billing", resource: 15 },
-  //   { type: "vacation", resource: 16 },
-  // ]);
-  const [openDatepicker, setOpenDatepicker] = useState(false);
   const ringAlarm = [
     { name: "At time of meeting", value: 0 },
     { name: "5 minutes before", value: 5 },

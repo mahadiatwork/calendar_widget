@@ -37,6 +37,7 @@ export function transformFormSubmission(data,individualParticipant = null) {
     Owner: {
       id: data.scheduleFor.id,
     },
+    Recurring_Activity:{"RRULE": `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1;UNTIL=${dayjs(data.endTime).format('YYYY-MM-DD')};BYDAY=SA;DTSTART=${dayjs(data.startTime).format('YYYY-MM-DD')}`},
 
     // Updated `What_Id` with both name and id from `associateWith`
     What_Id: data.associateWith
