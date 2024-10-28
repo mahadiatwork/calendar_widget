@@ -89,7 +89,7 @@ Appointment.propTypes = {
   data: PropTypes.object.isRequired,
 };
 
-const TaskScheduler = ({ myEvents, setEvents, users }) => {
+const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateTime }) => {
   const [clickedEvent, setClickedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState();
   const [priorityFilter, setPriorityFilter] = useState([]);
@@ -510,7 +510,7 @@ const TaskScheduler = ({ myEvents, setEvents, users }) => {
             resources={meetings}
             invalid={myInvalid}
             // refDate={calendarRef}
-            onPageChange={(e) => setSelectedDate(e.firstDay)}
+            onPageChange={(e) => {setSelectedDate(e.firstDay);console.log(e);setStartDateTime(e.firstDay);setEndDateTime(e.lastDay)}}
             dragToMove={true}
             dragToCreate={true}
             eventOverlap={false}

@@ -4,7 +4,7 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export function transformFormSubmission(data,individualParticipant = null) {
+export function transformFormSubmission(data, individualParticipant = null) {
   const transformScheduleWithToParticipants = (scheduleWith) => {
     return scheduleWith.map((contact) => ({
       name: contact?.name || null,
@@ -13,10 +13,10 @@ export function transformFormSubmission(data,individualParticipant = null) {
     }));
   };
 
-  const participantsFromScheduleWith = data.scheduleWith
-    ? transformScheduleWithToParticipants(data.scheduleWith)
-    : [];
-    const participants = individualParticipant
+  const dayOfMonth = dayjs(data.startTime).date();
+  const dayName = dayjs(data.startTime).format("dd");
+  const monthNumber = dayjs(data.startTime).format("MM");
+  const participants = individualParticipant
     ? [
         {
           name: individualParticipant.name || null,
@@ -28,16 +28,32 @@ export function transformFormSubmission(data,individualParticipant = null) {
 
   let transformedData = {
     ...data,
-    Event_Title:data.title,
-    Remind_At: dayjs(data.Remind_At).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'),
-    Start_DateTime:dayjs(data.start).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'), // Format `start` to ISO with timezone
-    End_DateTime: dayjs(data.end).tz('Australia/Adelaide').format('YYYY-MM-DDTHH:mm:ssZ'), // Format `end` to ISO with timezone
+    Event_Title: data.title,
+    Remind_At: dayjs(data.Remind_At)
+      .tz("Australia/Adelaide")
+      .format("YYYY-MM-DDTHH:mm:ssZ"),
+    Start_DateTime: dayjs(data.start)
+      .tz("Australia/Adelaide")
+      .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `start` to ISO with timezone
+    End_DateTime: dayjs(data.end)
+      .tz("Australia/Adelaide")
+      .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `end` to ISO with timezone
     Description: data.Description, // Map `description` to `Description`
     Event_Priority: data.priority, // Map `priority` to `Event_Priority`
     Owner: {
       id: data.scheduleFor.id,
     },
-    Recurring_Activity:{"RRULE": `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1;UNTIL=${dayjs(data.endTime).format('YYYY-MM-DD')};BYDAY=SA;DTSTART=${dayjs(data.startTime).format('YYYY-MM-DD')}`},
+    Recurring_Activity: {
+      RRULE: `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1${data.noEndDate? '':`;UNTIL=${dayjs(data.endTime).format('YYYY-MM-DD')}`}${
+        data.occurrence === "weekly"
+          ? `;BYDAY=${dayName.toUpperCase()}`
+          : data.occurrence === "monthly"
+          ? `;BYMONTHDAY=${dayOfMonth}`
+          : data.occurrence === "yearly"
+          ? `;BYMONTH=${monthNumber};BYMONTHDAY=${dayOfMonth}`
+          : ""
+      };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}${data.noEndDate?';UNTIL=-1':''}`,
+    },
 
     // Updated `What_Id` with both name and id from `associateWith`
     What_Id: data.associateWith
@@ -50,12 +66,12 @@ export function transformFormSubmission(data,individualParticipant = null) {
     // Combine the manually set participants and those from `scheduleWith`
     Participants: participants,
     Duration_Min: data.duration.toString(),
-    Venue:data.location,
-    Colour:data.color
+    Venue: data.location,
+    Colour: data.color,
   };
-//   delete transformedData.scheduleWith;
-//   delete transformedData.scheduleFor;
-//   delete transformedData.description;
+  //   delete transformedData.scheduleWith;
+  //   delete transformedData.scheduleFor;
+  //   delete transformedData.description;
 
   Object.keys(transformedData).forEach((key) => {
     if (transformedData[key] === null || transformedData[key] === undefined) {

@@ -3,12 +3,20 @@ import "./App.css";
 import TaskScheduler from "./component/TaskScheduler";
 import { data } from "./data/data";
 import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 const ZOHO = window.ZOHO;
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 function App() {
   const [myEvents, setEvents] = useState([]);
   const [zohoLoaded, setZohoLoaded] = useState(false);
   const [users, setUsers] = useState([]);
+  const [startDateTime,setStartDateTime] = useState('')
+  const [endDateTime,setEndDateTime] = useState('')
 
   async function initZoho() {
     ZOHO.embeddedApp.on("PageLoad", async function (data) {
@@ -36,7 +44,6 @@ function App() {
       }).then(function (d) {
         console.log(d);
         if (d?.data) {
-          console.log("hello");
             const x = d?.data.map((item,index)=>{
               return {
                 id:item.id,
@@ -76,7 +83,6 @@ function App() {
         per_page: 100,
         page: 1,
       }).then((usersResponse)=>{
-        console.log({usersResponse})
         usersResponse?.users?.map((user,index)=>{
           if (user.status === "active") {
             setUsers((prev)=>[...prev,user])
@@ -86,10 +92,33 @@ function App() {
     }
   }, [zohoLoaded]);
 
+  useEffect(async()=>{
+    const formattedBeginDate = dayjs(startDateTime).tz("Australia/Adelaide").format("YYYY-MM-DDTHH:mm:ssZ")
+    const formattedCloseDate = dayjs(endDateTime).tz("Australia/Adelaide").format("YYYY-MM-DDTHH:mm:ssZ")
+
+    const req_data_meetings1 = {
+      url: `https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:${encodeURIComponent(
+        formattedBeginDate
+      )})and(End_DateTime:less_equal:${encodeURIComponent(
+        formattedCloseDate
+      )}))`,
+      method: "GET",
+      param_type: 1,
+    };
+
+    // Fetching data with custom search criteria
+    const data1 = await ZOHO.CRM.CONNECTION.invoke(
+      "zoho_crm_conn",
+      req_data_meetings1
+    );
+
+    console.log({data1})
+  },[zohoLoaded])
+
   console.log({faky:myEvents})
   return (
     <div>
-      <TaskScheduler myEvents={myEvents} setEvents={setEvents} users={users}/>
+      <TaskScheduler myEvents={myEvents} setEvents={setEvents} users={users} setStartDateTime={setStartDateTime} setEndDateTime={setEndDateTime} />
       {/* <TaskScheduler /> */}
     </div>
   );
