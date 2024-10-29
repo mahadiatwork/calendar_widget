@@ -89,7 +89,7 @@ Appointment.propTypes = {
   data: PropTypes.object.isRequired,
 };
 
-const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateTime }) => {
+const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateTime,loader }) => {
   const [clickedEvent, setClickedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState();
   const [priorityFilter, setPriorityFilter] = useState([]);
@@ -499,6 +499,11 @@ const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateT
   };
 
   console.log(formData.Remind_At);
+  if (loader) {
+    return (
+      <Box> Fetching data ....</Box>
+    )
+  }
 
   return (
     <div className="mbsc-grid mbsc-no-padding">

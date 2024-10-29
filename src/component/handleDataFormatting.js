@@ -7,7 +7,7 @@ dayjs.extend(timezone);
 export function transformFormSubmission(data, individualParticipant = null) {
   const transformScheduleWithToParticipants = (scheduleWith) => {
     return scheduleWith.map((contact) => ({
-      name: contact?.name || null,
+      Full_Name: contact?.Full_Name || null,
       type: "contact",
       participant: contact?.participant || null,
     }));
@@ -16,14 +16,19 @@ export function transformFormSubmission(data, individualParticipant = null) {
   const dayOfMonth = dayjs(data.startTime).date();
   const dayName = dayjs(data.startTime).format("dd");
   const monthNumber = dayjs(data.startTime).format("MM");
+  const customEndTime = data.noEndDate && (data.occurrence === 'daily') ?  dayjs(data.startTime).add(70,'day').format('YYYY-MM-DD') :
+                        data.noEndDate && (data.occurrence === 'weekly') ? dayjs(data.startTime).add(10,'month').format('YYYY-MM-DD') :
+                        data.noEndDate && (data.occurrence === 'monthly') ? dayjs(data.startTime).add(12,'month').format('YYYY-MM-DD') :
+                        data.noEndDate && (data.occurrence === 'yearly') ? dayjs(data.startTime).add(2,'year').format('YYYY-MM-DD') :
+                        dayjs(data.endTime).format('YYYY-MM-DD')
   const participants = individualParticipant
     ? [
         {
-          name: individualParticipant.name || null,
+          Full_Name: individualParticipant.Full_Name || null,
           type: "contact",
           participant: individualParticipant.participant || null,
         },
-      ]
+      ]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
     : transformScheduleWithToParticipants(data.scheduledWith || []);
 
   let transformedData = {
@@ -44,7 +49,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
       id: data.scheduleFor.id,
     },
     Recurring_Activity: {
-      RRULE: `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1${data.noEndDate? '':`;UNTIL=${dayjs(data.endTime).format('YYYY-MM-DD')}`}${
+      RRULE: `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${
         data.occurrence === "weekly"
           ? `;BYDAY=${dayName.toUpperCase()}`
           : data.occurrence === "monthly"
@@ -52,7 +57,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
           : data.occurrence === "yearly"
           ? `;BYMONTH=${monthNumber};BYMONTHDAY=${dayOfMonth}`
           : ""
-      };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}${data.noEndDate?';UNTIL=-1':''}`,
+      };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}`,
     },
 
     // Updated `What_Id` with both name and id from `associateWith`

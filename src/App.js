@@ -15,8 +15,11 @@ function App() {
   const [myEvents, setEvents] = useState([]);
   const [zohoLoaded, setZohoLoaded] = useState(false);
   const [users, setUsers] = useState([]);
-  const [startDateTime,setStartDateTime] = useState('')
-  const [endDateTime,setEndDateTime] = useState('')
+  const [startDateTime, setStartDateTime] = useState("");
+  const [endDateTime, setEndDateTime] = useState("");
+  const [loader, setLoader] = useState(false);
+  console.log({ startDateTime });
+  console.log({ endDateTime });
 
   async function initZoho() {
     ZOHO.embeddedApp.on("PageLoad", async function (data) {
@@ -44,35 +47,35 @@ function App() {
       }).then(function (d) {
         console.log(d);
         if (d?.data) {
-            const x = d?.data.map((item,index)=>{
-              return {
-                id:item.id,
-                title: item.Event_Title,
-                resource:item.resource,
-                startTime: "",
-                endTime: "",
-                duration: item.Duration_Min,
-                associateWith: item.What_Id,
-                Type_of_Activity: item.Type_of_Activity,
-                resource: item.resource,
-                scheduleFor:item.Owner,
-                scheduleWith:[...item.Participants],
-                location: item.Venue,
-                priority: item.Event_Priority,
-                Remind_At: item.Remind_At,
-                occurrence: item.Recurring_Activity,
-                start: item.Start_DateTime,
-                end: item.End_DateTime,
-                noEndDate: false,
-                color: item.Colour,
-                Banner:item.Banner,
-                Description:item?.Description,
-                Regarding:item?.Regarding,
-                Reminder_Text:item?.Reminder_Text
-              }
-            })
-            console.log({x})
-            setEvents(x)
+          const x = d?.data.map((item, index) => {
+            return {
+              id: item.id,
+              title: item.Event_Title,
+              resource: item.resource,
+              startTime: "",
+              endTime: "",
+              duration: item.Duration_Min,
+              associateWith: item.What_Id,
+              Type_of_Activity: item.Type_of_Activity,
+              resource: item.resource,
+              scheduleFor: item.Owner,
+              scheduleWith: [...item.Participants],
+              location: item.Venue,
+              priority: item.Event_Priority,
+              Remind_At: item.Remind_At,
+              occurrence: item.Recurring_Activity,
+              start: item.Start_DateTime,
+              end: item.End_DateTime,
+              noEndDate: false,
+              color: item.Colour,
+              Banner: item.Banner,
+              Description: item?.Description,
+              Regarding: item?.Regarding,
+              Reminder_Text: item?.Reminder_Text,
+            };
+          });
+          console.log({ x });
+          setEvents(x);
         }
         // setEvents(d?.data)
       });
@@ -82,19 +85,24 @@ function App() {
         sort_order: "asc",
         per_page: 100,
         page: 1,
-      }).then((usersResponse)=>{
-        usersResponse?.users?.map((user,index)=>{
+      }).then((usersResponse) => {
+        usersResponse?.users?.map((user, index) => {
           if (user.status === "active") {
-            setUsers((prev)=>[...prev,user])
+            setUsers((prev) => [...prev, user]);
           }
-        })
-      })
+        });
+      });
     }
   }, [zohoLoaded]);
 
-  useEffect(async()=>{
-    const formattedBeginDate = dayjs(startDateTime).tz("Australia/Adelaide").format("YYYY-MM-DDTHH:mm:ssZ")
-    const formattedCloseDate = dayjs(endDateTime).tz("Australia/Adelaide").format("YYYY-MM-DDTHH:mm:ssZ")
+  const searchDataByDate = async () => {
+    setLoader(true);
+    const formattedBeginDate = dayjs(startDateTime)
+      .tz("Australia/Adelaide")
+      .format("YYYY-MM-DDTHH:mm:ssZ");
+    const formattedCloseDate = dayjs(endDateTime)
+      .tz("Australia/Adelaide")
+      .format("YYYY-MM-DDTHH:mm:ssZ");
 
     const req_data_meetings1 = {
       url: `https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:${encodeURIComponent(
@@ -111,14 +119,55 @@ function App() {
       "zoho_crm_conn",
       req_data_meetings1
     );
+    const eventsData = data1?.details?.statusMessage?.data || [];
+    const x = eventsData.map((item, index) => {
+      return {
+        id: item.id,
+        title: item.Event_Title,
+        resource: item.resource,
+        startTime: "",
+        endTime: "",
+        duration: item.Duration_Min,
+        associateWith: item.What_Id,
+        Type_of_Activity: item.Type_of_Activity,
+        resource: item.resource,
+        scheduleFor: item.Owner,
+        scheduleWith: [...item.Participants],
+        location: item.Venue,
+        priority: item.Event_Priority,
+        Remind_At: item.Remind_At,
+        occurrence: item.Recurring_Activity,
+        start: item.Start_DateTime,
+        end: item.End_DateTime,
+        noEndDate: false,
+        color: item.Colour,
+        Banner: item.Banner,
+        Description: item?.Description,
+        Regarding: item?.Regarding,
+        Reminder_Text: item?.Reminder_Text,
+      };
+    });
+    setEvents(x);
+    console.log({ data1 });
+    setLoader(false);
+  };
+  useEffect(() => {
+    if (startDateTime !== "" && endDateTime !== "") {
+      searchDataByDate();
+    }
+  }, [startDateTime, endDateTime]);
 
-    console.log({data1})
-  },[zohoLoaded])
-
-  console.log({faky:myEvents})
+  console.log({ faky: myEvents });
   return (
     <div>
-      <TaskScheduler myEvents={myEvents} setEvents={setEvents} users={users} setStartDateTime={setStartDateTime} setEndDateTime={setEndDateTime} />
+      <TaskScheduler
+        myEvents={myEvents}
+        setEvents={setEvents}
+        users={users}
+        setStartDateTime={setStartDateTime}
+        setEndDateTime={setEndDateTime}
+        loader={loader}
+      />
       {/* <TaskScheduler /> */}
     </div>
   );

@@ -104,10 +104,10 @@ export default function ContactField({
     handleInputChange(
       "scheduleWith",
       newValue.map((contact) => ({
-        name: contact.Full_Name,
+        Full_Name: contact.Full_Name,
         participant: contact.id,
-        type: contact.type,
-        // type: "contact",
+        // type: contact.type,
+        type: "contact",
       }))
     );
   };
@@ -119,7 +119,7 @@ export default function ContactField({
       <Autocomplete
         multiple
         options={contacts}
-        getOptionLabel={(option) => option.name || ""}
+        getOptionLabel={(option) => option.Full_Name || ""}
         value={selectedParticipants} // Control the selected values
         onChange={handleSelectionChange} // Handle the selection of new values
         inputValue={inputValue} // Display input text
