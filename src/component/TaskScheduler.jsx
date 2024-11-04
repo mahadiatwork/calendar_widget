@@ -89,7 +89,16 @@ Appointment.propTypes = {
   data: PropTypes.object.isRequired,
 };
 
-const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateTime,loader }) => {
+const TaskScheduler = ({
+  myEvents,
+  setEvents,
+  users,
+  setStartDateTime,
+  setEndDateTime,
+  loader,
+  recentColor,
+  setRecentColor,
+}) => {
   const [clickedEvent, setClickedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState();
   const [priorityFilter, setPriorityFilter] = useState([]);
@@ -149,7 +158,7 @@ const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateT
     start: newEvent?.start || "",
     end: newEvent?.end || "",
     noEndDate: false,
-    color: newEvent?.color || "#d1891f",
+    color: newEvent?.color ||"#d1891f",
     Banner: newEvent?.Banner || false,
     Description: newEvent?.Description || "",
     create_sperate_contact: false,
@@ -376,7 +385,7 @@ const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateT
   const handleCellDoubleClick = (args) => {
     console.log(args);
     handleInputChange("start", args.date);
-    handleInputChange("end", dayjs(args.date).add(1, "hour"));
+    handleInputChange("end", new Date(dayjs(args.date).add(1, "hour").toDate()));
     handleInputChange("duration", 60);
     const selectedActivity = activityType.find(
       (item) => item.resource === args.resource
@@ -386,6 +395,7 @@ const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateT
       // Update both the activity type and the resource
       handleInputChange("Type_of_Activity", selectedActivity.type);
       handleInputChange("resource", selectedActivity.resource);
+      console.log({formData})
     }
     setOpen(true);
   };
@@ -393,7 +403,7 @@ const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateT
   // Call handleFilterEvents when priorityFilter or myEvents change
   useEffect(() => {
     let filtered = myEvents;
-    console.log({filtered})
+    console.log({ filtered });
 
     if (priorityFilter.length > 0) {
       filtered = filtered.filter((event) =>
@@ -500,9 +510,7 @@ const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateT
 
   console.log(formData.Remind_At);
   if (loader) {
-    return (
-      <Box> Fetching data ....</Box>
-    )
+    return <Box> Fetching data ....</Box>;
   }
 
   return (
@@ -515,7 +523,12 @@ const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateT
             resources={meetings}
             invalid={myInvalid}
             // refDate={calendarRef}
-            onPageChange={(e) => {setSelectedDate(e.firstDay);console.log(e);setStartDateTime(e.firstDay);setEndDateTime(e.lastDay)}}
+            onPageChange={(e) => {
+              setSelectedDate(e.firstDay);
+              console.log(e);
+              setStartDateTime(e.firstDay);
+              setEndDateTime(e.lastDay);
+            }}
             dragToMove={true}
             dragToCreate={true}
             eventOverlap={false}
@@ -572,6 +585,8 @@ const TaskScheduler = ({ myEvents, setEvents, users,setStartDateTime,setEndDateT
             handleInputChange={handleInputChange}
             setFormData={setFormData}
             users={users}
+            recentColor={recentColor}
+            setRecentColor={setRecentColor}
           />
         </Modal>
       </div>

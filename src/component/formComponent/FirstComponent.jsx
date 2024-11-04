@@ -22,6 +22,14 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import AccountField from "../atom/AccountField";
 import RegardingField from "../atom/RegardingField";
+import { SketchPicker } from "react-color";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import CustomColorPicker from "../atom/CustomColorPicker";
+import {
+  DatePicker,
+  DateTimePicker,
+  LocalizationProvider,
+} from "@mui/x-date-pickers";
 
 const FirstComponent = ({
   formData,
@@ -30,11 +38,17 @@ const FirstComponent = ({
   activityType,
   setActivityType,
   users,
+  recentColor,
+  setRecentColor,
 }) => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
+  const [displayColorPicker, setDisplayColorPicker] = useState(false);
+  const [startValue, setStartValue] = useState(dayjs(formData.start));
+  const [endValue, setEndValue] = useState(dayjs(formData.end));
+
   const ringAlarm = [
     { name: "At time of meeting", value: 0 },
     { name: "5 minutes before", value: 5 },
@@ -153,9 +167,10 @@ const FirstComponent = ({
   }
 
   const handleEndDateChange = (e) => {
-    handleInputChange("end", e.value);
+    console.log("fahim", e.$d);
+    handleInputChange("end", e.$d);
     console.log("end", e.value);
-    const getDiffInMinutes = getTimeDifference(e.value);
+    const getDiffInMinutes = getTimeDifference(e.$d);
     handleInputChange("duration", getDiffInMinutes);
     console.log({ getDiffInMinutes });
     // if (formData.end ) {
@@ -163,10 +178,15 @@ const FirstComponent = ({
     // }
   };
 
+  const handleColorChange = (e) => {
+    setRecentColor((prev) => [...prev, e]);
+    handleInputChange("color", e);
+  };
+
   return (
     <Box>
-      <Grid container spacing={2} sx={{ mt: 2 }}>
-        <Grid size={12}>
+      <Grid container columns={18} spacing={2} sx={{ mt: 2 }}>
+        <Grid size={18}>
           <CustomTextField
             fullWidth
             size="small"
@@ -177,12 +197,9 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={12}>
+        <Grid size={18}>
           <FormControl fullWidth size="small">
-            <InputLabel
-              id="demo-simple-select-standard-label"
-              sx={{ top: "-5px" }}
-            >
+            <InputLabel id="demo-simple-select-standard-label">
               Activity type
             </InputLabel>
             <Select
@@ -191,6 +208,7 @@ const FirstComponent = ({
               label="Activity type"
               fullWidth
               value={formData.Type_of_Activity}
+              InputLabelProps={{ shrink: true }}
               onChange={handleActivityChange}
               MenuProps={{
                 //   disablePortal: true,  // This ensures the dropdown is not restricted to the modal's container
@@ -202,7 +220,7 @@ const FirstComponent = ({
               }}
               sx={{
                 "& .MuiSelect-select": {
-                  padding: "3px 10px", // Adjust the padding to shrink the Select content
+                  padding: "4px 10px", // Adjust the padding to shrink the Select content
                 },
                 "& .MuiOutlinedInput-root": {
                   // height: '40px', // Set a consistent height
@@ -229,8 +247,8 @@ const FirstComponent = ({
           </FormControl>
         </Grid>
 
-        <Grid size={4}>
-          <Datepicker
+        <Grid size={7}>
+          {/* <Datepicker
             controls={["calendar", "time"]}
             display="center"
             inputComponent={() =>
@@ -244,10 +262,52 @@ const FirstComponent = ({
             onClose={() => setOpenStartDatepicker(false)}
             onChange={(e) => handleInputChange("start", e.value)}
             isOpen={openStartDatepicker}
-          />
+          /> */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              label="Start Time"
+              value={startValue}
+              slotProps={{ textField: { size: "small" } }}
+              onChange={(e) => {
+                handleInputChange("start", e.$d);
+                console.log(e.$d);
+              }}
+              sx={{ "& input": { py: 0 } }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  sx={{
+                    "& .MuiInputBase-input": {
+                      fontSize: "0.7rem", // Smaller font size for compact appearance
+                      padding: "0px 4px !important", // Minimal padding
+                      minHeight: "25px", // Reduced min-height for compactness
+                      width: "100%", // Ensuring the input width adapts to fit text
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: "0.7rem", // Smaller label font size
+                      transform: "translate(14px, 5px) scale(1)", // Adjusted to align label properly
+                    },
+                    "& input": {
+                      padding: "0px 4px", // Reduced padding for the input field
+                      whiteSpace: "nowrap", // Prevents text wrapping
+                      overflow: "hidden",
+                      textOverflow: "ellipsis", // Adds ellipsis if text overflows
+                    },
+                  }}
+                  InputProps={{
+                    style: {
+                      lineHeight: 1, // Adjusted line height
+                    },
+                  }}
+                />
+              )}
+              format="DD/MM/YYYY HH:mm A" // Ensures 24-hour format for clarity
+            />
+          </LocalizationProvider>
         </Grid>
-        <Grid size={4}>
-          <Datepicker
+        <Grid size={7}>
+          {/* <Datepicker
             controls={["calendar", "time"]}
             display="center"
             inputComponent={() =>
@@ -257,13 +317,24 @@ const FirstComponent = ({
             onClose={() => setOpenEndDatepicker(false)}
             onChange={(e) => handleEndDateChange(e)}
             isOpen={openEndDatepicker}
-          />
+          /> */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              label="End Time"
+              value={endValue}
+              slotProps={{ textField: { size: "small" } }}
+              onChange={(e) => handleEndDateChange(e)}
+              sx={{ "& input": { py: 0 } }}
+              renderInput={(params) => <TextField {...params} size="small" />}
+              format="DD/MM/YYYY HH:mm A" // Ensures 24-hour format for clarity
+            />
+          </LocalizationProvider>
         </Grid>
         <Grid size={4}>
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
-              sx={{ top: "-5px" }}
+              // sx={{ top: "-5px" }}
             >
               Duration
             </InputLabel>
@@ -274,17 +345,18 @@ const FirstComponent = ({
               fullWidth
               value={formData.duration}
               disabled={formData.Banner ? true : false}
+              InputLabelProps={{ shrink: true }}
               onChange={(e) => {
                 handleInputChange("duration", e.target.value);
                 addMinutesToDateTime("duration", e.target.value);
               }}
               sx={{
                 "& .MuiSelect-select": {
-                  padding: "3px 10px", // Adjust the padding to shrink the Select content
+                  padding: "4px 5px", // Adjust the padding to shrink the Select content
                 },
                 "& .MuiOutlinedInput-root": {
                   // height: '40px', // Set a consistent height
-                  padding: 0, // Ensure no extra padding
+                  padding: "3px 0px", // Ensure no extra padding
                 },
                 "& .MuiInputBase-input": {
                   display: "flex",
@@ -301,7 +373,7 @@ const FirstComponent = ({
           </FormControl>
         </Grid>
 
-        <Grid size={12} alignItems={"center"}>
+        <Grid size={18} alignItems={"center"}>
           <FormControlLabel
             sx={{ height: "35px" }}
             control={
@@ -315,7 +387,7 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={12}>
+        <Grid size={18}>
           {/* <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -367,7 +439,7 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={12}>
+        <Grid size={18}>
           <ContactField
             value={formData.scheduleWith} // Use formData
             handleInputChange={handleInputChange}
@@ -375,13 +447,13 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={12}>
+        <Grid size={18}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <Autocomplete
               id="schedule-for-autocomplete"
               size="small"
               options={users}
-              getOptionLabel={(option) => option.full_name || ""} 
+              getOptionLabel={(option) => option.full_name || ""}
               value={formData.scheduleFor || ""} // Use formData
               onChange={(event, newValue) => {
                 handleInputChange("scheduleFor", newValue || "");
@@ -412,14 +484,14 @@ const FirstComponent = ({
           </FormControl>
         </Grid>
 
-        <Grid size={12}>
+        <Grid size={18}>
           <RegardingField
             formData={formData}
             handleInputChange={handleInputChange}
           />
         </Grid>
 
-        <Grid size={3}>
+        <Grid size={4}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -454,7 +526,7 @@ const FirstComponent = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={4}>
+        <Grid size={6}>
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -503,7 +575,7 @@ const FirstComponent = ({
           </FormControl>
         </Grid>
 
-        <Grid size={5}>
+        <Grid size={8}>
           {/* <CustomTextField
             type="color"
             label="color"
@@ -521,7 +593,7 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={8}>
+        <Grid size={12}>
           <FormControlLabel
             control={
               <Checkbox
@@ -536,20 +608,56 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={4} sx={{ display: "flex", alignItems: "center" }}>
+        <Grid size={6} sx={{ display: "flex", alignItems: "center" }}>
           <Box display="flex" alignItems="center" p={0}>
-            <Typography
-              variant="body1"
-              sx={{ minWidth: "60px", fontWeight: "bold" }}
-            >
+            <Typography variant="body1" sx={{ minWidth: "60px" }}>
               Color
             </Typography>
-            <input
+            {/* <input
               type="color"
               name="color"
               value={formData.color}
               onChange={(e) => handleInputChange("color", e.target.value)}
-            />
+            /> */}
+            <Box
+              sx={{
+                width: "20px",
+                height: "20px",
+                backgroundColor: formData.color,
+                border: "1px solid #ccc",
+                display: "inline-block",
+                cursor: "pointer",
+                marginLeft: 1,
+              }}
+              onClick={() => setDisplayColorPicker(!displayColorPicker)}
+            >
+              {displayColorPicker && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    zIndex: "2",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: "fixed",
+
+                      right: "0px",
+                      bottom: "0px",
+                      left: "0px",
+                    }}
+                    onClick={() => setDisplayColorPicker(false)}
+                  >
+                    <CustomColorPicker
+                      recentColors={recentColor}
+                      setDisplayColorPicker={setDisplayColorPicker}
+                      handleColorChange={handleColorChange}
+                      formData={formData}
+                    />
+                  </Box>
+                </Box>
+              )}
+            </Box>
           </Box>
         </Grid>
       </Grid>

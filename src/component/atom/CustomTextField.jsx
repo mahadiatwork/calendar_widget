@@ -16,7 +16,7 @@ const CustomTextField = ({ onChange, value, ...props }) => {
         "& .MuiOutlinedInput-root": {
           padding: "2px",
           "& input": {
-            padding: "0px 10px",
+            padding: "2px 10px",
           },
         },
       }}

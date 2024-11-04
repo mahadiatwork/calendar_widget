@@ -18,6 +18,7 @@ function App() {
   const [startDateTime, setStartDateTime] = useState("");
   const [endDateTime, setEndDateTime] = useState("");
   const [loader, setLoader] = useState(false);
+  const [recentColor,setRecentColor] = useState([])
   console.log({ startDateTime });
   console.log({ endDateTime });
 
@@ -91,6 +92,16 @@ function App() {
             setUsers((prev) => [...prev, user]);
           }
         });
+      });
+
+       // Get organization variable
+       ZOHO.CRM.API.getOrgVariable("recent_colors").then(function (
+        data
+      ) {
+        // Parse the string to an array and store it in the state
+        const colorsArray = JSON.parse(data?.Success?.Content || "[]");
+        console.log({colorsArray})
+        setRecentColor(colorsArray);
       });
     }
   }, [zohoLoaded]);
@@ -167,6 +178,8 @@ function App() {
         setStartDateTime={setStartDateTime}
         setEndDateTime={setEndDateTime}
         loader={loader}
+        recentColor= {recentColor}
+        setRecentColor={setRecentColor}
       />
       {/* <TaskScheduler /> */}
     </div>

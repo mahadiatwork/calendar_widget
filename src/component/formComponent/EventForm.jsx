@@ -81,7 +81,9 @@ const EventForm = ({
   formData,
   setFormData,
   handleInputChange,
-  users
+  users,
+  recentColor,
+  setRecentColor,
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
@@ -347,6 +349,8 @@ const EventForm = ({
           activityType={activityType}
           setActivityType={setActivityType}
           users={users}
+          recentColor= {recentColor}
+          setRecentColor={setRecentColor}
         />
         <Box display="flex" justifyContent="space-between" mt={2}>
           <Button size="small" disabled>

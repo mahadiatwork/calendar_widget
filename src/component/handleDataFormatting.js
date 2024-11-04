@@ -16,11 +16,16 @@ export function transformFormSubmission(data, individualParticipant = null) {
   const dayOfMonth = dayjs(data.startTime).date();
   const dayName = dayjs(data.startTime).format("dd");
   const monthNumber = dayjs(data.startTime).format("MM");
-  const customEndTime = data.noEndDate && (data.occurrence === 'daily') ?  dayjs(data.startTime).add(70,'day').format('YYYY-MM-DD') :
-                        data.noEndDate && (data.occurrence === 'weekly') ? dayjs(data.startTime).add(10,'month').format('YYYY-MM-DD') :
-                        data.noEndDate && (data.occurrence === 'monthly') ? dayjs(data.startTime).add(12,'month').format('YYYY-MM-DD') :
-                        data.noEndDate && (data.occurrence === 'yearly') ? dayjs(data.startTime).add(2,'year').format('YYYY-MM-DD') :
-                        dayjs(data.endTime).format('YYYY-MM-DD')
+  const customEndTime =
+    data.noEndDate && data.occurrence === "daily"
+      ? dayjs(data.startTime).add(70, "day").format("YYYY-MM-DD")
+      : data.noEndDate && data.occurrence === "weekly"
+      ? dayjs(data.startTime).add(10, "month").format("YYYY-MM-DD")
+      : data.noEndDate && data.occurrence === "monthly"
+      ? dayjs(data.startTime).add(12, "month").format("YYYY-MM-DD")
+      : data.noEndDate && data.occurrence === "yearly"
+      ? dayjs(data.startTime).add(2, "year").format("YYYY-MM-DD")
+      : dayjs(data.endTime).format("YYYY-MM-DD");
   const participants = individualParticipant
     ? [
         {
@@ -28,7 +33,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
           type: "contact",
           participant: individualParticipant.participant || null,
         },
-      ]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+      ]
     : transformScheduleWithToParticipants(data.scheduledWith || []);
 
   let transformedData = {
@@ -74,6 +79,11 @@ export function transformFormSubmission(data, individualParticipant = null) {
     Venue: data.location,
     Colour: data.color,
   };
+
+  if (
+    transformedData.Recurring_Activity.RRULE ==="FREQ=ONCE;INTERVAL=1;UNTIL=Invalid Date;DTSTART=Invalid Date") {
+    delete transformedData.Recurring_Activity;
+  }
   //   delete transformedData.scheduleWith;
   //   delete transformedData.scheduleFor;
   //   delete transformedData.description;

@@ -137,7 +137,7 @@ export default function AccountField({
             placeholder="Associate with"
             sx={{
               "& .MuiOutlinedInput-root": {
-                padding: "0px", // Remove padding around the input
+                padding: "2px 0px", // Remove padding around the input
                 minHeight: "28px", // Set a minimum height for the input field
                 height: "28px", // Set the desired height
               },
