@@ -73,6 +73,7 @@ function App() {
               Description: item?.Description,
               Regarding: item?.Regarding,
               Reminder_Text: item?.Reminder_Text,
+              $send_notification:item?.$send_notification
             };
           });
           console.log({ x });
@@ -156,6 +157,7 @@ function App() {
         Description: item?.Description,
         Regarding: item?.Regarding,
         Reminder_Text: item?.Reminder_Text,
+        $send_notification:item?.$send_notification
       };
     });
     setEvents(x);

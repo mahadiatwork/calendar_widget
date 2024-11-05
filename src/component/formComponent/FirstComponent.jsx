@@ -76,7 +76,7 @@ const FirstComponent = ({
       const modifiedDate = localDate.toISOString().slice(0, 16);
 
       handleInputChange("end", modifiedDate);
-      setEndValue(dayjs(modifiedDate))
+      setEndValue(dayjs(modifiedDate));
     } else {
       let date = new Date(formData.start);
 
@@ -148,8 +148,8 @@ const FirstComponent = ({
       // console.log("fahim", timeAt6AM, timeAt7AM);
       handleInputChange("start", timeAt6AM);
       handleInputChange("end", timeAt7AM);
-      setStartValue(dayjs(timeAt6AM))
-      setEndValue(dayjs(timeAt7AM))
+      setStartValue(dayjs(timeAt6AM));
+      setEndValue(dayjs(timeAt7AM));
     } else {
       const now = new Date();
       // console.log(now);
@@ -158,8 +158,8 @@ const FirstComponent = ({
       // console.log("fahim", timeAt6AM, timeAt7AM);
       handleInputChange("start", timeAt6AM);
       handleInputChange("end", timeAt7AM);
-      setStartValue(dayjs(timeAt6AM))
-      setEndValue(dayjs(timeAt7AM))
+      setStartValue(dayjs(timeAt6AM));
+      setEndValue(dayjs(timeAt7AM));
     }
   };
 
@@ -187,6 +187,10 @@ const FirstComponent = ({
     setRecentColor((prev) => [...prev, e]);
     handleInputChange("color", e);
   };
+
+  const handleNotificationChange = (e)=>{
+    handleInputChange("$send_notification", e.target.checked) 
+  }
 
   return (
     <Box>
@@ -275,17 +279,15 @@ const FirstComponent = ({
               disabled={formData.Banner ? true : false}
               slotProps={{ textField: { size: "small" } }}
               onChange={(e) => {
-                const addedHour =  new Date(dayjs(e.$d).add(1, "hour").toDate())
+                const addedHour = new Date(dayjs(e.$d).add(1, "hour").toDate());
                 handleInputChange("start", e.$d);
-                handleInputChange("end", addedHour)
-                setEndValue(dayjs(addedHour))
+                handleInputChange("end", addedHour);
+                setEndValue(dayjs(addedHour));
                 console.log(e.$d);
                 console.log(addedHour);
               }}
               sx={{ "& input": { py: 0 } }}
-              renderInput={(params) => (
-                <TextField {...params} size="small" />
-              )}
+              renderInput={(params) => <TextField {...params} size="small" />}
               format="DD/MM/YYYY hh:mm A" // Ensures 24-hour format for clarity
             />
           </LocalizationProvider>
@@ -358,7 +360,7 @@ const FirstComponent = ({
           </FormControl>
         </Grid>
 
-        <Grid size={18} alignItems={"center"}>
+        <Grid size={9} alignItems={"center"}>
           <FormControlLabel
             sx={{ height: "35px" }}
             control={
@@ -369,6 +371,19 @@ const FirstComponent = ({
               />
             }
             label="Banner/Timeless"
+          />
+        </Grid>
+        <Grid size={9} alignItems={"center"}>
+          <FormControlLabel
+            sx={{ height: "35px" }}
+            control={
+              <Checkbox
+                size="small"
+                checked={formData.$send_notification}
+                onChange={handleNotificationChange}
+              />
+            }
+            label="Send notification"
           />
         </Grid>
 

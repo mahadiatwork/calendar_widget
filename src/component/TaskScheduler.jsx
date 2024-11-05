@@ -164,6 +164,7 @@ const TaskScheduler = ({
     create_sperate_contact: false,
     Regarding: newEvent?.Regarding || "",
     Reminder_Text: newEvent?.Reminder_Text || "",
+    $send_notification:newEvent?.$send_notification || true
   });
 
   const changeView = useCallback((event) => {
