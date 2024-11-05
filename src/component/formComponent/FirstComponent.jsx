@@ -147,6 +147,8 @@ const FirstComponent = ({
       // console.log("fahim", timeAt6AM, timeAt7AM);
       handleInputChange("start", timeAt6AM);
       handleInputChange("end", timeAt7AM);
+      setStartValue(dayjs(timeAt6AM))
+      setEndValue(dayjs(timeAt7AM))
     } else {
       const now = new Date();
       // console.log(now);
@@ -155,6 +157,8 @@ const FirstComponent = ({
       // console.log("fahim", timeAt6AM, timeAt7AM);
       handleInputChange("start", timeAt6AM);
       handleInputChange("end", timeAt7AM);
+      setStartValue(dayjs(timeAt6AM))
+      setEndValue(dayjs(timeAt7AM))
     }
   };
 
@@ -267,6 +271,7 @@ const FirstComponent = ({
             <DateTimePicker
               label="Start Time"
               value={startValue}
+              disabled={formData.Banner ? true : false}
               slotProps={{ textField: { size: "small" } }}
               onChange={(e) => {
                 handleInputChange("start", e.$d);
@@ -322,6 +327,7 @@ const FirstComponent = ({
             <DateTimePicker
               label="End Time"
               value={endValue}
+              disabled={formData.Banner ? true : false}
               slotProps={{ textField: { size: "small" } }}
               onChange={(e) => handleEndDateChange(e)}
               sx={{ "& input": { py: 0 } }}
