@@ -546,7 +546,7 @@ const TaskScheduler = ({
             onEventDelete={handleEventDelete}
             onEventDragEnter={handleEventDragEnter}
             onEventDragLeave={handleEventDragLeave}
-            className="mbsc-schedule-date-header-text"
+            className="mbsc-schedule-date-header-text mbsc-schedule-resource-title"
           />
           <Toast
             isOpen={isToastOpen}
