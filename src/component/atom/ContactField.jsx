@@ -22,14 +22,14 @@ export default function ContactField({
   ); // Selected values in autocomplete
   const [inputValue, setInputValue] = useState(""); // Store the input text
   const [notFoundMessage, setNotFoundMessage] = useState("");
+  const [loading, setLoading] = useState(false); 
 
   // Sync selectedParticipants with value and selectedRowData
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedRowData?.Participants?.length > 0) {
-      // Otherwise, if selectedRowData is available, use it as the default
       const defaultParticipants = selectedRowData.Participants.map(
         (participant) => ({
-          Full_Name: participant.name, // Match with Full_Name for Autocomplete
+          Full_Name: participant.name,
           id: participant.participant,
         })
       );
@@ -37,32 +37,18 @@ export default function ContactField({
     }
   }, [selectedRowData, contacts]);
 
-  const handleSearch = async (searchType) => {
+
+  const handleSearch = async (query) => {
     setNotFoundMessage(""); // Reset the message
+    setLoading(true); // Start loading
 
-    if (ZOHO && inputValue) {
+    if (ZOHO && query.trim()) {
       try {
-        let searchResults;
-
-        // Set the search method based on the search type
-        if (searchType === "firstName") {
-          // Search by first name using criteria
-          const searchCriteria = `(First_Name:equals:${inputValue})`;
-          searchResults = await ZOHO.CRM.API.searchRecord({
-            Entity: "Contacts",
-            Type: "criteria",
-            Query: searchCriteria,
-          });
-          console.log({searchResults})
-        } else if (searchType === "fullName") {
-          // Search by full name using "word" type, which performs a full-text search
-          searchResults = await ZOHO.CRM.API.searchRecord({
-            Entity: "Contacts",
-            Type: "word", // Full-text search
-            Query: inputValue,
-          });
-          console.log({searchResults})
-        }
+        const searchResults = await ZOHO.CRM.API.searchRecord({
+          Entity: "Contacts",
+          Type: "word", // Full-text search
+          Query: query.trim(),
+        });
 
         if (searchResults.data && searchResults.data.length > 0) {
           const formattedContacts = searchResults.data.map((contact) => ({
@@ -70,43 +56,45 @@ export default function ContactField({
             id: contact.id,
           }));
 
-          // Merge new search results with the previously selected participants
-          const mergedContacts = [
-            ...formattedContacts,
-            ...selectedParticipants,
-          ];
-
-          // Remove duplicates (in case the search result includes already selected contacts)
+          const mergedContacts = [...formattedContacts, ...selectedParticipants];
           const uniqueContacts = mergedContacts.filter(
             (contact, index, self) =>
               index === self.findIndex((c) => c.id === contact.id)
           );
 
-          setContacts(uniqueContacts); // Update contacts list with merged data
-          setNotFoundMessage(""); // Clear the "Not Found" message
+          setContacts(uniqueContacts);
+          setNotFoundMessage("");
         } else {
-          setNotFoundMessage(`"${inputValue}" not found in the database`); // Show "Not Found" message
+          setNotFoundMessage(`"${query}" not found in the database`);
         }
       } catch (error) {
-        console.error("Error during advanced search:", error);
-        setNotFoundMessage(
-          "An error occurred while searching. Please try again."
-        );
+        console.error("Error during search:", error);
+        setNotFoundMessage("An error occurred while searching. Please try again.");
+      } finally {
+        setLoading(false); // End loading
       }
     } else {
-      setNotFoundMessage("Please enter a valid search term.");
+      setLoading(false);
+    }
+  };
+
+  const handleInputChangeWithDelay = (event, newInputValue) => {
+    setInputValue(newInputValue);
+    setNotFoundMessage(""); // Clear the "Not found" message when user types again
+
+    if (newInputValue.endsWith(" ")) {
+      // Trigger search only when a space is detected
+      handleSearch(newInputValue);
     }
   };
 
   const handleSelectionChange = (event, newValue) => {
-    setSelectedParticipants(newValue); // Update the selected values
-    // Update the parent component with the selected contacts
+    setSelectedParticipants(newValue);
     handleInputChange(
-      "scheduleWith",
+      "scheduledWith",
       newValue.map((contact) => ({
         Full_Name: contact.Full_Name,
         participant: contact.id,
-        // type: contact.type,
         type: "contact",
       }))
     );
@@ -120,13 +108,15 @@ export default function ContactField({
         multiple
         options={contacts}
         getOptionLabel={(option) => option.Full_Name || ""}
-        value={selectedParticipants} // Control the selected values
-        onChange={handleSelectionChange} // Handle the selection of new values
-        inputValue={inputValue} // Display input text
-        onInputChange={(event, newInputValue) => {
-          setInputValue(newInputValue); // Update input value when typing
-          setNotFoundMessage(""); // Clear the "Not found" message when user types again
-        }}
+        value={selectedParticipants}
+        onChange={handleSelectionChange}
+        inputValue={inputValue}
+        onInputChange={handleInputChangeWithDelay} // Use the custom handler
+        loading={loading} // Display input text
+        // onInputChange={(event, newInputValue) => {
+        //   setInputValue(newInputValue); // Update input value when typing
+        //   setNotFoundMessage(""); // Clear the "Not found" message when user types again
+        // }}
         sx={{"& .MuiInputBase-root": {p:'0px'},"& .MuiOutlinedInput-root":{p:0}}}
         noOptionsText={
           notFoundMessage ? (
@@ -151,7 +141,9 @@ export default function ContactField({
             fullWidth
             size="small"
             variant="outlined"
-            placeholder="Scheduled with"
+            label="Scheduled with"
+            InputLabelProps={{ shrink: true }}
+            placeholder="Type and press space to search..."
             sx={{
               "& > div":{py:'0 !important'},
               "& .MuiOutlinedInput-root": {
