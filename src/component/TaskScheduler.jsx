@@ -534,7 +534,6 @@ const TaskScheduler = ({
             eventOverlap={false}
             externalDrop={true}
             externalDrag={true}
-            // height={"500px"}
             selectedDate={selectedDate}
             colors={myColors}
             onCellDoubleClick={handleCellDoubleClick}
@@ -547,6 +546,7 @@ const TaskScheduler = ({
             onEventDelete={handleEventDelete}
             onEventDragEnter={handleEventDragEnter}
             onEventDragLeave={handleEventDragLeave}
+            className="mbsc-schedule-date-header-text"
           />
           <Toast
             isOpen={isToastOpen}
