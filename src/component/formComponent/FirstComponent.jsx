@@ -76,6 +76,7 @@ const FirstComponent = ({
       const modifiedDate = localDate.toISOString().slice(0, 16);
 
       handleInputChange("end", modifiedDate);
+      setEndValue(dayjs(modifiedDate))
     } else {
       let date = new Date(formData.start);
 
@@ -274,40 +275,18 @@ const FirstComponent = ({
               disabled={formData.Banner ? true : false}
               slotProps={{ textField: { size: "small" } }}
               onChange={(e) => {
+                const addedHour =  new Date(dayjs(e.$d).add(1, "hour").toDate())
                 handleInputChange("start", e.$d);
+                handleInputChange("end", addedHour)
+                setEndValue(dayjs(addedHour))
                 console.log(e.$d);
+                console.log(addedHour);
               }}
               sx={{ "& input": { py: 0 } }}
               renderInput={(params) => (
-                <TextField
-                  {...params}
-                  size="small"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      fontSize: "0.7rem", // Smaller font size for compact appearance
-                      padding: "0px 4px !important", // Minimal padding
-                      minHeight: "25px", // Reduced min-height for compactness
-                      width: "100%", // Ensuring the input width adapts to fit text
-                    },
-                    "& .MuiInputLabel-root": {
-                      fontSize: "0.7rem", // Smaller label font size
-                      transform: "translate(14px, 5px) scale(1)", // Adjusted to align label properly
-                    },
-                    "& input": {
-                      padding: "0px 4px", // Reduced padding for the input field
-                      whiteSpace: "nowrap", // Prevents text wrapping
-                      overflow: "hidden",
-                      textOverflow: "ellipsis", // Adds ellipsis if text overflows
-                    },
-                  }}
-                  InputProps={{
-                    style: {
-                      lineHeight: 1, // Adjusted line height
-                    },
-                  }}
-                />
+                <TextField {...params} size="small" />
               )}
-              format="DD/MM/YYYY HH:mm A" // Ensures 24-hour format for clarity
+              format="DD/MM/YYYY hh:mm A" // Ensures 24-hour format for clarity
             />
           </LocalizationProvider>
         </Grid>
@@ -332,7 +311,7 @@ const FirstComponent = ({
               onChange={(e) => handleEndDateChange(e)}
               sx={{ "& input": { py: 0 } }}
               renderInput={(params) => <TextField {...params} size="small" />}
-              format="DD/MM/YYYY HH:mm A" // Ensures 24-hour format for clarity
+              format="DD/MM/YYYY hh:mm A" // Ensures 24-hour format for clarity
             />
           </LocalizationProvider>
         </Grid>
