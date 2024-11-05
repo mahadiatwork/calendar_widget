@@ -57,4 +57,5 @@ input[type="color"]::-webkit-color-swatch {
 
 .mbsc-schedule-date-header-text{
   font-size: 20px !important;
+  padding: 0px !important;
 }
