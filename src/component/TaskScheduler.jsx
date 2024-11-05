@@ -152,7 +152,7 @@ const TaskScheduler = ({
     scheduleFor: newEvent?.scheduleFor || "",
     scheduleWith: newEvent?.scheduleWith || [],
     location: newEvent?.location || "",
-    priority: newEvent?.priority?.toLowerCase() || "",
+    priority: newEvent?.priority?.toLowerCase() || "medium",
     Remind_At: newEvent?.Remind_At || "",
     occurrence: newEvent?.occurrence || "once",
     start: newEvent?.start || "",

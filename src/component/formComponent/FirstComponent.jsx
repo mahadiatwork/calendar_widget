@@ -388,6 +388,13 @@ const FirstComponent = ({
         </Grid>
 
         <Grid size={18}>
+          <ContactField
+            value={formData.scheduleWith} // Use formData
+            handleInputChange={handleInputChange}
+            formData={formData}
+          />
+        </Grid>
+        <Grid size={18}>
           {/* <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
@@ -439,13 +446,7 @@ const FirstComponent = ({
           />
         </Grid>
 
-        <Grid size={18}>
-          <ContactField
-            value={formData.scheduleWith} // Use formData
-            handleInputChange={handleInputChange}
-            formData={formData}
-          />
-        </Grid>
+        
 
         <Grid size={18}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
