@@ -54,7 +54,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
       id: data.scheduleFor.id,
     },
     Recurring_Activity: {
-      RRULE: `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${
+      RRULE: `FREQ=${data?.occurrence?.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${
         data.occurrence === "weekly"
           ? `;BYDAY=${dayName.toUpperCase()}`
           : data.occurrence === "monthly"
