@@ -158,7 +158,8 @@ const EventForm = ({
 
   const handleSubmit = () => {
     console.log("Form Data Submitted:", formData);
-      console.log({transformedData})
+    // const transformedData = transformFormSubmission(formData);
+    // console.log({transformedData})
     // Add your submit logic here (e.g., send data to the backend)
     // setEvents((prev) => [...prev, formData]);
     if (formData.id !== "") {
@@ -204,8 +205,14 @@ const EventForm = ({
       });
     } else {
       if (formData.create_sperate_contact) {
-        for (let participant of formData?.scheduleWith) {
-          const transformedData = transformFormSubmission(formData,participant);
+        // console.log('hello')
+        let tempArr = [];
+        formData?.scheduledWith.forEach((item,index) => {
+          const transformedData = transformFormSubmission(
+            formData,
+            item
+          );
+          console.log({ transformedData });
           ZOHO.CRM.API.insertRecord({
             Entity: "Events",
             APIData: transformedData,
@@ -218,85 +225,86 @@ const EventForm = ({
                 data.data[0].code === "SUCCESS"
               ) {
                 alert("Event Created Successfully");
+                console.log(data?.data);
                 handleInputChange("id", data?.data[0].details?.id);
-    
-                setEvents((prev) => [...prev, formData]);
-                setFormData({
-                  id: "",
-                  title: "",
-                  startTime: "",
-                  endTime: "",
-                  duration: 0,
-                  associateWith: null,
-                  Type_of_Activity: "",
-                  resource: 0,
-                  scheduleFor: "",
-                  scheduleWith: [],
-                  location: "",
-                  priority: "",
-                  Remind_At: "",
-                  occurrence: "once",
-                  start: "",
-                  end: "",
-                  noEndDate: false,
-                  color: "#d1891f",
-                  Banner: false,
-                  Description: "",
-                });
-                setOpen(false);
+                setEvents((prev) => [...prev, {...formData,id:data?.data[0].details?.id}]);
               }
             })
             .catch((error) => {
               console.error("Error submitting the form:", error);
-            });
-        }
-      }else{
+            })
+        });
+        setFormData({
+          id: "",
+          title: "",
+          startTime: "",
+          endTime: "",
+          duration: 0,
+          associateWith: null,
+          Type_of_Activity: "",
+          resource: 0,
+          scheduleFor: "",
+          scheduleWith: [],
+          location: "",
+          priority: "",
+          Remind_At: "",
+          occurrence: "once",
+          start: "",
+          end: "",
+          noEndDate: false,
+          color: "#d1891f",
+          Banner: false,
+          Description: "",
+        });
+        setOpen(false);
+
+        
+      } else {
         const transformedData = transformFormSubmission(formData);
-          ZOHO.CRM.API.insertRecord({
-            Entity: "Events",
-            APIData: transformedData,
-            Trigger: ["workflow"],
+        ZOHO.CRM.API.insertRecord({
+          Entity: "Events",
+          APIData: transformedData,
+          Trigger: ["workflow"],
+        })
+          .then((data) => {
+            if (
+              data.data &&
+              data.data.length > 0 &&
+              data.data[0].code === "SUCCESS"
+            ) {
+              alert("Event Created Successfully");
+              handleInputChange("id", data?.data[0].details?.id);
+
+              setEvents((prev) => [...prev, formData]);
+              setFormData({
+                id: "",
+                title: "",
+                startTime: "",
+                endTime: "",
+                duration: 0,
+                associateWith: null,
+                Type_of_Activity: "",
+                resource: 0,
+                scheduleFor: "",
+                scheduleWith: [],
+                location: "",
+                priority: "",
+                Remind_At: "",
+                occurrence: "once",
+                start: "",
+                end: "",
+                noEndDate: false,
+                color: "#d1891f",
+                Banner: false,
+                Description: "",
+              });
+              setOpen(false);
+            }
           })
-            .then((data) => {
-              if (
-                data.data &&
-                data.data.length > 0 &&
-                data.data[0].code === "SUCCESS"
-              ) {
-                alert("Event Created Successfully");
-                handleInputChange("id", data?.data[0].details?.id);
-    
-                setEvents((prev) => [...prev, formData]);
-                setFormData({
-                  id: "",
-                  title: "",
-                  startTime: "",
-                  endTime: "",
-                  duration: 0,
-                  associateWith: null,
-                  Type_of_Activity: "",
-                  resource: 0,
-                  scheduleFor: "",
-                  scheduleWith: [],
-                  location: "",
-                  priority: "",
-                  Remind_At: "",
-                  occurrence: "once",
-                  start: "",
-                  end: "",
-                  noEndDate: false,
-                  color: "#d1891f",
-                  Banner: false,
-                  Description: "",
-                });
-                setOpen(false);
-              }
-            })
-            .catch((error) => {
-              console.error("Error submitting the form:", error);
-            });
+          .catch((error) => {
+            console.error("Error submitting the form:", error);
+          });
       }
-     
     }
   };
 
@@ -348,7 +356,7 @@ const EventForm = ({
           activityType={activityType}
           setActivityType={setActivityType}
           users={users}
-          recentColor= {recentColor}
+          recentColor={recentColor}
           setRecentColor={setRecentColor}
         />
         <Box display="flex" justifyContent="space-between" mt={2}>
@@ -357,24 +365,24 @@ const EventForm = ({
           </Button>{" "}
           {/* Back is disabled on first tab */}
           <Box>
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={handleNext}
-            sx={{mr:2}}
-          >
-            Next
-          </Button>
-          <Button
-            size="small"
-            variant="contained"
-            color="secondary"
-            onClick={handleSubmit}
-          >
-            {formData.id !== ""? 'Update': "Submit"}
-            {/* Submit */}
-          </Button>
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={handleNext}
+              sx={{ mr: 2 }}
+            >
+              Next
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              color="secondary"
+              onClick={handleSubmit}
+            >
+              {formData.id !== "" ? "Update" : "Submit"}
+              {/* Submit */}
+            </Button>
           </Box>
         </Box>
       </TabPanel>
@@ -405,24 +413,24 @@ const EventForm = ({
             Back
           </Button>
           <Box>
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={handleNext}
-            sx={{mr:2}}
-          >
-            Next
-          </Button>
-          <Button
-            size="small"
-            variant="contained"
-            color="secondary"
-            onClick={handleSubmit}
-          >
-            {formData.id !== ""? 'Update': "Submit"}
-            {/* Submit */}
-          </Button>
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={handleNext}
+              sx={{ mr: 2 }}
+            >
+              Next
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              color="secondary"
+              onClick={handleSubmit}
+            >
+              {formData.id !== "" ? "Update" : "Submit"}
+              {/* Submit */}
+            </Button>
           </Box>
         </Box>
       </TabPanel>
@@ -446,7 +454,7 @@ const EventForm = ({
             color="secondary"
             onClick={handleSubmit}
           >
-            {formData.id !== ""? 'Update': "Submit"}
+            {formData.id !== "" ? "Update" : "Submit"}
             {/* Submit */}
           </Button>{" "}
           {/* Next is disabled on the last tab */}
