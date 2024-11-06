@@ -84,6 +84,7 @@ const EventForm = ({
   users,
   recentColor,
   setRecentColor,
+  clickedEvent
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
@@ -358,6 +359,7 @@ const EventForm = ({
           users={users}
           recentColor={recentColor}
           setRecentColor={setRecentColor}
+          clickedEvent={clickedEvent}
         />
         <Box display="flex" justifyContent="space-between" mt={2}>
           <Button size="small" disabled>

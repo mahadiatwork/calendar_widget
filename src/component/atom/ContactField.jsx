@@ -14,11 +14,13 @@ export default function ContactField({
   value,
   handleInputChange,
   selectedRowData,
-  formData
+  formData,
+  clickedEvent
 }) {
+  console.log('tazwer',clickedEvent)
   const [contacts, setContacts] = useState([]); // Contacts fetched from Zoho
   const [selectedParticipants, setSelectedParticipants] = useState(
-    formData.scheduleWith || []
+    clickedEvent?.scheduledWith || []
   ); // Selected values in autocomplete
   const [inputValue, setInputValue] = useState(""); // Store the input text
   const [notFoundMessage, setNotFoundMessage] = useState("");
@@ -26,8 +28,8 @@ export default function ContactField({
 
   // Sync selectedParticipants with value and selectedRowData
   useEffect(() => {
-    if (selectedRowData?.Participants?.length > 0) {
-      const defaultParticipants = selectedRowData.Participants.map(
+    if (clickedEvent?.scheduledWith?.length > 0) {
+      const defaultParticipants = clickedEvent.scheduledWith.map(
         (participant) => ({
           Full_Name: participant.name,
           id: participant.participant,
@@ -35,7 +37,7 @@ export default function ContactField({
       );
       setSelectedParticipants(defaultParticipants);
     }
-  }, [selectedRowData, contacts]);
+  }, [clickedEvent, contacts]);
 
 
   const handleSearch = async (query) => {
@@ -100,7 +102,7 @@ export default function ContactField({
     );
   };
 
-  console.log({ data: selectedRowData?.Participants });
+  console.log({ data: clickedEvent?.scheduledWith });
 
   return (
     <Box>
@@ -112,12 +114,7 @@ export default function ContactField({
         onChange={handleSelectionChange}
         inputValue={inputValue}
         onInputChange={handleInputChangeWithDelay} // Use the custom handler
-        loading={loading} // Display input text
-        // onInputChange={(event, newInputValue) => {
-        //   setInputValue(newInputValue); // Update input value when typing
-        //   setNotFoundMessage(""); // Clear the "Not found" message when user types again
-        // }}
-        sx={{"& .MuiInputBase-root": {p:'0px'},"& .MuiOutlinedInput-root":{p:0}}}
+        loading={loading} // Show loading indicator during search
         noOptionsText={
           notFoundMessage ? (
             <Box display="flex" alignItems="center" color="error.main">

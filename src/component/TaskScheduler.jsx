@@ -482,7 +482,7 @@ const TaskScheduler = ({
 
   const handleEventClick = (args) => {
     console.log({ args });
-    setClickedEvent(args);
+    setClickedEvent(args?.event);
     setFormData({
       id: args?.event?.id,
       title: args?.event?.title,
@@ -588,6 +588,7 @@ const TaskScheduler = ({
             users={users}
             recentColor={recentColor}
             setRecentColor={setRecentColor}
+            clickedEvent={clickedEvent}
           />
         </Modal>
       </div>

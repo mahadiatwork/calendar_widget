@@ -14,7 +14,8 @@ const ZOHO = window.ZOHO;
 export default function AccountField({
   value,
   handleInputChange,
-  selectedRowData,
+  // clickedEvent,
+  clickedEvent,
 }) {
   const [accounts, setAccounts] = useState([]); // No initial accounts
   const [selectedAccount, setSelectedAccount] = useState(null); // Selected account object
@@ -23,18 +24,19 @@ export default function AccountField({
   const [loading, setLoading] = useState(false);
 
   // Utility to find matched account by id
-  const findMatchedAccount = (accountId) => accounts.find((account) => account.id === accountId);
+  const findMatchedAccount = (accountId) =>
+    accounts.find((account) => account.id === accountId);
 
-  // Sync inputValue and selectedAccount with the provided value and selectedRowData
+  // Sync inputValue and selectedAccount with the provided value and clickedEvent
   useEffect(() => {
-    if (selectedRowData?.What_Id?.id) {
+    if (clickedEvent?.scheduleFor?.id) {
       setSelectedAccount({
-        Account_Name: selectedRowData.What_Id.name,
-        id: selectedRowData.What_Id.id,
+        Account_Name: clickedEvent.scheduleFor.name,
+        id: clickedEvent.scheduleFor.id,
       });
-      setInputValue(selectedRowData.What_Id.name || "");
+      setInputValue(clickedEvent.scheduleFor.name || "");
     }
-  }, [selectedRowData]);
+  }, [clickedEvent]);
 
   // useEffect(() => {
   //   const fetchAccounts = async () => {
@@ -57,52 +59,53 @@ export default function AccountField({
   //   fetchAccounts();
   // }, [ZOHO]); // Add ZOHO as a dependency
 
-    // Handle advanced search when no accounts are found
-    const handleAdvancedSearch = async (query) => {
-      setNotFoundMessage(""); // Reset message before search
-      setLoading(true); // Start loading
-  
-      if (ZOHO && query.trim()) {
-        try {
-          const searchResults = await ZOHO.CRM.API.searchRecord({
-            Entity: "Accounts",
-            Type: "word", // Full-text search
-            Query: query.trim(),
-          });
-  
-          if (searchResults.data && searchResults.data.length > 0) {
-            const formattedAccounts = searchResults.data.map((account) => ({
-              Account_Name: account.Account_Name,
-              id: account.id,
-            }));
-            setAccounts(formattedAccounts);
-            setNotFoundMessage(""); // Clear the not-found message
-          } else {
-            setNotFoundMessage(`"${query.trim()}" not found in the database`);
-          }
-        } catch (error) {
-          console.error("Error during search:", error);
-          setNotFoundMessage("An error occurred while searching. Please try again.");
-        } finally {
-          setLoading(false); // End loading
+  // Handle advanced search when no accounts are found
+  const handleAdvancedSearch = async (query) => {
+    setNotFoundMessage(""); // Reset message before search
+    setLoading(true); // Start loading
+
+    if (ZOHO && query.trim()) {
+      try {
+        const searchResults = await ZOHO.CRM.API.searchRecord({
+          Entity: "Accounts",
+          Type: "word", // Full-text search
+          Query: query.trim(),
+        });
+
+        if (searchResults.data && searchResults.data.length > 0) {
+          const formattedAccounts = searchResults.data.map((account) => ({
+            Account_Name: account.Account_Name,
+            id: account.id,
+          }));
+          setAccounts(formattedAccounts);
+          setNotFoundMessage(""); // Clear the not-found message
+        } else {
+          setNotFoundMessage(`"${query.trim()}" not found in the database`);
         }
-      } else {
-        setLoading(false);
+      } catch (error) {
+        console.error("Error during search:", error);
+        setNotFoundMessage(
+          "An error occurred while searching. Please try again."
+        );
+      } finally {
+        setLoading(false); // End loading
       }
-    };
-  
-    const handleInputChangeWithDelay = (event, newInputValue) => {
-      setInputValue(newInputValue); // Update input value
-      setNotFoundMessage(""); // Clear not-found message
-  
-      if (newInputValue.endsWith(" ")) {
-        // Trigger search only when a space is detected
-        handleAdvancedSearch(newInputValue);
-      }
-    };
-    // Check if input value matches any account name
-    // const showSearchButton = inputValue && !accounts.some(account => account.Account_Name === inputValue);
-  
+    } else {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChangeWithDelay = (event, newInputValue) => {
+    setInputValue(newInputValue); // Update input value
+    setNotFoundMessage(""); // Clear not-found message
+
+    if (newInputValue.endsWith(" ")) {
+      // Trigger search only when a space is detected
+      handleAdvancedSearch(newInputValue);
+    }
+  };
+  // Check if input value matches any account name
+  // const showSearchButton = inputValue && !accounts.some(account => account.Account_Name === inputValue);
 
   return (
     <Box>
@@ -134,7 +137,6 @@ export default function AccountField({
             </Typography>
           )
         }
-        
         renderInput={(params) => (
           <TextField
             {...params}

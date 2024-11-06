@@ -40,6 +40,7 @@ const FirstComponent = ({
   users,
   recentColor,
   setRecentColor,
+  clickedEvent
 }) => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
@@ -389,9 +390,10 @@ const FirstComponent = ({
 
         <Grid size={18}>
           <ContactField
-            value={formData.scheduleWith} // Use formData
+            value={formData?.scheduledWith} // Use formData
             handleInputChange={handleInputChange}
             formData={formData}
+            clickedEvent={clickedEvent}
           />
         </Grid>
         <Grid size={18}>
@@ -443,6 +445,7 @@ const FirstComponent = ({
           <AccountField
             value={formData.associateWith} // Use formData
             handleInputChange={handleInputChange}
+            clickedEvent={clickedEvent}
           />
         </Grid>
 
