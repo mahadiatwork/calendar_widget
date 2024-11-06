@@ -158,7 +158,6 @@ const EventForm = ({
 
   const handleSubmit = () => {
     console.log("Form Data Submitted:", formData);
-      const transformedData = transformFormSubmission(formData);
       console.log({transformedData})
     // Add your submit logic here (e.g., send data to the backend)
     // setEvents((prev) => [...prev, formData]);

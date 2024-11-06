@@ -600,9 +600,9 @@ const FirstComponent = ({
               <Checkbox
                 checked={formData.create_sperate_contact}
                 disabled={formData.id !== "" ? true : false}
-                onChange={(e) =>
-                  handleInputChange("create_sperate_contact", e.target.value)
-                }
+                onChange={(e) =>{
+                  handleInputChange("create_sperate_contact", e.target.checked);console.log(e.target.checked)
+                }}
               />
             }
             label="Create separate activity for each contact"

@@ -125,14 +125,7 @@ export default function ContactField({
               <Typography variant="body2">{notFoundMessage}</Typography>
             </Box>
           ) : (
-            <Button
-              variant="text"
-              startIcon={<SearchIcon />}
-              onClick={()=> handleSearch("fullName")}
-              sx={{ color: "#1976d2", textTransform: "none" }}
-            >
-              Search First Name
-            </Button>
+            "No options"
           )
         }
         renderInput={(params) => (

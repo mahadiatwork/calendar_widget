@@ -12,7 +12,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
       participant: contact?.participant || null,
     }));
   };
-
+console.log({individualParticipant})
   const dayOfMonth = dayjs(data.startTime).date();
   const dayName = dayjs(data.startTime).format("dd");
   const monthNumber = dayjs(data.startTime).format("MM");
@@ -26,6 +26,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
       : data.noEndDate && data.occurrence === "yearly"
       ? dayjs(data.startTime).add(2, "year").format("YYYY-MM-DD")
       : dayjs(data.endTime).format("YYYY-MM-DD");
+
   const participants = individualParticipant
     ? [
         {
