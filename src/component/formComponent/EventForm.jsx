@@ -84,7 +84,9 @@ const EventForm = ({
   users,
   recentColor,
   setRecentColor,
-  clickedEvent
+  clickedEvent,
+  setClickedEvent,
+  argumentLoader
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
@@ -200,14 +202,14 @@ const EventForm = ({
             color: "#d1891f",
             Banner: false,
             Description: "",
+            send_notification:true
           });
+          setClickedEvent(null)
           setOpen(false);
         }
       });
     } else {
       if (formData.create_sperate_contact) {
-        // console.log('hello')
-        let tempArr = [];
         formData?.scheduledWith.forEach((item,index) => {
           const transformedData = transformFormSubmission(
             formData,
@@ -225,10 +227,10 @@ const EventForm = ({
                 data.data.length > 0 &&
                 data.data[0].code === "SUCCESS"
               ) {
-                alert("Event Created Successfully");
                 console.log(data?.data);
-                handleInputChange("id", data?.data[0].details?.id);
+                handleInputChange("id", data?.data[0]?.details?.id);
                 setEvents((prev) => [...prev, {...formData,id:data?.data[0].details?.id}]);
+                alert("Event Created Successfully");
               }
             })
             .catch((error) => {
@@ -256,7 +258,9 @@ const EventForm = ({
           color: "#d1891f",
           Banner: false,
           Description: "",
+          send_notification:true
         });
+        setClickedEvent(null)
         setOpen(false);
 
         
@@ -273,10 +277,10 @@ const EventForm = ({
               data.data.length > 0 &&
               data.data[0].code === "SUCCESS"
             ) {
-              alert("Event Created Successfully");
-              handleInputChange("id", data?.data[0].details?.id);
+             
+              handleInputChange("id", data?.data[0]?.details?.id);
 
-              setEvents((prev) => [...prev, formData]);
+              setEvents((prev) => [...prev, {...formData,id:data?.data[0].details?.id}]);
               setFormData({
                 id: "",
                 title: "",
@@ -298,8 +302,11 @@ const EventForm = ({
                 color: "#d1891f",
                 Banner: false,
                 Description: "",
+                send_notification:true
               });
+              setClickedEvent(null)
               setOpen(false);
+              alert("Event Created Successfully");
             }
           })
           .catch((error) => {
@@ -308,6 +315,40 @@ const EventForm = ({
       }
     }
   };
+
+  if (argumentLoader) {
+    return (
+      <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 650,
+        bgcolor: "background.paper",
+        border: "2px solid #000",
+        boxShadow: 24,
+        p: 2,
+        borderRadius: 5,
+      }}
+    >
+      <Box height={15}>
+        <IconButton
+          aria-label="close"
+          onClick={() => handleClose()}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <Typography variant="h3" color="primary">Loading...</Typography>
+      </Box>
+    )
+  }
 
   return (
     <Box

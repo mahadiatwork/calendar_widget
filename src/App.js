@@ -18,7 +18,7 @@ function App() {
   const [startDateTime, setStartDateTime] = useState("");
   const [endDateTime, setEndDateTime] = useState("");
   const [loader, setLoader] = useState(false);
-  const [recentColor,setRecentColor] = useState([])
+  const [recentColor, setRecentColor] = useState([]);
   console.log({ startDateTime });
   console.log({ endDateTime });
 
@@ -56,11 +56,18 @@ function App() {
               startTime: "",
               endTime: "",
               duration: item.Duration_Min,
-              associateWith: item.What_Id,
+              associateWith: {
+                Account_Name: item?.What_Id?.name,
+                id: item?.What_Id?.id,
+              },
               Type_of_Activity: item.Type_of_Activity,
               resource: item.resource,
               scheduleFor: item.Owner,
-              scheduledWith: [...item.Participants],
+              scheduledWith: item?.Participants.map((participant) => ({
+                Full_Name: participant.name,
+                participant: participant.participant,
+                type: participant.type,
+              })),
               location: item.Venue,
               priority: item.Event_Priority,
               Remind_At: item.Remind_At,
@@ -73,7 +80,7 @@ function App() {
               Description: item?.Description,
               Regarding: item?.Regarding,
               Reminder_Text: item?.Reminder_Text,
-              $send_notification:item?.$send_notification
+              send_notification: item?.$send_notification,
             };
           });
           console.log({ x });
@@ -95,13 +102,11 @@ function App() {
         });
       });
 
-       // Get organization variable
-       ZOHO.CRM.API.getOrgVariable("recent_colors").then(function (
-        data
-      ) {
+      // Get organization variable
+      ZOHO.CRM.API.getOrgVariable("recent_colors").then(function (data) {
         // Parse the string to an array and store it in the state
         const colorsArray = JSON.parse(data?.Success?.Content || "[]");
-        console.log({colorsArray})
+        console.log({ colorsArray });
         setRecentColor(colorsArray);
       });
     }
@@ -140,11 +145,18 @@ function App() {
         startTime: "",
         endTime: "",
         duration: item.Duration_Min,
-        associateWith: item.What_Id,
+        associateWith: {
+          Account_Name: item?.What_Id?.name,
+          id: item?.What_Id?.id,
+        },
         Type_of_Activity: item.Type_of_Activity,
         resource: item.resource,
         scheduleFor: item.Owner,
-        scheduledWith: [...item.Participants],
+        scheduledWith: item?.Participants.map((participant) => ({
+          Full_Name: participant.name,
+          participant: participant.participant,
+          type: participant.type,
+        })),
         location: item.Venue,
         priority: item.Event_Priority,
         Remind_At: item.Remind_At,
@@ -157,7 +169,7 @@ function App() {
         Description: item?.Description,
         Regarding: item?.Regarding,
         Reminder_Text: item?.Reminder_Text,
-        $send_notification:item?.$send_notification
+        send_notification: item?.$send_notification,
       };
     });
     setEvents(x);
@@ -171,6 +183,7 @@ function App() {
   }, [startDateTime, endDateTime]);
 
   console.log({ faky: myEvents });
+  console.log({ users });
   return (
     <div>
       <TaskScheduler
@@ -180,7 +193,7 @@ function App() {
         setStartDateTime={setStartDateTime}
         setEndDateTime={setEndDateTime}
         loader={loader}
-        recentColor= {recentColor}
+        recentColor={recentColor}
         setRecentColor={setRecentColor}
       />
       {/* <TaskScheduler /> */}

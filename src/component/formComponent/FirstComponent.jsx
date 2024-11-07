@@ -190,8 +190,13 @@ const FirstComponent = ({
   };
 
   const handleNotificationChange = (e)=>{
-    handleInputChange("$send_notification", e.target.checked) 
+    handleInputChange("send_notification", e.target.checked) 
   }
+  // const fn =()=>{
+  //   handleInputChange("Remind_At",'')
+  //   handleInputChange('Reminder_Text','')
+  //   return true
+  // }
 
   return (
     <Box>
@@ -380,7 +385,8 @@ const FirstComponent = ({
             control={
               <Checkbox
                 size="small"
-                checked={formData.$send_notification}
+                value={formData.send_notification}
+                checked={formData.send_notification}
                 onChange={handleNotificationChange}
               />
             }
@@ -457,9 +463,10 @@ const FirstComponent = ({
               id="schedule-for-autocomplete"
               size="small"
               options={users}
-              getOptionLabel={(option) => option.full_name || ""}
-              value={formData.scheduleFor || ""} // Use formData
+              getOptionLabel={(option) => option?.full_name || ""}
+              value={formData?.scheduleFor || ""} 
               onChange={(event, newValue) => {
+                console.log('hello',newValue)
                 handleInputChange("scheduleFor", newValue || "");
               }}
               renderInput={(params) => (
@@ -543,6 +550,7 @@ const FirstComponent = ({
               id="demo-simple-select-standard"
               label="Ring Alarm"
               fullWidth
+              disabled={!formData.send_notification ? true:false }
               value={formData.Reminder_Text || ""} // Use `Reminder_Text` to display selected text
               onChange={(e) => {
                 // Find the selected ring object

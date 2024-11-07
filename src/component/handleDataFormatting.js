@@ -13,46 +13,46 @@ export function transformFormSubmission(data, individualParticipant = null) {
     }));
   };
 console.log({individualParticipant})
-  const dayOfMonth = dayjs(data.startTime).date();
-  const dayName = dayjs(data.startTime).format("dd");
-  const monthNumber = dayjs(data.startTime).format("MM");
+  const dayOfMonth = dayjs(data?.startTime).date();
+  const dayName = dayjs(data?.startTime).format("dd");
+  const monthNumber = dayjs(data?.startTime).format("MM");
   const customEndTime =
     data.noEndDate && data.occurrence === "daily"
-      ? dayjs(data.startTime).add(70, "day").format("YYYY-MM-DD")
-      : data.noEndDate && data.occurrence === "weekly"
-      ? dayjs(data.startTime).add(10, "month").format("YYYY-MM-DD")
-      : data.noEndDate && data.occurrence === "monthly"
-      ? dayjs(data.startTime).add(12, "month").format("YYYY-MM-DD")
-      : data.noEndDate && data.occurrence === "yearly"
-      ? dayjs(data.startTime).add(2, "year").format("YYYY-MM-DD")
-      : dayjs(data.endTime).format("YYYY-MM-DD");
+      ? dayjs(data?.startTime).add(70, "day").format("YYYY-MM-DD")
+      : data?.noEndDate && data?.occurrence === "weekly"
+      ? dayjs(data?.startTime).add(10, "month").format("YYYY-MM-DD")
+      : data?.noEndDate && data?.occurrence === "monthly"
+      ? dayjs(data?.startTime).add(12, "month").format("YYYY-MM-DD")
+      : data?.noEndDate && data?.occurrence === "yearly"
+      ? dayjs(data?.startTime).add(2, "year").format("YYYY-MM-DD")
+      : dayjs(data?.endTime).format("YYYY-MM-DD");
 
   const participants = individualParticipant
     ? [
         {
-          Full_Name: individualParticipant.Full_Name || null,
+          Full_Name: individualParticipant?.Full_Name || null,
           type: "contact",
-          participant: individualParticipant.participant || null,
+          participant: individualParticipant?.participant || null,
         },
       ]
-    : transformScheduleWithToParticipants(data.scheduledWith || []);
+    : transformScheduleWithToParticipants(data?.scheduledWith || []);
 
   let transformedData = {
     ...data,
-    Event_Title: data.title,
-    Remind_At: dayjs(data.Remind_At)
-      .tz("Australia/Adelaide")
-      .format("YYYY-MM-DDTHH:mm:ssZ"),
-    Start_DateTime: dayjs(data.start)
+    Event_Title: data?.title,
+    // Remind_At: dayjs(data?.Remind_At)
+    //   .tz("Australia/Adelaide")
+    //   .format("YYYY-MM-DDTHH:mm:ssZ"),
+    Start_DateTime: dayjs(data?.start)
       .tz("Australia/Adelaide")
       .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `start` to ISO with timezone
-    End_DateTime: dayjs(data.end)
+    End_DateTime: dayjs(data?.end)
       .tz("Australia/Adelaide")
       .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `end` to ISO with timezone
-    Description: data.Description, // Map `description` to `Description`
-    Event_Priority: data.priority, // Map `priority` to `Event_Priority`
+    Description: data?.Description, // Map `description` to `Description`
+    Event_Priority: data?.priority, // Map `priority` to `Event_Priority`
     Owner: {
-      id: data.scheduleFor.id,
+      id: data.scheduleFor?.id,
     },
     Recurring_Activity: {
       RRULE: `FREQ=${data?.occurrence?.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${
@@ -65,6 +65,7 @@ console.log({individualParticipant})
           : ""
       };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}`,
     },
+    $send_notification:data.send_notification,
 
     // Updated `What_Id` with both name and id from `associateWith`
     What_Id: data.associateWith
@@ -79,6 +80,8 @@ console.log({individualParticipant})
     Duration_Min: data.duration.toString(),
     Venue: data.location,
     Colour: data.color,
+    Remind_At: data.send_notification? data.Remind_At:null,
+    Reminder_Text:data.send_notification? data.Reminder_Text:null
   };
 
   if (

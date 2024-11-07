@@ -17,6 +17,7 @@ export default function AccountField({
   // clickedEvent,
   clickedEvent,
 }) {
+  
   const [accounts, setAccounts] = useState([]); // No initial accounts
   const [selectedAccount, setSelectedAccount] = useState(null); // Selected account object
   const [inputValue, setInputValue] = useState("");
@@ -29,12 +30,12 @@ export default function AccountField({
 
   // Sync inputValue and selectedAccount with the provided value and clickedEvent
   useEffect(() => {
-    if (clickedEvent?.scheduleFor?.id) {
+    if (clickedEvent?.associateWith?.id) {
       setSelectedAccount({
-        Account_Name: clickedEvent.scheduleFor.name,
-        id: clickedEvent.scheduleFor.id,
+        Account_Name: clickedEvent?.associateWith?.Account_Name,
+        id: clickedEvent?.associateWith?.id,
       });
-      setInputValue(clickedEvent.scheduleFor.name || "");
+      setInputValue(clickedEvent?.associateWith.name || "");
     }
   }, [clickedEvent]);
 
@@ -116,6 +117,7 @@ export default function AccountField({
         value={selectedAccount}
         onChange={(event, newValue) => {
           setSelectedAccount(newValue); // Set selected account
+          console.log({newValue})
           handleInputChange("associateWith", newValue); // Trigger change handler
         }}
         inputValue={inputValue}

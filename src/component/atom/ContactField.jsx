@@ -31,7 +31,7 @@ export default function ContactField({
     if (clickedEvent?.scheduledWith?.length > 0) {
       const defaultParticipants = clickedEvent.scheduledWith.map(
         (participant) => ({
-          Full_Name: participant.name,
+          Full_Name: participant.Full_Name,
           id: participant.participant,
         })
       );

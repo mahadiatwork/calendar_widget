@@ -103,6 +103,7 @@ const TaskScheduler = ({
   const [selectedDate, setSelectedDate] = useState();
   const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
+  const [argumentLoader,setArgumentLoader] = useState(false)
   const [activityType, setActivityType] = useState([
     { type: "Meeting", resource: 1 },
     { type: "To-Do", resource: 2 },
@@ -141,7 +142,7 @@ const TaskScheduler = ({
   const newEvent = clickedEvent?.event;
 
   const [formData, setFormData] = useState({
-    id: newEvent?.id || "",
+    id: newEvent?.id || '',
     title: newEvent?.title || "",
     startTime: "",
     endTime: "",
@@ -150,7 +151,7 @@ const TaskScheduler = ({
     Type_of_Activity: newEvent?.Type_of_Activity?.toLowerCase() || "",
     resource: newEvent?.resource || 0,
     scheduleFor: newEvent?.scheduleFor || "",
-    scheduledWith: newEvent?.scheduleWith || [],
+    scheduledWith: newEvent?.scheduledWith || [],
     location: newEvent?.location || "",
     priority: newEvent?.priority?.toLowerCase() || "medium",
     Remind_At: newEvent?.Remind_At || "",
@@ -158,13 +159,13 @@ const TaskScheduler = ({
     start: newEvent?.start || "",
     end: newEvent?.end || "",
     noEndDate: false,
-    color: newEvent?.color ||"#d1891f",
+    color: newEvent?.color || "#d1891f",
     Banner: newEvent?.Banner || false,
     Description: newEvent?.Description || "",
     create_sperate_contact: false,
     Regarding: newEvent?.Regarding || "",
     Reminder_Text: newEvent?.Reminder_Text || "",
-    $send_notification:newEvent?.$send_notification || true
+    send_notification: newEvent?.send_notification || true,
   });
 
   const changeView = useCallback((event) => {
@@ -386,7 +387,10 @@ const TaskScheduler = ({
   const handleCellDoubleClick = (args) => {
     console.log(args);
     handleInputChange("start", args.date);
-    handleInputChange("end", new Date(dayjs(args.date).add(1, "hour").toDate()));
+    handleInputChange(
+      "end",
+      new Date(dayjs(args.date).add(1, "hour").toDate())
+    );
     handleInputChange("duration", 60);
     const selectedActivity = activityType.find(
       (item) => item.resource === args.resource
@@ -396,7 +400,7 @@ const TaskScheduler = ({
       // Update both the activity type and the resource
       handleInputChange("Type_of_Activity", selectedActivity.type);
       handleInputChange("resource", selectedActivity.resource);
-      console.log({formData})
+      console.log({ formData });
     }
     setOpen(true);
   };
@@ -478,9 +482,34 @@ const TaskScheduler = ({
 
   const onClose = () => {
     setOpen(false);
+    setFormData({
+      id: "",
+      title: "",
+      startTime: "",
+      endTime: "",
+      duration: 0,
+      associateWith: null,
+      Type_of_Activity: "",
+      resource: 0,
+      scheduleFor: "",
+      scheduleWith: [],
+      location: "",
+      priority: "",
+      Remind_At: "",
+      occurrence: "once",
+      start: "",
+      end: "",
+      noEndDate: false,
+      color: "#d1891f",
+      Banner: false,
+      Description: "",
+      send_notification:true
+    })
+    setClickedEvent(null)
   };
 
   const handleEventClick = (args) => {
+    setArgumentLoader(true)
     console.log({ args });
     setClickedEvent(args?.event);
     setFormData({
@@ -493,7 +522,7 @@ const TaskScheduler = ({
       Type_of_Activity: args?.event?.Type_of_Activity,
       resource: args?.event?.resource,
       scheduleFor: args?.event?.scheduleFor,
-      scheduledWith: args?.event?.scheduleWith,
+      scheduledWith: args?.event?.scheduledWith,
       location: args?.event?.location,
       priority: args?.event?.priority?.toLowerCase(),
       Remind_At: args?.event?.Remind_At,
@@ -505,13 +534,22 @@ const TaskScheduler = ({
       Banner: args?.event?.Banner,
       Description: args?.event?.Description,
       Reminder_Text: args?.event?.Reminder_Text,
+      send_notification:args?.event?.$send_notification
     });
     setOpen(true);
+    setArgumentLoader(false)
   };
 
   console.log(formData.Remind_At);
   if (loader) {
     return <Box> Fetching data ....</Box>;
+  }
+
+  const handlePageChange =(e)=>{
+    setSelectedDate(e.firstDay);
+    console.log(e);
+    setStartDateTime(e.firstDay);
+    setEndDateTime(e.lastDay);
   }
 
   return (
@@ -524,12 +562,7 @@ const TaskScheduler = ({
             resources={meetings}
             invalid={myInvalid}
             // refDate={calendarRef}
-            onPageChange={(e) => {
-              setSelectedDate(e.firstDay);
-              console.log(e);
-              setStartDateTime(e.firstDay);
-              setEndDateTime(e.lastDay);
-            }}
+            onPageChange={(e)=>handlePageChange(e)}
             dragToMove={true}
             dragToCreate={true}
             eventOverlap={false}
@@ -589,6 +622,8 @@ const TaskScheduler = ({
             recentColor={recentColor}
             setRecentColor={setRecentColor}
             clickedEvent={clickedEvent}
+            setClickedEvent={setClickedEvent}
+            argumentLoader={argumentLoader}
           />
         </Modal>
       </div>
