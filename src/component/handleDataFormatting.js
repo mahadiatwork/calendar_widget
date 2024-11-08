@@ -80,8 +80,10 @@ console.log({individualParticipant})
     Duration_Min: data.duration.toString(),
     Venue: data.location,
     Colour: data.color,
-    Remind_At: data.send_notification? data.Remind_At:null,
-    Reminder_Text:data.send_notification? data.Reminder_Text:null
+    Remind_At: data.send_notification? dayjs(data.Remind_At)
+    .tz("Australia/Adelaide")
+    .format("YYYY-MM-DDTHH:mm:ssZ") :null,
+    // Reminder_Text:data.send_notification? data.Reminder_Text:null
   };
 
   if (

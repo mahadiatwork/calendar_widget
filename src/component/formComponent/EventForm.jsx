@@ -89,11 +89,12 @@ const EventForm = ({
   clickedEvent,
   setClickedEvent,
   argumentLoader,
+  snackbarOpen, setSnackbarOpen
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
   const todayDate = getLocalDateTime();
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  
   dayjs.extend(utc);
   dayjs.extend(timezone);
   console.log({ myEvents });
@@ -508,32 +509,7 @@ const EventForm = ({
           {/* Next is disabled on the last tab */}
         </Box>
       </TabPanel>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={(even, reason) => {
-          if (reason === "clickaway") {
-            return;
-          }
-
-          setOpen(false);
-        }}
-      >
-        <Alert
-          onClose={(even, reason) => {
-            if (reason === "clickaway") {
-              return;
-            }
-  
-            setOpen(false);
-          }}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          Event created successfully !
-        </Alert>
-      </Snackbar>
+      
     </Box>
   );
 };

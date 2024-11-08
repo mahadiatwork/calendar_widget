@@ -19,8 +19,8 @@ function App() {
   const [endDateTime, setEndDateTime] = useState("");
   const [loader, setLoader] = useState(false);
   const [recentColor, setRecentColor] = useState([]);
-  console.log({ startDateTime });
-  console.log({ endDateTime });
+  // console.log({ startDateTime });
+  // console.log({ endDateTime });
 
   async function initZoho() {
     ZOHO.embeddedApp.on("PageLoad", async function (data) {
@@ -106,7 +106,6 @@ function App() {
       ZOHO.CRM.API.getOrgVariable("recent_colors").then(function (data) {
         // Parse the string to an array and store it in the state
         const colorsArray = JSON.parse(data?.Success?.Content || "[]");
-        console.log({ colorsArray });
         setRecentColor(colorsArray);
       });
     }
@@ -182,8 +181,8 @@ function App() {
     }
   }, [startDateTime, endDateTime]);
 
-  console.log({ faky: myEvents });
-  console.log({ users });
+  // console.log({ faky: myEvents });
+  // console.log({ users });
   return (
     <div>
       <TaskScheduler
@@ -191,6 +190,7 @@ function App() {
         setEvents={setEvents}
         users={users}
         setStartDateTime={setStartDateTime}
+        startDateTime={startDateTime}
         setEndDateTime={setEndDateTime}
         loader={loader}
         recentColor={recentColor}

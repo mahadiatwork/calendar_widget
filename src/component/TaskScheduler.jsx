@@ -23,6 +23,7 @@ import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import "./test.css";
 import EventForm from "./formComponent/EventForm";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -32,6 +33,7 @@ import {
   MenuItem,
   Modal,
   OutlinedInput,
+  Snackbar,
   TextField,
 } from "@mui/material";
 import dayjs from "dayjs";
@@ -94,6 +96,7 @@ const TaskScheduler = ({
   setEvents,
   users,
   setStartDateTime,
+  startDateTime,
   setEndDateTime,
   loader,
   recentColor,
@@ -131,6 +134,7 @@ const TaskScheduler = ({
   const [view, setView] = useState("day");
   const [filteredEvents, setFilteredEvents] = useState(myEvents);
   const [userFilter, setUserFilter] = useState([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [myView, setMyView] = useState({
     schedule: {
       type: "day",
@@ -400,7 +404,7 @@ const TaskScheduler = ({
       // Update both the activity type and the resource
       handleInputChange("Type_of_Activity", selectedActivity.type);
       handleInputChange("resource", selectedActivity.resource);
-      console.log({ formData });
+      // console.log({ formData });
     }
     setOpen(true);
   };
@@ -408,7 +412,7 @@ const TaskScheduler = ({
   // Call handleFilterEvents when priorityFilter or myEvents change
   useEffect(() => {
     let filtered = myEvents;
-    console.log({ filtered });
+    // console.log({ filtered });
 
     if (priorityFilter.length > 0) {
       filtered = filtered.filter((event) =>
@@ -521,7 +525,7 @@ const TaskScheduler = ({
       associateWith: args?.event?.associateWith,
       Type_of_Activity: args?.event?.Type_of_Activity,
       resource: args?.event?.resource,
-      scheduleFor: args?.event?.scheduleFor,
+      scheduleFor: {...args?.event?.scheduleFor,full_name:args?.event?.scheduleFor?.name},
       scheduledWith: args?.event?.scheduledWith,
       location: args?.event?.location,
       priority: args?.event?.priority?.toLowerCase(),
@@ -534,19 +538,20 @@ const TaskScheduler = ({
       Banner: args?.event?.Banner,
       Description: args?.event?.Description,
       Reminder_Text: args?.event?.Reminder_Text,
-      send_notification:args?.event?.$send_notification
+      send_notification:args?.event?.send_notification,
+      Regarding:args?.event?.Regarding
     });
     setOpen(true);
     setArgumentLoader(false)
   };
 
-  console.log(formData.Remind_At);
+ 
   if (loader) {
     return <Box> Fetching data ....</Box>;
   }
 
   const handlePageChange =(e)=>{
-    setSelectedDate(e.firstDay);
+    // setSelectedDate(e.firstDay);
     console.log(e);
     setStartDateTime(e.firstDay);
     setEndDateTime(e.lastDay);
@@ -561,6 +566,7 @@ const TaskScheduler = ({
             view={myView}
             resources={meetings}
             invalid={myInvalid}
+            // startDay={(e)=>{console.log('faky',e)}}
             // refDate={calendarRef}
             onPageChange={(e)=>handlePageChange(e)}
             dragToMove={true}
@@ -568,7 +574,7 @@ const TaskScheduler = ({
             eventOverlap={false}
             externalDrop={true}
             externalDrag={true}
-            selectedDate={selectedDate}
+            selectedDate={startDateTime}
             colors={myColors}
             onCellDoubleClick={handleCellDoubleClick}
             onEventClick={handleEventClick}
@@ -624,8 +630,36 @@ const TaskScheduler = ({
             clickedEvent={clickedEvent}
             setClickedEvent={setClickedEvent}
             argumentLoader={argumentLoader}
+            snackbarOpen={snackbarOpen}
+            setSnackbarOpen={setSnackbarOpen}
           />
         </Modal>
+        <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={(even, reason) => {
+          if (reason === "clickaway") {
+            return;
+          }
+
+          setSnackbarOpen(false);
+        }}
+      >
+        <Alert
+          onClose={(even, reason) => {
+            if (reason === "clickaway") {
+              return;
+            }
+  
+            setSnackbarOpen(false);
+          }}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          Event created successfully !
+        </Alert>
+      </Snackbar>
       </div>
     </div>
   );

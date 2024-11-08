@@ -40,7 +40,7 @@ const FirstComponent = ({
   users,
   recentColor,
   setRecentColor,
-  clickedEvent
+  clickedEvent,
 }) => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
@@ -189,9 +189,9 @@ const FirstComponent = ({
     handleInputChange("color", e);
   };
 
-  const handleNotificationChange = (e)=>{
-    handleInputChange("send_notification", e.target.checked) 
-  }
+  const handleNotificationChange = (e) => {
+    handleInputChange("send_notification", e.target.checked);
+  };
   // const fn =()=>{
   //   handleInputChange("Remind_At",'')
   //   handleInputChange('Reminder_Text','')
@@ -455,8 +455,6 @@ const FirstComponent = ({
           />
         </Grid>
 
-        
-
         <Grid size={18}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <Autocomplete
@@ -464,10 +462,17 @@ const FirstComponent = ({
               size="small"
               options={users}
               getOptionLabel={(option) => option?.full_name || ""}
-              value={formData?.scheduleFor || ""} 
+              value={formData?.scheduleFor || ""}
               onChange={(event, newValue) => {
-                console.log('hello',newValue)
-                handleInputChange("scheduleFor", newValue || "");
+                console.log("hello", newValue);
+                handleInputChange(
+                  "scheduleFor",
+                  {
+                    name: newValue.full_name,
+                    id: newValue.id,
+                    email: newValue.email,
+                  } || ""
+                );
               }}
               renderInput={(params) => (
                 <TextField
@@ -550,7 +555,7 @@ const FirstComponent = ({
               id="demo-simple-select-standard"
               label="Ring Alarm"
               fullWidth
-              disabled={!formData.send_notification ? true:false }
+              disabled={!formData.send_notification ? true : false}
               value={formData.Reminder_Text || ""} // Use `Reminder_Text` to display selected text
               onChange={(e) => {
                 // Find the selected ring object
@@ -611,8 +616,9 @@ const FirstComponent = ({
               <Checkbox
                 checked={formData.create_sperate_contact}
                 disabled={formData.id !== "" ? true : false}
-                onChange={(e) =>{
-                  handleInputChange("create_sperate_contact", e.target.checked);console.log(e.target.checked)
+                onChange={(e) => {
+                  handleInputChange("create_sperate_contact", e.target.checked);
+                  console.log(e.target.checked);
                 }}
               />
             }
