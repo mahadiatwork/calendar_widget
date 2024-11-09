@@ -558,6 +558,9 @@ const TaskScheduler = ({
     setEndDateTime(e.lastDay);
   }
 
+
+  console.log({mahadi: filteredEvents})
+
   return (
     <div className="mbsc-grid mbsc-no-padding">
       <div className="mbsc-row">

@@ -113,12 +113,25 @@ function App() {
 
   const searchDataByDate = async () => {
     setLoader(true);
-    const formattedBeginDate = dayjs(startDateTime)
-      .tz("Australia/Adelaide")
-      .format("YYYY-MM-DDTHH:mm:ssZ");
-    const formattedCloseDate = dayjs(endDateTime)
-      .tz("Australia/Adelaide")
-      .format("YYYY-MM-DDTHH:mm:ssZ");
+    let formattedBeginDate = dayjs(startDateTime)
+      .startOf("day")
+      .utcOffset(570) // Set offset to +09:30 (570 minutes)
+      .set("hour", 0)
+      .set("minute", 0)
+      .set("second", 0)
+      .format("YYYY-DD-MMTHH:mm:ssZ");
+    let formattedCloseDate = dayjs(startDateTime)
+      .utcOffset(570)
+      .set("hour", 23)
+      .set("minute", 59)
+      .set("second", 59)
+      .format("YYYY-DD-MMTHH:mm:ssZ");
+
+    console.log({ formattedBeginDate });
+    console.log({ formattedCloseDate });
+
+    // formattedBeginDate = "2024-08-11T00:00:00+09:30";
+    // formattedCloseDate = "2024-08-11T11:59:00+09:30";
 
     const req_data_meetings1 = {
       url: `https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:${encodeURIComponent(
@@ -129,6 +142,14 @@ function App() {
       method: "GET",
       param_type: 1,
     };
+
+    // const req_data_meetings1 = {
+    //   url: "https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:2024-10-07T05%3A00%3A00%2B11%3A00)and(End_DateTime:less_equal:2024-11-10T05%3A00%3A00%2B11%3A00))",
+    //   method: "GET",
+    //   param_type: 1,
+    // };
+
+    console.log({ req_data_meetings1 });
 
     // Fetching data with custom search criteria
     const data1 = await ZOHO.CRM.CONNECTION.invoke(
@@ -181,7 +202,7 @@ function App() {
     }
   }, [startDateTime, endDateTime]);
 
-  // console.log({ faky: myEvents });
+  console.log({ faky: myEvents });
   // console.log({ users });
   return (
     <div>
