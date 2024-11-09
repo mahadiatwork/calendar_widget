@@ -544,14 +544,15 @@ const TaskScheduler = ({
     setOpen(true);
     setArgumentLoader(false)
   };
-
  
   if (loader) {
     return <Box> Fetching data ....</Box>;
   }
 
+  
+
   const handlePageChange =(e)=>{
-    // setSelectedDate(e.firstDay);
+    setSelectedDate(e.firstDay);
     console.log(e);
     setStartDateTime(e.firstDay);
     setEndDateTime(e.lastDay);
@@ -574,7 +575,7 @@ const TaskScheduler = ({
             eventOverlap={false}
             externalDrop={true}
             externalDrag={true}
-            selectedDate={startDateTime}
+            selectedDate={selectedDate}
             colors={myColors}
             onCellDoubleClick={handleCellDoubleClick}
             onEventClick={handleEventClick}
