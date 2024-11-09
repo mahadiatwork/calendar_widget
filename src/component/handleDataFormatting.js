@@ -43,9 +43,7 @@ console.log({individualParticipant})
     // Remind_At: dayjs(data?.Remind_At)
     //   .tz("Australia/Adelaide")
     //   .format("YYYY-MM-DDTHH:mm:ssZ"),
-    Start_DateTime: dayjs(data?.start)
-      .tz("Australia/Adelaide")
-      .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `start` to ISO with timezone
+    Start_DateTime: dayjs(data?.start).tz("Australia/Adelaide").format("YYYY-MM-DDTHH:mm:ssZ"), // Format `start` to ISO with timezone
     End_DateTime: dayjs(data?.end)
       .tz("Australia/Adelaide")
       .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `end` to ISO with timezone

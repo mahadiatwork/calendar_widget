@@ -149,7 +149,7 @@ function App() {
     //   param_type: 1,
     // };
 
-    console.log({ req_data_meetings1 });
+    // console.log({ req_data_meetings1 });
 
     // Fetching data with custom search criteria
     const data1 = await ZOHO.CRM.CONNECTION.invoke(
@@ -207,7 +207,7 @@ function App() {
   return (
     <div>
       <TaskScheduler
-        myEvents={myEvents}
+        myEvents={JSON.parse(JSON.stringify(myEvents))}
         setEvents={setEvents}
         users={users}
         setStartDateTime={setStartDateTime}

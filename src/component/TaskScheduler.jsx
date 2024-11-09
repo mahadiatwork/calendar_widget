@@ -106,7 +106,7 @@ const TaskScheduler = ({
   const [selectedDate, setSelectedDate] = useState();
   const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
-  const [argumentLoader,setArgumentLoader] = useState(false)
+  const [argumentLoader, setArgumentLoader] = useState(false);
   const [activityType, setActivityType] = useState([
     { type: "Meeting", resource: 1 },
     { type: "To-Do", resource: 2 },
@@ -146,7 +146,7 @@ const TaskScheduler = ({
   const newEvent = clickedEvent?.event;
 
   const [formData, setFormData] = useState({
-    id: newEvent?.id || '',
+    id: newEvent?.id || "",
     title: newEvent?.title || "",
     startTime: "",
     endTime: "",
@@ -507,13 +507,13 @@ const TaskScheduler = ({
       color: "#d1891f",
       Banner: false,
       Description: "",
-      send_notification:true
-    })
-    setClickedEvent(null)
+      send_notification: true,
+    });
+    setClickedEvent(null);
   };
 
   const handleEventClick = (args) => {
-    setArgumentLoader(true)
+    setArgumentLoader(true);
     console.log({ args });
     setClickedEvent(args?.event);
     setFormData({
@@ -525,7 +525,10 @@ const TaskScheduler = ({
       associateWith: args?.event?.associateWith,
       Type_of_Activity: args?.event?.Type_of_Activity,
       resource: args?.event?.resource,
-      scheduleFor: {...args?.event?.scheduleFor,full_name:args?.event?.scheduleFor?.name},
+      scheduleFor: {
+        ...args?.event?.scheduleFor,
+        full_name: args?.event?.scheduleFor?.name,
+      },
       scheduledWith: args?.event?.scheduledWith,
       location: args?.event?.location,
       priority: args?.event?.priority?.toLowerCase(),
@@ -538,29 +541,26 @@ const TaskScheduler = ({
       Banner: args?.event?.Banner,
       Description: args?.event?.Description,
       Reminder_Text: args?.event?.Reminder_Text,
-      send_notification:args?.event?.send_notification,
-      Regarding:args?.event?.Regarding
+      send_notification: args?.event?.send_notification,
+      Regarding: args?.event?.Regarding,
     });
     setOpen(true);
-    setArgumentLoader(false)
+    setArgumentLoader(false);
   };
- 
+
   if (loader) {
     return <Box> Fetching data ....</Box>;
   }
 
-  
-
-  const handlePageChange =(e)=>{
+  const handlePageChange = (e) => {
     setSelectedDate(e.firstDay);
     console.log(e);
     setStartDateTime(e.firstDay);
     setEndDateTime(e.lastDay);
-  }
+  };
 
-
-  console.log({mahadi: filteredEvents})
-
+  console.log({ mahadi: filteredEvents });
+  console.log(filteredEvents.length);
   return (
     <div className="mbsc-grid mbsc-no-padding">
       <div className="mbsc-row">
@@ -572,7 +572,7 @@ const TaskScheduler = ({
             invalid={myInvalid}
             // startDay={(e)=>{console.log('faky',e)}}
             // refDate={calendarRef}
-            onPageChange={(e)=>handlePageChange(e)}
+            onPageChange={(e) => handlePageChange(e)}
             dragToMove={true}
             dragToCreate={true}
             eventOverlap={false}
@@ -639,31 +639,31 @@ const TaskScheduler = ({
           />
         </Modal>
         <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={(even, reason) => {
-          if (reason === "clickaway") {
-            return;
-          }
-
-          setSnackbarOpen(false);
-        }}
-      >
-        <Alert
+          open={snackbarOpen}
+          autoHideDuration={6000}
           onClose={(even, reason) => {
             if (reason === "clickaway") {
               return;
             }
-  
+
             setSnackbarOpen(false);
           }}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
         >
-          Event created successfully !
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={(even, reason) => {
+              if (reason === "clickaway") {
+                return;
+              }
+
+              setSnackbarOpen(false);
+            }}
+            severity="success"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            Event created successfully !
+          </Alert>
+        </Snackbar>
       </div>
     </div>
   );
