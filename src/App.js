@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { radioClasses } from "@mui/material";
 const ZOHO = window.ZOHO;
 
 dayjs.extend(utc);
@@ -112,33 +113,35 @@ function App() {
   }, [zohoLoaded]);
 
   const searchDataByDate = async () => {
+    // console.log({ startDateTime });
+    // console.log({ endDateTime });
+    // return;
     setLoader(true);
-    let formattedBeginDate = dayjs(startDateTime)
-      .startOf("day")
-      .utcOffset(570) // Set offset to +09:30 (570 minutes)
-      .set("hour", 0)
-      .set("minute", 0)
-      .set("second", 0)
-      .format("YYYY-DD-MMTHH:mm:ssZ");
-    let formattedCloseDate = dayjs(startDateTime)
-      .utcOffset(570)
-      .set("hour", 23)
-      .set("minute", 59)
-      .set("second", 59)
-      .format("YYYY-DD-MMTHH:mm:ssZ");
+    // let formattedBeginDate = dayjs(startDateTime)
+    //   .startOf("day")
+    //   .utcOffset(570) // Set offset to +09:30 (570 minutes)
+    //   .set("hour", 0)
+    //   .set("minute", 0)
+    //   .set("second", 0)
+    //   .format("YYYY-DD-MMTHH:mm:ssZ");
+    // let formattedCloseDate = dayjs(startDateTime)
+    //   .utcOffset(570)
+    //   .set("hour", 23)
+    //   .set("minute", 59)
+    //   .set("second", 59)
+    //   .format("YYYY-DD-MMTHH:mm:ssZ");
 
-    console.log({ formattedBeginDate });
-    console.log({ formattedCloseDate });
+    // return;
 
-    // formattedBeginDate = "2024-08-11T00:00:00+09:30";
-    // formattedCloseDate = "2024-08-11T11:59:00+09:30";
+    // let formattedBeginDate = "2024-10-16T00:00:01+10:30";
+    // let formattedCloseDate = "2024-10-16T23:59:00+10:30";
+    console.log({ startDateTime });
+    console.log({ endDateTime });
 
     const req_data_meetings1 = {
       url: `https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:${encodeURIComponent(
-        formattedBeginDate
-      )})and(End_DateTime:less_equal:${encodeURIComponent(
-        formattedCloseDate
-      )}))`,
+        startDateTime
+      )})and(End_DateTime:less_equal:${encodeURIComponent(endDateTime)}))`,
       method: "GET",
       param_type: 1,
     };
@@ -149,13 +152,14 @@ function App() {
     //   param_type: 1,
     // };
 
-    // console.log({ req_data_meetings1 });
+    console.log({ req_data_meetings1 });
 
     // Fetching data with custom search criteria
     const data1 = await ZOHO.CRM.CONNECTION.invoke(
       "zoho_crm_conn",
       req_data_meetings1
     );
+    console.log({ data1 });
     const eventsData = data1?.details?.statusMessage?.data || [];
     const x = eventsData.map((item, index) => {
       return {
@@ -207,13 +211,14 @@ function App() {
   return (
     <div>
       <TaskScheduler
-        myEvents={JSON.parse(JSON.stringify(myEvents))}
+        myEvents={myEvents}
         setEvents={setEvents}
         users={users}
         setStartDateTime={setStartDateTime}
         startDateTime={startDateTime}
         setEndDateTime={setEndDateTime}
         loader={loader}
+        setLoader={setLoader}
         recentColor={recentColor}
         setRecentColor={setRecentColor}
       />

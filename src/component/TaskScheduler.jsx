@@ -27,6 +27,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   FormControl,
   InputLabel,
   ListItemText,
@@ -35,6 +36,7 @@ import {
   OutlinedInput,
   Snackbar,
   TextField,
+  Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -99,6 +101,7 @@ const TaskScheduler = ({
   startDateTime,
   setEndDateTime,
   loader,
+  setLoader,
   recentColor,
   setRecentColor,
 }) => {
@@ -218,6 +221,8 @@ const TaskScheduler = ({
     setView(event.target.value);
     setMyView(myView);
   }, []);
+
+  console.log({ view });
 
   const meetings = useMemo(
     () => [
@@ -437,6 +442,18 @@ const TaskScheduler = ({
 
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
+    const handleDates = (e) => {
+      let currentDate = dayjs(e.value).format("YYYY-MM-DD");
+      const beginDate =
+        dayjs(currentDate).startOf("day").format("YYYY-MM-DD") +
+        "T00:00:00+10:30";
+      const closeDate =
+        dayjs(currentDate).endOf("day").format("YYYY-MM-DD") +
+        "T23:59:59+10:30";
+      setSelectedDate(e.value);
+      setStartDateTime(beginDate);
+      setEndDateTime(closeDate);
+    };
     return (
       <>
         <CalendarNav className="cal-header-nav" />
@@ -459,7 +476,7 @@ const TaskScheduler = ({
           pages={3}
           className="mbsc-textfield"
           inputProps={props}
-          onChange={(e) => setSelectedDate(e.value)}
+          onChange={handleDates}
         />
 
         <Box display={"flex"}>
@@ -548,16 +565,64 @@ const TaskScheduler = ({
     setArgumentLoader(false);
   };
 
-  if (loader) {
-    return <Box> Fetching data ....</Box>;
-  }
+  const onDateChange = async (args) => {
+    console.log(args);
+    console.log(dayjs(args.date).format("YYYY-MM-DD"));
+    let currentDate = dayjs(args.date).format("YYYY-MM-DD");
+    if (view === "day") {
+      const beginDate =
+        dayjs(currentDate).startOf("day").format("YYYY-MM-DD") +
+        "T00:00:00+10:30";
+      const closeDate =
+        dayjs(currentDate).endOf("day").format("YYYY-MM-DD") +
+        "T23:59:59+10:30";
+      setSelectedDate(beginDate);
+      setStartDateTime(beginDate);
+      setEndDateTime(closeDate);
+    } else if (view === "week") {
+      const beginDate =
+        dayjs(currentDate).startOf("week").format("YYYY-MM-DD") +
+        "T00:00:00+10:30";
+      const closeDate =
+        dayjs(currentDate).endOf("week").format("YYYY-MM-DD") +
+        "T23:59:59+10:30";
+      // setSelectedDate(beginDate);
+      setStartDateTime(beginDate);
+      setEndDateTime(closeDate);
+    } else {
+      const beginDate =
+        dayjs(currentDate).startOf("month").format("YYYY-MM-DD") +
+        "T00:00:00+10:30";
+      const closeDate =
+        dayjs(currentDate).endOf("month").format("YYYY-MM-DD") +
+        "T23:59:59+10:30";
+      // setSelectedDate(beginDate);
+      setStartDateTime(beginDate);
+      setEndDateTime(closeDate);
+    }
 
-  const handlePageChange = (e) => {
-    setSelectedDate(e.firstDay);
-    console.log(e);
-    setStartDateTime(e.firstDay);
-    setEndDateTime(e.lastDay);
+    // return;
+    // let currentDate = dayjs(args.date).format("YYYY-MM-DDTHH:mm:ss") + "-10:30";
+    // const beginDate =
+    //   dayjs(currentDate).startOf("month").format("YYYY-MM-DD") +
+    //   "T00:00:00-10:30";
+    // const closeDate =
+    //   dayjs(currentDate).endOf("month").format("YYYY-MM-DD") +
+    //   "T23:59:59-10:30";
+    // console.log(beginDate);
+    // console.log(closeDate);
   };
+
+  // const handlePageChange = (e) => {
+  //   console.log(e);
+  //   setSelectedDate(e.firstDay);
+  //   // console.log(e);
+  //   setStartDateTime(e.firstDay);
+  //   setEndDateTime(e.lastDay);
+  // };
+  // if (loader) {
+  //   return <Box> Fetching data ....</Box>;
+  // }
 
   console.log({ mahadi: filteredEvents });
   console.log(filteredEvents.length);
@@ -572,7 +637,8 @@ const TaskScheduler = ({
             invalid={myInvalid}
             // startDay={(e)=>{console.log('faky',e)}}
             // refDate={calendarRef}
-            onPageChange={(e) => handlePageChange(e)}
+            // onPageChange={(e) => handlePageChange(e)}
+            onSelectedDateChange={onDateChange}
             dragToMove={true}
             dragToCreate={true}
             eventOverlap={false}
@@ -664,6 +730,34 @@ const TaskScheduler = ({
             Event created successfully !
           </Alert>
         </Snackbar>
+        <Modal
+          open={loader}
+          onClose={() => setLoader(false)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={'center'}>
+              Fetching data ...
+            </Typography>
+            <Box textAlign={'center'} mt={3}>
+            <CircularProgress />
+            </Box>
+          </Box>
+        </Modal>
+        {/* {loader && } */}
       </div>
     </div>
   );
