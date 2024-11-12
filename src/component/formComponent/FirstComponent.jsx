@@ -454,6 +454,7 @@ const FirstComponent = ({
             clickedEvent={clickedEvent}
           />
         </Grid>
+
         <Grid size={18}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <Autocomplete

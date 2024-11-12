@@ -322,6 +322,20 @@ const EventForm = ({
     }
   };
 
+   // Function to check if all required fields are filled
+   const isFormValid = () => {
+    return (
+      formData.title &&
+      formData.Type_of_Activity &&
+      formData.startTime &&
+      formData.endTime &&
+      formData.duration &&
+      formData.scheduleWith.length > 0
+    );
+  };
+
+  
+
   if (argumentLoader) {
     return (
       <Box
@@ -431,7 +445,8 @@ const EventForm = ({
               color="secondary"
               onClick={handleSubmit}
             >
-              {formData.id !== "" ? "Update" : "Submit"}
+              {/* {formData.id !== "" ? "Update" : "Submit"} */}
+              Ok
               {/* Submit */}
             </Button>
           </Box>
@@ -479,7 +494,8 @@ const EventForm = ({
               color="secondary"
               onClick={handleSubmit}
             >
-              {formData.id !== "" ? "Update" : "Submit"}
+              {/* {formData.id !== "" ? "Update" : "Submit"} */}
+              Ok
               {/* Submit */}
             </Button>
           </Box>
@@ -505,7 +521,8 @@ const EventForm = ({
             color="secondary"
             onClick={handleSubmit}
           >
-            {formData.id !== "" ? "Update" : "Submit"}
+            {/* {formData.id !== "" ? "Update" : "Ok"} */}
+            Ok
             {/* Submit */}
           </Button>{" "}
           {/* Next is disabled on the last tab */}

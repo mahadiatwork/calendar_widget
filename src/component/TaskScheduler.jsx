@@ -159,7 +159,7 @@ const TaskScheduler = ({
     Type_of_Activity: newEvent?.Type_of_Activity?.toLowerCase() || "",
     resource: newEvent?.resource || 0,
     scheduleFor: loggedInUser || "",
-    scheduledWith: loggedInUser.full_name?.scheduledWith || [],
+    scheduledWith: loggedInUser?.full_name || [],
     location: newEvent?.location || "",
     priority: newEvent?.priority?.toLowerCase() || "medium",
     Remind_At: newEvent?.Remind_At || "",
