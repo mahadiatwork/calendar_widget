@@ -454,25 +454,22 @@ const FirstComponent = ({
             clickedEvent={clickedEvent}
           />
         </Grid>
-
         <Grid size={18}>
           <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
             <Autocomplete
               id="schedule-for-autocomplete"
               size="small"
               options={users}
-              getOptionLabel={(option) => option?.full_name || ""}
+              getOptionLabel={(option) =>
+                option?.name || option?.full_name || ""
+              }
               value={formData?.scheduleFor || ""}
               onChange={(event, newValue) => {
-                console.log("hello", newValue);
-                handleInputChange(
-                  "scheduleFor",
-                  {
-                    name: newValue.full_name,
-                    id: newValue.id,
-                    email: newValue.email,
-                  } || ""
-                );
+                handleInputChange("scheduleFor", {
+                  name: newValue.full_name,
+                  id: newValue.id,
+                  email: newValue.email,
+                });
               }}
               renderInput={(params) => (
                 <TextField

@@ -166,7 +166,6 @@ const EventForm = ({
   };
 
   const handleSubmit = () => {
-    console.log("Form Data Submitted:", formData);
     // const transformedData = transformFormSubmission(formData);
     // console.log({transformedData})
     // Add your submit logic here (e.g., send data to the backend)
@@ -321,20 +320,6 @@ const EventForm = ({
       }
     }
   };
-
-   // Function to check if all required fields are filled
-   const isFormValid = () => {
-    return (
-      formData.title &&
-      formData.Type_of_Activity &&
-      formData.startTime &&
-      formData.endTime &&
-      formData.duration &&
-      formData.scheduleWith.length > 0
-    );
-  };
-
-  
 
   if (argumentLoader) {
     return (
