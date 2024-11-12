@@ -12,7 +12,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
       participant: contact?.participant || null,
     }));
   };
-console.log({individualParticipant})
+  console.log({ individualParticipant });
   const dayOfMonth = dayjs(data?.startTime).date();
   const dayName = dayjs(data?.startTime).format("dd");
   const monthNumber = dayjs(data?.startTime).format("MM");
@@ -43,7 +43,9 @@ console.log({individualParticipant})
     // Remind_At: dayjs(data?.Remind_At)
     //   .tz("Australia/Adelaide")
     //   .format("YYYY-MM-DDTHH:mm:ssZ"),
-    Start_DateTime: dayjs(data?.start).tz("Australia/Adelaide").format("YYYY-MM-DDTHH:mm:ssZ"), // Format `start` to ISO with timezone
+    Start_DateTime: dayjs(data?.start)
+      .tz("Australia/Adelaide")
+      .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `start` to ISO with timezone
     End_DateTime: dayjs(data?.end)
       .tz("Australia/Adelaide")
       .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `end` to ISO with timezone
@@ -63,7 +65,7 @@ console.log({individualParticipant})
           : ""
       };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}`,
     },
-    $send_notification:data.send_notification,
+    $send_notification: data.send_notification,
 
     // Updated `What_Id` with both name and id from `associateWith`
     What_Id: data.associateWith
@@ -78,14 +80,22 @@ console.log({individualParticipant})
     Duration_Min: data.duration.toString(),
     Venue: data.location,
     Colour: data.color,
-    Remind_At: data.send_notification? dayjs(data.Remind_At)
-    .tz("Australia/Adelaide")
-    .format("YYYY-MM-DDTHH:mm:ssZ") :null,
+    Remind_At: data.send_notification
+      ? dayjs(data.Remind_At)
+          .tz("Australia/Adelaide")
+          .format("YYYY-MM-DDTHH:mm:ssZ")
+      : null,
     // Reminder_Text:data.send_notification? data.Reminder_Text:null
   };
 
+  if (transformedData.Remind_At == null || transformedData.Remind_At == "Invalid Date" || transformedData.Remind_At == "") {
+    delete transformedData.Remind_At;
+  }
+
   if (
-    transformedData.Recurring_Activity.RRULE ==="FREQ=ONCE;INTERVAL=1;UNTIL=Invalid Date;DTSTART=Invalid Date") {
+    transformedData.Recurring_Activity.RRULE ===
+    "FREQ=ONCE;INTERVAL=1;UNTIL=Invalid Date;DTSTART=Invalid Date"
+  ) {
     delete transformedData.Recurring_Activity;
   }
   //   delete transformedData.scheduleWith;
@@ -97,6 +107,8 @@ console.log({individualParticipant})
       delete transformedData[key];
     }
   });
+
+  console.log({ transformedData });
 
   return transformedData;
 }
