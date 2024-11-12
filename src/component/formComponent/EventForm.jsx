@@ -89,12 +89,14 @@ const EventForm = ({
   clickedEvent,
   setClickedEvent,
   argumentLoader,
-  snackbarOpen, setSnackbarOpen
+  snackbarOpen,
+  setSnackbarOpen,
+  loggedInUser,
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
   const todayDate = getLocalDateTime();
-  
+
   dayjs.extend(utc);
   dayjs.extend(timezone);
   console.log({ myEvents });
@@ -509,7 +511,6 @@ const EventForm = ({
           {/* Next is disabled on the last tab */}
         </Box>
       </TabPanel>
-      
     </Box>
   );
 };

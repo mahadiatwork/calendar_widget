@@ -104,6 +104,7 @@ const TaskScheduler = ({
   setLoader,
   recentColor,
   setRecentColor,
+  loggedInUser,
 }) => {
   const [clickedEvent, setClickedEvent] = useState(null);
   const [selectedDate, setSelectedDate] = useState();
@@ -150,15 +151,15 @@ const TaskScheduler = ({
 
   const [formData, setFormData] = useState({
     id: newEvent?.id || "",
-    title: newEvent?.title || "",
+    title: newEvent?.title || "New Meeting",
     startTime: "",
     endTime: "",
     duration: parseInt(newEvent?.duration) || 0,
     associateWith: newEvent?.associateWith || null,
     Type_of_Activity: newEvent?.Type_of_Activity?.toLowerCase() || "",
     resource: newEvent?.resource || 0,
-    scheduleFor: newEvent?.scheduleFor || "",
-    scheduledWith: newEvent?.scheduledWith || [],
+    scheduleFor: loggedInUser || "",
+    scheduledWith: loggedInUser.full_name?.scheduledWith || [],
     location: newEvent?.location || "",
     priority: newEvent?.priority?.toLowerCase() || "medium",
     Remind_At: newEvent?.Remind_At || "",
@@ -702,6 +703,7 @@ const TaskScheduler = ({
             argumentLoader={argumentLoader}
             snackbarOpen={snackbarOpen}
             setSnackbarOpen={setSnackbarOpen}
+            loggedInUser={loggedInUser}
           />
         </Modal>
         <Snackbar
@@ -749,11 +751,16 @@ const TaskScheduler = ({
               p: 4,
             }}
           >
-            <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={'center'}>
+            <Typography
+              id="modal-modal-title"
+              variant="h6"
+              component="h2"
+              textAlign={"center"}
+            >
               Fetching data ...
             </Typography>
-            <Box textAlign={'center'} mt={3}>
-            <CircularProgress />
+            <Box textAlign={"center"} mt={3}>
+              <CircularProgress />
             </Box>
           </Box>
         </Modal>

@@ -20,6 +20,7 @@ function App() {
   const [endDateTime, setEndDateTime] = useState("");
   const [loader, setLoader] = useState(false);
   const [recentColor, setRecentColor] = useState([]);
+  const [loggedInUser, setLoggedInUser] = useState(null);
   // console.log({ startDateTime });
   // console.log({ endDateTime });
 
@@ -41,6 +42,10 @@ function App() {
   useEffect(() => {
     // fetchTemplateList();
     if (zohoLoaded) {
+      ZOHO.CRM.CONFIG.getCurrentUser().then(function (data) {
+        setLoggedInUser(data?.users[0]);
+      });
+
       ZOHO.CRM.API.getAllRecords({
         Entity: "Events",
         sort_order: "asc",
@@ -206,7 +211,7 @@ function App() {
     }
   }, [startDateTime, endDateTime]);
 
-  console.log({ faky: myEvents });
+  console.log({ faky: loggedInUser });
   // console.log({ users });
   return (
     <div>
@@ -221,6 +226,7 @@ function App() {
         setLoader={setLoader}
         recentColor={recentColor}
         setRecentColor={setRecentColor}
+        loggedInUser={loggedInUser}
       />
       {/* <TaskScheduler /> */}
     </div>
