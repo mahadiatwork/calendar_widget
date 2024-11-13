@@ -64,6 +64,7 @@ const FirstComponent = ({
   const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
 
   function addMinutesToDateTime(formatType, durationInMinutes) {
+    console.log(durationInMinutes)
     // // Create a new Date object using the start time from formData
     // console.log(formatType,durationInMinutes)
     if (formatType === "duration") {
@@ -90,6 +91,7 @@ const FirstComponent = ({
       );
 
       const modifiedDate = localDate.toISOString().slice(0, 16);
+      console.log({modifiedDate})
 
       handleInputChange("Remind_At", modifiedDate);
       handleInputChange("Reminder_Text", durationInMinutes.name);
@@ -207,7 +209,7 @@ const FirstComponent = ({
             size="small"
             label="Event_title"
             variant="outlined"
-            value={formData.title}
+            value={formData?.title}
             onChange={(e) => handleInputChange("title", e.target.value)}
           />
         </Grid>

@@ -17,27 +17,27 @@ export default function ContactField({
   formData,
   clickedEvent
 }) {
-  console.log('tazwer',clickedEvent)
+  console.log('tazwer',clickedEvent?.scheduledWith)
   const [contacts, setContacts] = useState([]); // Contacts fetched from Zoho
   const [selectedParticipants, setSelectedParticipants] = useState(
     clickedEvent?.scheduledWith || []
-  ); // Selected values in autocomplete
+  ); 
   const [inputValue, setInputValue] = useState(""); // Store the input text
   const [notFoundMessage, setNotFoundMessage] = useState("");
   const [loading, setLoading] = useState(false); 
 
   // Sync selectedParticipants with value and selectedRowData
   useEffect(() => {
-    if (clickedEvent?.scheduledWith?.length > 0) {
-      const defaultParticipants = clickedEvent.scheduledWith.map(
-        (participant) => ({
-          Full_Name: participant.Full_Name,
-          id: participant.participant,
-        })
-      );
+    // Sync selectedParticipants with formData's scheduledWith prop
+    if (formData.scheduledWith && formData.scheduledWith.length > 0) {
+      const defaultParticipants = formData.scheduledWith.map((participant) => ({
+        Full_Name: participant.Full_Name,
+        id: participant.participant,
+      }));
       setSelectedParticipants(defaultParticipants);
     }
-  }, [clickedEvent, contacts]);
+  }, [formData.scheduledWith]);
+  
 
 
   const handleSearch = async (query) => {
@@ -91,7 +91,13 @@ export default function ContactField({
   };
 
   const handleSelectionChange = (event, newValue) => {
-    setSelectedParticipants(newValue);
+    console.log({newValue})
+    
+    console.log(newValue.map((contact) => ({
+      Full_Name: contact.Full_Name,
+      participant: contact.id,
+      type: "contact",
+    })))
     handleInputChange(
       "scheduledWith",
       newValue.map((contact) => ({
@@ -100,6 +106,11 @@ export default function ContactField({
         type: "contact",
       }))
     );
+    setSelectedParticipants(newValue.map((contact) => ({
+      Full_Name: contact.Full_Name,
+      participant: contact.id,
+      type: "contact",
+    })));
   };
 
   console.log({ data: clickedEvent?.scheduledWith });

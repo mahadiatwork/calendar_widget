@@ -173,7 +173,6 @@ const EventForm = ({
       const transformedData = transformFormSubmission(formData);
 
       console.log(transformedData);
-      return;
       var config = {
         Entity: "Events",
         APIData: transformedData,
@@ -428,6 +427,7 @@ const EventForm = ({
             </Button>
             <Button
               size="small"
+              disabled={formData?.scheduledWith?.length>0 ? false : true}
               variant="contained"
               color="secondary"
               onClick={handleSubmit}

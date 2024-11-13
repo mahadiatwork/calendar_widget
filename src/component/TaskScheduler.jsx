@@ -89,10 +89,6 @@ const Appointment = (props) => {
   );
 };
 
-Appointment.propTypes = {
-  data: PropTypes.object.isRequired,
-};
-
 const TaskScheduler = ({
   myEvents,
   setEvents,
@@ -393,15 +389,47 @@ const TaskScheduler = ({
       [field]: value,
     }));
   };
+  function setInitialMinutesToDateTime(durationInMinutes) {
+    console.log(durationInMinutes);
+    let date = new Date(formData.start);
+  
+    date.setMinutes(date.getMinutes() - parseInt(durationInMinutes.value, 10));
+  
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  
+    const modifiedDate = localDate.toISOString().slice(0, 16);
+    console.log({ modifiedDate });
+  
+    handleInputChange("Remind_At", modifiedDate);
+    handleInputChange("Reminder_Text", durationInMinutes.name);
+  }
 
   const handleCellDoubleClick = (args) => {
     console.log(args);
     handleInputChange("start", args.date);
+    handleInputChange("title", "new meeting")
     handleInputChange(
       "end",
       new Date(dayjs(args.date).add(1, "hour").toDate())
     );
+    // setInitialMinutesToDateTime({
+    //   name: "5 minutes before",
+    //   value: 5,
+    // });
     handleInputChange("duration", 60);
+    handleInputChange("scheduleFor", loggedInUser);
+    handleInputChange("priority", "medium");
+    let date = new Date(args.date);
+  
+    date.setMinutes(date.getMinutes() - parseInt(5, 10));
+  
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  
+    const modifiedDate = localDate.toISOString().slice(0, 16);
+    console.log({ modifiedDate });
+  
+    handleInputChange("Remind_At", modifiedDate);
+    handleInputChange("Reminder_Text", "5 minutes before");
     const selectedActivity = activityType.find(
       (item) => item.resource === args.resource
     );
