@@ -2,45 +2,19 @@ import { Box, Button, Typography } from "@mui/material";
 import React, { useState } from "react";
 
 const colors = [
-  "#ff0000",
-  "#ff9900",
-  "#ffff00",
-  "#00ff00",
-  "#00ffff",
-  "#0000ff",
-  "#9900ff",
-  "#ff00ff",
-  "#ff9999",
-  "#ffcc99",
-  "#ffff99",
-  "#ccff99",
-  "#99ffcc",
-  "#99ccff",
-  "#cc99ff",
-  "#ff99ff",
-  "#660000",
-  "#996633",
-  "#669933",
-  "#336600",
-  "#006666",
-  "#003366",
-  "#660066",
-  "#660033",
-  "#cc0000",
-  "#cc6600",
-  "#cccc00",
-  "#66cc00",
-  "#00cccc",
-  "#0066cc",
-  "#6600cc",
-  "#cc00cc",
-  "#999999",
-  "#cccccc",
-  "#333333",
-  "#666666",
+  "#ff0000", "#ff9900", "#ffff00", "#00ff00", "#00ffff", "#0000ff", "#9900ff", "#ff00ff",
+  "#ff9999", "#ffcc99", "#ffff99", "#ccff99", "#99ffcc", "#99ccff", "#cc99ff", "#ff99ff",
+  "#660000", "#996633", "#669933", "#336600", "#006666", "#003366", "#660066", "#660033",
+  "#cc0000", "#cc6600", "#cccc00", "#66cc00", "#00cccc", "#0066cc", "#6600cc", "#cc00cc",
+  "#999999", "#cccccc", "#333333", "#666666",
 ];
 
-const CustomColorPicker = ({ recentColors, setDisplayColorPicker, handleColorChange,formData }) => {
+const CustomColorPicker = ({
+  recentColors,
+  setDisplayColorPicker,
+  handleColorChange,
+  formData,
+}) => {
   const [selectedColor, setSelectedColor] = useState("#ffffff");
   const [customColor, setCustomColor] = useState("#ffffff");
 
@@ -56,6 +30,10 @@ const CustomColorPicker = ({ recentColors, setDisplayColorPicker, handleColorCha
     handleColorChange(color);
   };
 
+  const preventCloseOnClick = (e) => {
+    e.stopPropagation(); // Prevents the modal from closing when clicking inside the color picker
+  };
+
   return (
     <div
       style={{
@@ -65,9 +43,10 @@ const CustomColorPicker = ({ recentColors, setDisplayColorPicker, handleColorCha
         borderRadius: "10px",
         backgroundColor: "#fdfdfd",
         zIndex: 1000,
-        // position: "relative",
         boxShadow: "0 10px 20px rgba(0, 0, 0, 0.15)",
+        position: "relative",
       }}
+      onClick={preventCloseOnClick} // Prevent closing the color picker when clicking inside
     >
       <Box
         sx={{
@@ -82,7 +61,7 @@ const CustomColorPicker = ({ recentColors, setDisplayColorPicker, handleColorCha
         </Typography>
         <Button
           variant="contained"
-          onClick={()=>setDisplayColorPicker(false)}
+          onClick={() => setDisplayColorPicker(false)}
           size="small"
         >
           OK
@@ -110,7 +89,6 @@ const CustomColorPicker = ({ recentColors, setDisplayColorPicker, handleColorCha
               cursor: "pointer",
               borderRadius: "4px",
               boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-              zIndex: 1000,
             }}
           ></div>
         ))}
@@ -119,7 +97,10 @@ const CustomColorPicker = ({ recentColors, setDisplayColorPicker, handleColorCha
       {/* Recent Colors Section */}
       {recentColors.length > 0 && (
         <div style={{ marginBottom: "15px" }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold", marginBottom: "8px" }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: "bold", marginBottom: "8px" }}
+          >
             Recent Colors:
           </Typography>
           <div style={{ display: "flex", gap: "6px" }}>
@@ -131,11 +112,13 @@ const CustomColorPicker = ({ recentColors, setDisplayColorPicker, handleColorCha
                   width: "20px",
                   height: "20px",
                   backgroundColor: color,
-                  border: selectedColor === color ? "1px solid #000" : "1px solid #ccc",
+                  border:
+                    selectedColor === color
+                      ? "1px solid #000"
+                      : "1px solid #ccc",
                   cursor: "pointer",
                   borderRadius: "4px",
                   boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                  zIndex: 1000,
                 }}
               ></div>
             ))}

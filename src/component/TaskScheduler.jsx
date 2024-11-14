@@ -42,6 +42,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import DrawerComponent from "./DrawerComponent";
+// import { formatDate } from "@mobiscroll/react/dist/src/core/util/datetime.js";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -135,6 +136,9 @@ const TaskScheduler = ({
   const [filteredEvents, setFilteredEvents] = useState(myEvents);
   const [userFilter, setUserFilter] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isTooltipOpen, setTooltipOpen] = useState(false);
+  const [tooltipAnchor, setTooltipAnchor] = useState(null);
+  const [hoverInEvents,setHoverInEvents]= useState()
   const [myView, setMyView] = useState({
     schedule: {
       type: "day",
@@ -143,6 +147,7 @@ const TaskScheduler = ({
       allDay: false,
     },
   });
+  const timer = useRef(null);
   const newEvent = clickedEvent?.event;
 
   const [formData, setFormData] = useState({
@@ -392,14 +397,16 @@ const TaskScheduler = ({
   function setInitialMinutesToDateTime(durationInMinutes) {
     console.log(durationInMinutes);
     let date = new Date(formData.start);
-  
+
     date.setMinutes(date.getMinutes() - parseInt(durationInMinutes.value, 10));
-  
-    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  
+
+    const localDate = new Date(
+      date.getTime() - date.getTimezoneOffset() * 60000
+    );
+
     const modifiedDate = localDate.toISOString().slice(0, 16);
     console.log({ modifiedDate });
-  
+
     handleInputChange("Remind_At", modifiedDate);
     handleInputChange("Reminder_Text", durationInMinutes.name);
   }
@@ -407,7 +414,7 @@ const TaskScheduler = ({
   const handleCellDoubleClick = (args) => {
     console.log(args);
     handleInputChange("start", args.date);
-    handleInputChange("title", "new meeting")
+    handleInputChange("title", "new meeting");
     handleInputChange(
       "end",
       new Date(dayjs(args.date).add(1, "hour").toDate())
@@ -420,14 +427,16 @@ const TaskScheduler = ({
     handleInputChange("scheduleFor", loggedInUser);
     handleInputChange("priority", "medium");
     let date = new Date(args.date);
-  
+
     date.setMinutes(date.getMinutes() - parseInt(5, 10));
-  
-    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  
+
+    const localDate = new Date(
+      date.getTime() - date.getTimezoneOffset() * 60000
+    );
+
     const modifiedDate = localDate.toISOString().slice(0, 16);
     console.log({ modifiedDate });
-  
+
     handleInputChange("Remind_At", modifiedDate);
     handleInputChange("Reminder_Text", "5 minutes before");
     const selectedActivity = activityType.find(
@@ -641,6 +650,58 @@ const TaskScheduler = ({
     // console.log(beginDate);
     // console.log(closeDate);
   };
+  // const openTooltip = useCallback((args) => {
+  //   const event = args.event;
+
+  //   const doctor = args.resourceObj;
+  //   // const time = formatDate('hh:mm A', new Date(event.start)) + ' - ' + formatDate('hh:mm A', new Date(event.end));
+
+  //   if (timer.current) {
+  //     clearTimeout(timer.current);
+  //     timer.current = null;
+  //   }
+
+  //   // if (event.confirmed) {
+  //   //   setAppointmentStatus('Confirmed');
+  //   //   setButtonText('Cancel appointment');
+  //   //   setButtonType('warning');
+  //   // } else {
+  //   //   setAppointmentStatus('Canceled');
+  //   //   setButtonText('Confirm appointment');
+  //   //   setButtonType('success');
+  //   // }
+
+  //   // setAppointment(event);
+  //   // setAppointmentInfo(event.title + ', Age: ' + event.age);
+  //   // setAppointmentLocation(event.location);
+  //   // setAppointmentTime(time);
+  //   // setAppointmentReason(event.reason);
+  //   // setTooltipColor(doctor.color);
+  //   console.log({hoverInEvents})
+  //   setTooltipAnchor(args.domEvent.target.closest(".mbsc-schedule-event"));
+  //   setTooltipOpen(true);
+  // }, []);
+
+  // const handleTooltipClose = useCallback(() => {
+  //   setTooltipOpen(false);
+  // }, []);
+  // const handleEventHoverIn = useCallback(
+  //   (args) => {
+  //     console.log('hoverInargs',args)
+  //     setHoverInEvents(args.event)
+  //     setTimeout(openTooltip(args),500)
+      
+  //   },
+  //   [openTooltip,hoverInEvents]
+  // );
+
+  // const handleEventHoverOut = useCallback(() => {
+  //   if (!timer.current) {
+  //     timer.current = setTimeout(() => {
+  //       setTooltipOpen(false);
+  //     }, 200);
+  //   }
+  // }, []);
 
   // const handlePageChange = (e) => {
   //   console.log(e);
@@ -685,8 +746,52 @@ const TaskScheduler = ({
             onEventDelete={handleEventDelete}
             onEventDragEnter={handleEventDragEnter}
             onEventDragLeave={handleEventDragLeave}
+            // onEventHoverIn={handleEventHoverIn}
+            // onEventHoverOut={handleEventHoverOut}
             className="mbsc-schedule-date-header-text mbsc-schedule-resource-title"
           />
+          {/* <Popup
+            anchor={tooltipAnchor}
+            contentPadding={false}
+            display="anchored"
+            isOpen={isTooltipOpen}
+            scrollLock={false}
+            showOverlay={false}
+            touchUi={false}
+            width={350}
+            onClose={handleTooltipClose}
+          >
+            <div
+              className="mds-tooltip"
+              // onMouseEnter={handleMouseEnter}
+              // onMouseLeave={handleMouseLeave}
+            >
+              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'}>
+                <Typography variant="h5" display={"inline-block"} maxWidth={'120px'}>
+                  Title
+                </Typography>
+                <Typography variant="p">{hoverInEvents?.title}</Typography>
+              </Box>
+              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'}>
+                <Typography variant="h5" display={"inline-block"} maxWidth={'120px'}>
+                  Priority
+                </Typography>
+                <Typography variant="p">{hoverInEvents?.priority}</Typography>
+              </Box>
+              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'}>
+                <Typography variant="h5" display={"inline-block"} maxWidth={'120px'}>
+                  Start time
+                </Typography>
+                <Typography variant="p">{hoverInEvents?.start}</Typography>
+              </Box>
+              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'}>
+                <Typography variant="h5" display={"inline-block"} maxWidth={'120px'}>
+                  End time
+                </Typography>
+                <Typography variant="p">{hoverInEvents?.end}</Typography>
+              </Box>
+            </div>
+          </Popup> */}
           <Toast
             isOpen={isToastOpen}
             message={toastMessage}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import { Input, Select, Textarea } from "@mobiscroll/react";
 import {
@@ -95,33 +95,13 @@ const EventForm = ({
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
+  const [edited,setEdited] = useState(false)
   const todayDate = getLocalDateTime();
 
   dayjs.extend(utc);
   dayjs.extend(timezone);
   console.log({ myEvents });
-  // const [formData, setFormData] = useState({
-  //   id: newEvent?.id || "",
-  //   title: newEvent?.title || "",
-  //   startTime: "",
-  //   endTime: "",
-  //   duration: parseInt(newEvent?.duration) || 0,
-  //   associateWith: newEvent?.associateWith || "",
-  //   Type_of_Activity: newEvent?.Type_of_Activity?.toLowerCase() || "",
-  //   resource: newEvent?.resource || 0,
-  //   scheduleFor: newEvent?.scheduleFor || "",
-  //   scheduleWith: newEvent?.scheduleWith || [],
-  //   location: newEvent?.location || "",
-  //   priority: newEvent?.priority?.toLowerCase() || "",
-  //   Remind_At: newEvent?.ringAlarm || "",
-  //   occurrence: newEvent?.occurrence || "once",
-  //   start: newEvent?.start || todayDate,
-  //   end: newEvent?.end || "",
-  //   noEndDate: false,
-  //   color: newEvent?.color || "#d1891f",
-  //   Banner: newEvent?.Banner || false,
-  //   Description: newEvent?.Description || "",
-  // });
+  
 
   console.log({ formData });
 
@@ -322,6 +302,12 @@ const EventForm = ({
     }
   };
 
+  useEffect(()=>{
+    if (formData.id !== '') {
+      setEdited(true)
+    }
+  },[formData])
+
   if (argumentLoader) {
     return (
       <Box
@@ -339,15 +325,19 @@ const EventForm = ({
         }}
       >
         <Box height={15}>
-          <IconButton
-            aria-label="close"
+          <Button
+            variant="outlined"
             onClick={() => handleClose()}
             sx={{
               position: "absolute",
               right: 8,
               top: 8,
             }}
+            startIcon={<CloseIcon />}
           >
+            Cancel
+          </Button>
+          <IconButton aria-label="close">
             <CloseIcon />
           </IconButton>
         </Box>
@@ -373,8 +363,22 @@ const EventForm = ({
         borderRadius: 5,
       }}
     >
-      <Box height={15}>
-        <IconButton
+      <Box height={18}>
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={() => handleClose()}
+          sx={{
+            position: "absolute",
+            right: 15,
+            top: 10,
+            p:0.5
+          }}
+          endIcon={<CloseIcon />}
+        >
+          Cancel
+        </Button>
+        {/* <IconButton
           aria-label="close"
           onClick={() => handleClose()}
           sx={{
@@ -384,7 +388,7 @@ const EventForm = ({
           }}
         >
           <CloseIcon />
-        </IconButton>
+        </IconButton> */}
       </Box>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
@@ -427,7 +431,7 @@ const EventForm = ({
             </Button>
             <Button
               size="small"
-              disabled={formData?.scheduledWith?.length>0 ? false : true}
+              disabled={formData?.scheduledWith?.length > 0 || edited ? false : true}
               variant="contained"
               color="secondary"
               onClick={handleSubmit}
@@ -477,6 +481,7 @@ const EventForm = ({
             </Button>
             <Button
               size="small"
+              disabled={formData?.scheduledWith?.length > 0 || edited ? false : true}
               variant="contained"
               color="secondary"
               onClick={handleSubmit}
@@ -504,6 +509,7 @@ const EventForm = ({
           </Button>
           <Button
             size="small"
+            disabled={formData?.scheduledWith?.length > 0 || edited ? false : true}
             variant="contained"
             color="secondary"
             onClick={handleSubmit}

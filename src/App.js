@@ -151,14 +151,6 @@ function App() {
       param_type: 1,
     };
 
-    // const req_data_meetings1 = {
-    //   url: "https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:2024-10-07T05%3A00%3A00%2B11%3A00)and(End_DateTime:less_equal:2024-11-10T05%3A00%3A00%2B11%3A00))",
-    //   method: "GET",
-    //   param_type: 1,
-    // };
-
-    console.log({ req_data_meetings1 });
-
     // Fetching data with custom search criteria
     const data1 = await ZOHO.CRM.CONNECTION.invoke(
       "zoho_crm_conn",
