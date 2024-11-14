@@ -650,58 +650,59 @@ const TaskScheduler = ({
     // console.log(beginDate);
     // console.log(closeDate);
   };
-  // const openTooltip = useCallback((args) => {
-  //   const event = args.event;
+  const openTooltip = useCallback((args) => {
+    const event = args.event;
 
-  //   const doctor = args.resourceObj;
-  //   // const time = formatDate('hh:mm A', new Date(event.start)) + ' - ' + formatDate('hh:mm A', new Date(event.end));
+    const doctor = args.resourceObj;
+    // const time = formatDate('hh:mm A', new Date(event.start)) + ' - ' + formatDate('hh:mm A', new Date(event.end));
 
-  //   if (timer.current) {
-  //     clearTimeout(timer.current);
-  //     timer.current = null;
-  //   }
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
 
-  //   // if (event.confirmed) {
-  //   //   setAppointmentStatus('Confirmed');
-  //   //   setButtonText('Cancel appointment');
-  //   //   setButtonType('warning');
-  //   // } else {
-  //   //   setAppointmentStatus('Canceled');
-  //   //   setButtonText('Confirm appointment');
-  //   //   setButtonType('success');
-  //   // }
+    // if (event.confirmed) {
+    //   setAppointmentStatus('Confirmed');
+    //   setButtonText('Cancel appointment');
+    //   setButtonType('warning');
+    // } else {
+    //   setAppointmentStatus('Canceled');
+    //   setButtonText('Confirm appointment');
+    //   setButtonType('success');
+    // }
 
-  //   // setAppointment(event);
-  //   // setAppointmentInfo(event.title + ', Age: ' + event.age);
-  //   // setAppointmentLocation(event.location);
-  //   // setAppointmentTime(time);
-  //   // setAppointmentReason(event.reason);
-  //   // setTooltipColor(doctor.color);
-  //   console.log({hoverInEvents})
-  //   setTooltipAnchor(args.domEvent.target.closest(".mbsc-schedule-event"));
-  //   setTooltipOpen(true);
-  // }, []);
+    // setAppointment(event);
+    setHoverInEvents(event)
+    // setAppointmentInfo(event.title + ', Age: ' + event.age);
+    // setAppointmentLocation(event.location);
+    // setAppointmentTime(time);
+    // setAppointmentReason(event.reason);
+    // setTooltipColor(doctor.color);
+    console.log({hoverInEvents})
+    setTooltipAnchor(args.domEvent.target.closest(".mbsc-schedule-event"));
+    setTooltipOpen(true);
+  }, []);
 
-  // const handleTooltipClose = useCallback(() => {
-  //   setTooltipOpen(false);
-  // }, []);
-  // const handleEventHoverIn = useCallback(
-  //   (args) => {
-  //     console.log('hoverInargs',args)
-  //     setHoverInEvents(args.event)
-  //     setTimeout(openTooltip(args),500)
+  const handleTooltipClose = useCallback(() => {
+    setTooltipOpen(false);
+  }, []);
+  const handleEventHoverIn = useCallback(
+    (args) => {
+      console.log('hoverInargs',args)
+      // setHoverInEvents(args.event)
+      setTimeout(openTooltip(args),500)
       
-  //   },
-  //   [openTooltip,hoverInEvents]
-  // );
+    },
+    [openTooltip]
+  );
 
-  // const handleEventHoverOut = useCallback(() => {
-  //   if (!timer.current) {
-  //     timer.current = setTimeout(() => {
-  //       setTooltipOpen(false);
-  //     }, 200);
-  //   }
-  // }, []);
+  const handleEventHoverOut = useCallback(() => {
+    if (!timer.current) {
+      timer.current = setTimeout(() => {
+        setTooltipOpen(false);
+      }, 200);
+    }
+  }, []);
 
   // const handlePageChange = (e) => {
   //   console.log(e);
@@ -746,11 +747,11 @@ const TaskScheduler = ({
             onEventDelete={handleEventDelete}
             onEventDragEnter={handleEventDragEnter}
             onEventDragLeave={handleEventDragLeave}
-            // onEventHoverIn={handleEventHoverIn}
-            // onEventHoverOut={handleEventHoverOut}
+            onEventHoverIn={handleEventHoverIn}
+            onEventHoverOut={handleEventHoverOut}
             className="mbsc-schedule-date-header-text mbsc-schedule-resource-title"
           />
-          {/* <Popup
+          <Popup
             anchor={tooltipAnchor}
             contentPadding={false}
             display="anchored"
@@ -766,32 +767,33 @@ const TaskScheduler = ({
               // onMouseEnter={handleMouseEnter}
               // onMouseLeave={handleMouseLeave}
             >
-              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'}>
-                <Typography variant="h5" display={"inline-block"} maxWidth={'120px'}>
+              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'} mb={2}>
+                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
                   Title
                 </Typography>
                 <Typography variant="p">{hoverInEvents?.title}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'}>
-                <Typography variant="h5" display={"inline-block"} maxWidth={'120px'}>
+              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'} mb={2}>
+                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
                   Priority
                 </Typography>
                 <Typography variant="p">{hoverInEvents?.priority}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'}>
-                <Typography variant="h5" display={"inline-block"} maxWidth={'120px'}>
+              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'} mb={2}>
+                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
                   Start time
                 </Typography>
-                <Typography variant="p">{hoverInEvents?.start}</Typography>
+                <Typography variant="p">{dayjs(hoverInEvents?.start).format("DD/MM/YYYY hh:mm A")}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'}>
-                <Typography variant="h5" display={"inline-block"} maxWidth={'120px'}>
+              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'} mb={2}>
+                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
                   End time
                 </Typography>
-                <Typography variant="p">{hoverInEvents?.end}</Typography>
+                <Typography variant="p">{dayjs(hoverInEvents?.end).format("DD/MM/YYYY hh:mm A")}</Typography>
               </Box>
+              
             </div>
-          </Popup> */}
+          </Popup>
           <Toast
             isOpen={isToastOpen}
             message={toastMessage}
