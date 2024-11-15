@@ -138,7 +138,7 @@ const TaskScheduler = ({
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isTooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipAnchor, setTooltipAnchor] = useState(null);
-  const [hoverInEvents,setHoverInEvents]= useState()
+  const [hoverInEvents, setHoverInEvents] = useState();
   const [myView, setMyView] = useState({
     schedule: {
       type: "day",
@@ -672,13 +672,13 @@ const TaskScheduler = ({
     // }
 
     // setAppointment(event);
-    setHoverInEvents(event)
+    setHoverInEvents(event);
     // setAppointmentInfo(event.title + ', Age: ' + event.age);
     // setAppointmentLocation(event.location);
     // setAppointmentTime(time);
     // setAppointmentReason(event.reason);
     // setTooltipColor(doctor.color);
-    console.log({hoverInEvents})
+    console.log({ hoverInEvents });
     setTooltipAnchor(args.domEvent.target.closest(".mbsc-schedule-event"));
     setTooltipOpen(true);
   }, []);
@@ -688,11 +688,9 @@ const TaskScheduler = ({
   }, []);
   const handleEventHoverIn = useCallback(
     (args) => {
-      console.log('hoverInargs',args)
+      console.log("hoverInargs", args);
       // setHoverInEvents(args.event)
-      openTooltip(args)
-      
-      
+      openTooltip(args);
     },
     [openTooltip]
   );
@@ -779,47 +777,176 @@ const TaskScheduler = ({
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
-              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5} mt={1.5}>
-                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} minWidth={'120px'}>
+              <Box
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+                mb={2}
+                px={1.5}
+                mt={1.5}
+              >
+                <Typography
+                  variant="p"
+                  sx={{
+                    fontSize: "medium",
+                    fontWeight: "bolder",
+                    textAlign: "left",
+                  }}
+                  display={"inline-block"}
+                  minWidth={"120px"}
+                >
                   Title
                 </Typography>
                 <Typography variant="p">{hoverInEvents?.title}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
-                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
+              <Box
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+                mb={2}
+                px={1.5}
+              >
+                <Typography
+                  variant="p"
+                  sx={{
+                    fontSize: "medium",
+                    fontWeight: "bolder",
+                    textAlign: "left",
+                  }}
+                  display={"inline-block"}
+                  maxWidth={"120px"}
+                >
                   Priority
                 </Typography>
                 <Typography variant="p">{hoverInEvents?.priority}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
-                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
+              <Box
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+                mb={2}
+                px={1.5}
+              >
+                <Typography
+                  variant="p"
+                  sx={{
+                    fontSize: "medium",
+                    fontWeight: "bolder",
+                    textAlign: "left",
+                  }}
+                  display={"inline-block"}
+                  maxWidth={"120px"}
+                >
                   Start time
                 </Typography>
-                <Typography variant="p">{dayjs(hoverInEvents?.start).format("DD/MM/YYYY hh:mm A")}</Typography>
+                <Typography variant="p">
+                  {dayjs(hoverInEvents?.start).format("DD/MM/YYYY hh:mm A")}
+                </Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
-                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
+              <Box
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+                mb={2}
+                px={1.5}
+              >
+                <Typography
+                  variant="p"
+                  sx={{
+                    fontSize: "medium",
+                    fontWeight: "bolder",
+                    textAlign: "left",
+                  }}
+                  display={"inline-block"}
+                  maxWidth={"120px"}
+                >
                   End time
                 </Typography>
-                <Typography variant="p">{dayjs(hoverInEvents?.end).format("DD/MM/YYYY hh:mm A")}</Typography>
+                <Typography variant="p">
+                  {dayjs(hoverInEvents?.end).format("DD/MM/YYYY hh:mm A")}
+                </Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
-                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} minWidth={'120px'}>
+              <Box
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+                mb={2}
+                px={1.5}
+              >
+                <Typography
+                  variant="p"
+                  sx={{
+                    fontSize: "medium",
+                    fontWeight: "bolder",
+                    textAlign: "left",
+                  }}
+                  display={"inline-block"}
+                  maxWidth={"120px"}
+                >
+                  Description
+                </Typography>
+                <Typography
+                  variant="p"
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: "8",
+                    WebkitBoxOrient: "vertical",
+                    ml:2,
+                    textAlign:'right'
+                  }}
+                >
+                  {hoverInEvents?.Description}
+                </Typography>
+              </Box>
+              <Box
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+                mb={2}
+                px={1.5}
+              >
+                <Typography
+                  variant="p"
+                  sx={{
+                    fontSize: "medium",
+                    fontWeight: "bolder",
+                    textAlign: "left",
+                  }}
+                  display={"inline-block"}
+                  minWidth={"120px"}
+                >
                   Regarding
                 </Typography>
                 <Typography variant="p">{hoverInEvents?.Regarding}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
-                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} minWidth={'120px'}>
+              <Box
+                display={"flex"}
+                justifyContent={"space-between"}
+                alignItems={"center"}
+                mb={2}
+                px={1.5}
+              >
+                <Typography
+                  variant="p"
+                  sx={{
+                    fontSize: "medium",
+                    fontWeight: "bolder",
+                    textAlign: "left",
+                  }}
+                  display={"inline-block"}
+                  minWidth={"120px"}
+                >
                   Scheduled With
                 </Typography>
-                <ul style={{width:'100%'}}>
-                {hoverInEvents?.scheduledWith.length>0 && hoverInEvents?.scheduledWith.map((item,index)=>(
-                  <li>{item?.Full_Name}</li>
-                ))}
+                <ul style={{ width: "100%" }}>
+                  {hoverInEvents?.scheduledWith.length > 0 &&
+                    hoverInEvents?.scheduledWith.map((item, index) => (
+                      <li>{item?.Full_Name}</li>
+                    ))}
                 </ul>
               </Box>
-              
             </div>
           </Popup>
           <Toast
