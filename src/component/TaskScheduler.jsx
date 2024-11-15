@@ -690,7 +690,8 @@ const TaskScheduler = ({
     (args) => {
       console.log('hoverInargs',args)
       // setHoverInEvents(args.event)
-      setTimeout(openTooltip(args),500)
+      openTooltip(args)
+      
       
     },
     [openTooltip]
@@ -702,6 +703,17 @@ const TaskScheduler = ({
         setTooltipOpen(false);
       }, 200);
     }
+  }, []);
+  const handleMouseEnter = useCallback(() => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+  }, []);
+  const handleMouseLeave = useCallback(() => {
+    timer.current = setTimeout(() => {
+      setTooltipOpen(false);
+    }, 200);
   }, []);
 
   // const handlePageChange = (e) => {
@@ -764,32 +776,48 @@ const TaskScheduler = ({
           >
             <div
               className="mds-tooltip"
-              // onMouseEnter={handleMouseEnter}
-              // onMouseLeave={handleMouseLeave}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
             >
-              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'} mb={2}>
-                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
+              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5} mt={1.5}>
+                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} minWidth={'120px'}>
                   Title
                 </Typography>
                 <Typography variant="p">{hoverInEvents?.title}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'} mb={2}>
+              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
                 <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
                   Priority
                 </Typography>
                 <Typography variant="p">{hoverInEvents?.priority}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'} mb={2}>
+              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
                 <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
                   Start time
                 </Typography>
                 <Typography variant="p">{dayjs(hoverInEvents?.start).format("DD/MM/YYYY hh:mm A")}</Typography>
               </Box>
-              <Box display={"flex"} justifyContent={"space-around"} alignItems={'center'} mb={2}>
+              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
                 <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} maxWidth={'120px'}>
                   End time
                 </Typography>
                 <Typography variant="p">{dayjs(hoverInEvents?.end).format("DD/MM/YYYY hh:mm A")}</Typography>
+              </Box>
+              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
+                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} minWidth={'120px'}>
+                  Regarding
+                </Typography>
+                <Typography variant="p">{hoverInEvents?.Regarding}</Typography>
+              </Box>
+              <Box display={"flex"} justifyContent={"space-between"} alignItems={'center'} mb={2} px={1.5}>
+                <Typography variant="p" sx={{fontSize:"medium",fontWeight:'bolder',textAlign:'left'}} display={"inline-block"} minWidth={'120px'}>
+                  Scheduled With
+                </Typography>
+                <ul style={{width:'100%'}}>
+                {hoverInEvents?.scheduledWith.length>0 && hoverInEvents?.scheduledWith.map((item,index)=>(
+                  <li>{item?.Full_Name}</li>
+                ))}
+                </ul>
               </Box>
               
             </div>
