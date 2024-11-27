@@ -23,13 +23,19 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
 
   const CustomInputComponent = ({ field }) => {
+    const dateValue = formData?.[field];
+    const formattedDate =
+      dateValue && dayjs(dateValue).isValid()
+        ? dayjs(dateValue).format("DD/MM/YYYY hh:mm A")
+        : "";
+  
     return (
       <CustomTextField
         fullWidth
         size="small"
         label=""
         variant="outlined"
-        value={dayjs(formData?.[field]).format('DD/MM/YYYY hh:mm A')||""}
+        value={formattedDate}
         onClick={() =>
           field === "startTime"
             ? setOpenStartDatepicker(true)
@@ -38,6 +44,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
       />
     );
   };
+  
 
   return (
     <Box>

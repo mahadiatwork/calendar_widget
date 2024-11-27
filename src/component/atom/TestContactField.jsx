@@ -34,7 +34,7 @@ export default function TestContactField({
   // Prepopulate and fetch missing data for selectedParticipants
   useEffect(() => {
     const fetchParticipantsDetails = async () => {
-      if (clickedEvent.scheduledWith && ZOHO) {
+      if (clickedEvent?.scheduledWith && ZOHO) {
         const participants = await Promise.all(
           clickedEvent?.scheduledWith.map(async (participant) => {
             try {
