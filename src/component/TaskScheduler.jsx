@@ -35,6 +35,8 @@ import {
   Modal,
   OutlinedInput,
   Snackbar,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -224,78 +226,6 @@ const TaskScheduler = ({
     setMyView(myView);
   }, []);
 
-  console.log({ view });
-
-  const meetings = useMemo(
-    () => [
-      {
-        id: 1,
-        name: "Meeting",
-      },
-      {
-        id: 2,
-        name: "To-do",
-      },
-      {
-        id: 3,
-        name: "Appointment",
-      },
-      {
-        id: 4,
-        name: "Boardroom",
-      },
-      {
-        id: 5,
-        name: "Call Billing",
-      },
-      {
-        id: 6,
-        name: "Email Billing",
-      },
-      {
-        id: 7,
-        name: "Initial Consultation",
-      },
-      {
-        id: 8,
-        name: "Call",
-      },
-      {
-        id: 9,
-        name: "Mail",
-      },
-      {
-        id: 10,
-        name: "Meeting Billing",
-      },
-      {
-        id: 11,
-        name: "Personal Activity",
-      },
-      {
-        id: 12,
-        name: "Room 1",
-      },
-      {
-        id: 13,
-        name: "Room 2",
-      },
-      {
-        id: 14,
-        name: "Room 3",
-      },
-      {
-        id: 15,
-        name: "To Do Billing",
-      },
-      {
-        id: 16,
-        name: "Vacation",
-      },
-    ],
-    []
-  );
-
   const myInvalid = useMemo(
     () => [
       {
@@ -478,6 +408,113 @@ const TaskScheduler = ({
     setFilteredEvents(filtered);
   }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
+  const [admin, setAdmin] = useState(true);
+
+  const [types, setTypes] = useState("All");
+
+  const [currentTab, setCurrentTab] = useState(0); // To track selected tab
+
+  const meetings = useMemo(
+    () => [
+      {
+        id: 1,
+        name: "Meeting",
+      },
+      {
+        id: 2,
+        name: "To-do",
+      },
+      {
+        id: 3,
+        name: "Appointment",
+      },
+      {
+        id: 4,
+        name: "Boardroom",
+      },
+      {
+        id: 5,
+        name: "Call Billing",
+      },
+      {
+        id: 6,
+        name: "Email Billing",
+      },
+      {
+        id: 7,
+        name: "Initial Consultation",
+      },
+      {
+        id: 8,
+        name: "Call",
+      },
+      {
+        id: 9,
+        name: "Mail",
+      },
+      {
+        id: 10,
+        name: "Meeting Billing",
+      },
+      {
+        id: 11,
+        name: "Personal Activity",
+      },
+      {
+        id: 12,
+        name: "Room 1",
+      },
+      {
+        id: 13,
+        name: "Room 2",
+      },
+      {
+        id: 14,
+        name: "Room 3",
+      },
+      {
+        id: 15,
+        name: "To Do Billing",
+      },
+      {
+        id: 16,
+        name: "Vacation",
+      },
+    ],
+    []
+  );
+
+
+
+  const adminOnlyMeetings = useMemo(
+    () => [
+      "Meeting",
+      "Appointment",
+      "Boardroom",
+      "Room 1",
+      "Room 2",
+      "Room 3",
+      "Vacation",
+    ],
+    []
+  );
+
+ // Filtered meetings based on the types state
+ const filteredMeetings = useMemo(() => {
+  if (types === "All") return meetings; // Show all meetings
+  if (types === "Admin Only") {
+    return meetings.filter((meeting) =>
+      adminOnlyMeetings.includes(meeting.name)
+    );
+  }
+  if (types === "Generic") {
+    // Add specific logic for Generic view if needed
+    return meetings;
+  }
+  return meetings; // Default fallback
+}, [types, meetings, adminOnlyMeetings]);
+
+
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
     const handleDates = (e) => {
@@ -492,6 +529,25 @@ const TaskScheduler = ({
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
     };
+
+    // console.log("tutoring", )
+
+  const handleTabChange = (_, newValue) => {
+
+    console.log({filteredMeetings})
+    setCurrentTab(newValue);
+    if (newValue === 0) {
+      setAdmin(true);
+      setTypes("All"); // Default to show all meeting types
+    } else if (newValue === 1) {
+      setAdmin(true);
+      setTypes("Admin Only");
+    } else if (newValue === 2) {
+      setAdmin(false);
+      setTypes("Generic");
+    }
+  };
+
     return (
       <>
         <CalendarNav className="cal-header-nav" />
@@ -509,6 +565,7 @@ const TaskScheduler = ({
         <Datepicker
           controls={["calendar"]}
           calendarType="month"
+          dateFormat="DD/MM/YYYY"
           display="top"
           calendarScroll={"vertical"}
           pages={3}
@@ -527,9 +584,17 @@ const TaskScheduler = ({
             Filter
           </Button>
         </Box>
+
+      <Box sx={{borderColor: "divider",marginTop: 2, marginBottom: 2, display: "flex", justifyContent: "flex-end", marginLeft: 50 }}>
+        <Tabs value={currentTab} onChange={handleTabChange}>
+          <Tab label="All Types" />
+          <Tab label="Admin View" />
+          <Tab label="Generic View" />
+        </Tabs>
+      </Box>
       </>
     );
-  }, [view, priorityFilter, changeView]);
+  }, [view, currentTab, changeView, setAdmin, setTypes]);
 
   useEffect(() => {
     for (const event of myEvents) {
@@ -725,8 +790,6 @@ const TaskScheduler = ({
   //   return <Box> Fetching data ....</Box>;
   // }
 
-  console.log({ mahadi: filteredEvents });
-  console.log(filteredEvents.length);
   return (
     <div className="mbsc-grid mbsc-no-padding">
       <div className="mbsc-row">
@@ -734,7 +797,7 @@ const TaskScheduler = ({
           <Eventcalendar
             data={filteredEvents}
             view={myView}
-            resources={meetings}
+            resources={admin && filteredMeetings}
             invalid={myInvalid}
             // startDay={(e)=>{console.log('faky',e)}}
             // refDate={calendarRef}
@@ -893,8 +956,8 @@ const TaskScheduler = ({
                     display: "-webkit-box",
                     WebkitLineClamp: "8",
                     WebkitBoxOrient: "vertical",
-                    ml:2,
-                    textAlign:'right'
+                    ml: 2,
+                    textAlign: "right",
                   }}
                 >
                   {hoverInEvents?.Description}

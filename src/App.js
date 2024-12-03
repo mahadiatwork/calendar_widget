@@ -24,19 +24,19 @@ function App() {
   // console.log({ startDateTime });
   // console.log({ endDateTime });
 
-  async function initZoho() {
+  // async function initZoho() {
+
+  // }
+
+  useEffect(() => {
     ZOHO.embeddedApp.on("PageLoad", async function (data) {
-      // console.log("faky", data);
+      console.log("radicals", data);
       // setRecordId(data.EntityId[0]);
       // setModuleName(data.Entity);
     });
     ZOHO.embeddedApp.init().then(() => {
       setZohoLoaded(true);
     });
-  }
-
-  useEffect(() => {
-    initZoho();
   }, []);
 
   useEffect(() => {
@@ -203,8 +203,7 @@ function App() {
     }
   }, [startDateTime, endDateTime]);
 
-  console.log({ faky: loggedInUser });
-  // console.log({ users });
+  console.log({ loggedInUser: loggedInUser });
   return (
     <div>
       <TaskScheduler

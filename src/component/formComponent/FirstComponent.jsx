@@ -176,7 +176,6 @@ const FirstComponent = ({
   }
 
   const handleEndDateChange = (e) => {
-    console.log("fahim", e.$d);
     handleInputChange("end", e.$d);
     console.log("end", e.value);
     const getDiffInMinutes = getTimeDifference(e.$d);
