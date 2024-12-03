@@ -43,7 +43,13 @@ function App() {
     // fetchTemplateList();
     if (zohoLoaded) {
       ZOHO.CRM.CONFIG.getCurrentUser().then(function (data) {
-        setLoggedInUser(data?.users[0]);
+        ZOHO.CRM.API.getRecord({
+          Entity: "users", approved: "both", RecordID: data?.users[0]?.id
+         })
+         .then(function(data){
+          setLoggedInUser(data?.users[0]);
+         })
+         
       });
 
       ZOHO.CRM.API.getAllRecords({

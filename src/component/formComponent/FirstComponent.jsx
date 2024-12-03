@@ -50,6 +50,9 @@ const FirstComponent = ({
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [startValue, setStartValue] = useState(dayjs(formData.start));
   const [endValue, setEndValue] = useState(dayjs(formData.end));
+  const [sendNotification, setSendNotification] = useState(true);
+  const [sendReminders, setSendReminders] = useState(true); // Initially, reminders are enabled
+  const [reminderMinutes, setReminderMinutes] = useState(15);
 
   const ringAlarm = [
     { name: "At time of meeting", value: 0 },
@@ -65,7 +68,7 @@ const FirstComponent = ({
   const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
 
   function addMinutesToDateTime(formatType, durationInMinutes) {
-    console.log(durationInMinutes)
+    console.log(durationInMinutes);
     // // Create a new Date object using the start time from formData
     // console.log(formatType,durationInMinutes)
     if (formatType === "duration") {
@@ -92,7 +95,7 @@ const FirstComponent = ({
       );
 
       const modifiedDate = localDate.toISOString().slice(0, 16);
-      console.log({modifiedDate})
+      console.log({ modifiedDate });
 
       handleInputChange("Remind_At", modifiedDate);
       handleInputChange("Reminder_Text", durationInMinutes.name);
@@ -199,6 +202,44 @@ const FirstComponent = ({
   //   handleInputChange('Reminder_Text','')
   //   return true
   // }
+  const handleCheckboxChange = (field) => {
+    if (field === "send_notification") {
+      const newSendNotification = !sendNotification;
+      setSendNotification(newSendNotification);
+      handleInputChange("send_notification", newSendNotification);
+    } else if (field === "Remind_Participants") {
+      const newSendReminders = !sendReminders;
+      setSendReminders(newSendReminders);
+  
+      console.log({ newSendReminders });
+  
+      if (newSendReminders) {
+        // If reminders are enabled
+        handleInputChange("Remind_Participants", [
+          { period: "minutes", unit: reminderMinutes },
+        ]);
+        handleInputChange("Reminder_Text", `${reminderMinutes} minutes before`);
+      } else {
+        // If reminders are disabled
+        handleInputChange("Remind_Participants", []);
+        handleInputChange("Reminder_Text", "None");
+        handleInputChange("Remind_At", []);
+      }
+    }
+  };
+  
+
+  const handleReminderChange = (value) => {
+    setReminderMinutes(value);
+    handleInputChange("Remind_Participants", [
+      { period: "minutes", unit: value },
+    ]);
+    if (value === "None") {
+      handleInputChange("Reminder_Text", "None");
+    } else {
+      handleInputChange("Reminder_Text", `${value} minutes before`);
+    }
+  };
 
   return (
     <Box>
@@ -381,7 +422,7 @@ const FirstComponent = ({
             label="Banner/Timeless"
           />
         </Grid>
-        <Grid size={9} alignItems={"center"}>
+        {/* <Grid size={9} alignItems={"center"}>
           <FormControlLabel
             sx={{ height: "35px" }}
             control={
@@ -394,7 +435,7 @@ const FirstComponent = ({
             }
             label="Send notification"
           />
-        </Grid>
+        </Grid> */}
 
         <Grid size={18}>
           {/* <ContactField
@@ -403,54 +444,38 @@ const FirstComponent = ({
             formData={formData}
             clickedEvent={clickedEvent}
           /> */}
-          <TestContactField value={formData?.scheduledWith} handleInputChange={handleInputChange} clickedEvent={clickedEvent}/>
+          <TestContactField
+            value={formData?.scheduledWith}
+            handleInputChange={handleInputChange}
+            clickedEvent={clickedEvent}
+          />
         </Grid>
+        <Grid item xs={6}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!sendNotification} // Checked when invites are disabled
+                onChange={() => handleCheckboxChange("send_notification")} // Correct field name
+              />
+            }
+            label="Don't send invites"
+          />
+        </Grid>
+
+        {/* Don't send reminders */}
+        <Grid item xs={6}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!sendReminders} // Checked when reminders are disabled
+                onChange={() => handleCheckboxChange("Remind_Participants")}
+              />
+            }
+            label="Don't send reminders"
+          />
+        </Grid>
+
         <Grid size={18}>
-          {/* <FormControl fullWidth size="small">
-            <InputLabel
-              id="demo-simple-select-standard-label"
-              sx={{ top: "-5px" }}
-            >
-              Associate with
-            </InputLabel>
-            <Select
-              labelId="demo-simple-select-standard-label"
-              id="demo-simple-select-standard"
-              label="Associate with"
-              fullWidth
-              value={formData.associateWith}
-              onChange={(e) =>
-                handleInputChange("associateWith", e.target.value)
-              }
-              MenuProps={{
-                //   disablePortal: true,  // This ensures the dropdown is not restricted to the modal's container
-                PaperProps: {
-                  style: {
-                    zIndex: 1300, // Increase this if necessary, depending on the z-index of your popup
-                  },
-                },
-              }}
-              sx={{
-                "& .MuiSelect-select": {
-                  padding: "3px 10px", // Adjust the padding to shrink the Select content
-                },
-                "& .MuiOutlinedInput-root": {
-                  // height: '40px', // Set a consistent height
-                  padding: 0, // Ensure no extra padding
-                },
-                "& .MuiInputBase-input": {
-                  display: "flex",
-                  alignItems: "center", // Align the content vertically
-                },
-              }}
-            >
-              {associateWith.map((item, index) => (
-                <MenuItem value={item} key={index}>
-                  {item}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl> */}
           <AccountField
             value={formData.associateWith} // Use formData
             handleInputChange={handleInputChange}
@@ -568,6 +593,9 @@ const FirstComponent = ({
                   addMinutesToDateTime("remindAt", selectedRing);
                   // Update the `Reminder_Text` with the selected reminder text
                   handleInputChange("Reminder_Text", selectedRing.name);
+                  handleInputChange("Remind_Participants", [
+                    { period: "minutes", unit: e.target.value },
+                  ]);
                 }
               }}
               sx={{

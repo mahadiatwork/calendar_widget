@@ -408,11 +408,19 @@ const TaskScheduler = ({
     setFilteredEvents(filtered);
   }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
-  const [admin, setAdmin] = useState(true);
+  console.log("3rd dec", loggedInUser?.User_Type)
 
-  const [types, setTypes] = useState("All");
+  // const [admin, setAdmin] = useState(true);
+  const [admin, setAdmin] = useState(loggedInUser?.User_Type === "Admin");
 
-  const [currentTab, setCurrentTab] = useState(0); // To track selected tab
+  const [types, setTypes] = useState(
+    loggedInUser?.User_Type === "Admin" ? "Admin Only" : "Generic"
+  );
+  
+  const [currentTab, setCurrentTab] = useState(
+    loggedInUser?.User_Type === "Admin" ? 1 : 2 // Default to Admin View (1) or Generic View (2)
+  );
+  
 
   const meetings = useMemo(
     () => [

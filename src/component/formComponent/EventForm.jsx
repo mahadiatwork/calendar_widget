@@ -149,10 +149,9 @@ const EventForm = ({
     // const transformedData = transformFormSubmission(formData);
     // Add your submit logic here (e.g., send data to the backend)
     // setEvents((prev) => [...prev, formData]);
+
     if (formData.id !== "") {
       const transformedData = transformFormSubmission(formData);
-
-      console.log(transformedData);
       var config = {
         Entity: "Events",
         APIData: transformedData,
