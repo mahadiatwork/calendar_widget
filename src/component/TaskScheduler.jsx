@@ -129,12 +129,25 @@ const TaskScheduler = ({
     { type: "Vacation", resource: 16 },
   ]);
 
+    // const [admin, setAdmin] = useState(true);
+    const [admin, setAdmin] = useState(loggedInUser?.User_Type === "Admin");
+
+    const [types, setTypes] = useState(
+      loggedInUser?.User_Type === "Admin" ? "Admin Only" : "All"
+    );
+    
+    const [currentTab, setCurrentTab] = useState(
+      loggedInUser?.User_Type === "Admin" ? 1 : 0 // Default to Admin View (1) or Generic View (2)
+    );
+
+  const usertype = loggedInUser?.User_Type;
+
   const [myColors, setColors] = useState([]);
   const [open, setOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isToastOpen, setToastOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [view, setView] = useState("day");
+  const [view, setView] = useState("month");
   const [filteredEvents, setFilteredEvents] = useState(myEvents);
   const [userFilter, setUserFilter] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -142,12 +155,7 @@ const TaskScheduler = ({
   const [tooltipAnchor, setTooltipAnchor] = useState(null);
   const [hoverInEvents, setHoverInEvents] = useState();
   const [myView, setMyView] = useState({
-    schedule: {
-      type: "day",
-      startTime: "06:00",
-      endTime: "24:00",
-      allDay: false,
-    },
+    calendar: { labels: true, type: "month" },
   });
   const timer = useRef(null);
   const newEvent = clickedEvent?.event;
@@ -180,51 +188,73 @@ const TaskScheduler = ({
   });
 
   const changeView = useCallback((event) => {
+    let prevType = types;
+    setTypes();
+    setTypes(prevType);
+    let prevTabNumber = currentTab;
+    setCurrentTab(prevTabNumber);
     let myView;
 
     switch (event.target.value) {
-      case "month":
-        myView = {
-          calendar: { labels: true, type: "month" },
-        };
-        break;
-      case "week":
-        myView = {
-          schedule: {
-            type: "week",
-            allDay: false,
-            startDay: 1,
-            endDay: 5,
-            startTime: "06:00",
-            endTime: "24:00",
-          },
-        };
-        break;
-      case "day":
-        myView = {
-          schedule: {
-            type: "day",
-            allDay: false,
-            startTime: "06:00",
-            endTime: "24:00",
-          },
-        };
-        break;
-      default:
-        myView = {
-          schedule: {
-            type: "day",
-            startTime: "06:00",
-            endTime: "24:00",
-            allDay: false,
-          },
-        };
-        break;
+        case "month":
+            myView = {
+                calendar: { labels: true, type: "month" },
+            };
+            break;
+        case "week":
+            myView = {
+                schedule: {
+                    type: "week",
+                    allDay: false,
+                    startDay: 1,
+                    endDay: 5,
+                    startTime: "06:00",
+                    endTime: "24:00",
+                },
+            };
+            console.log({ loggedInType: loggedInUser?.User_Type });
+            setAdmin(true);
+            setTypes("All");
+            setTimeout(() => {
+                setAdmin(loggedInUser?.User_Type === "Admin");
+                setTypes(loggedInUser?.User_Type === "Admin" ? "Admin Only" : "Generic");
+                setCurrentTab(loggedInUser?.User_Type === "Admin" ? 1 : 2);
+            }, 500);
+            break;
+        case "day":
+            myView = {
+                schedule: {
+                    type: "day",
+                    allDay: false,
+                    startTime: "06:00",
+                    endTime: "24:00",
+                },
+            };
+            console.log({ loggedInType: loggedInUser?.User_Type });
+            setAdmin(true);
+            setTypes("All");
+            setTimeout(() => {
+                setAdmin(loggedInUser?.User_Type === "Admin");
+                setTypes(loggedInUser?.User_Type === "Admin" ? "Admin Only" : "Generic");
+                setCurrentTab(loggedInUser?.User_Type === "Admin" ? 1 : 2);
+            }, 500);
+            break;
+        default:
+            myView = {
+                schedule: {
+                    type: "day",
+                    startTime: "06:00",
+                    endTime: "24:00",
+                    allDay: false,
+                },
+            };
+            break;
     }
 
     setView(event.target.value);
     setMyView(myView);
-  }, []);
+}, [loggedInUser, types, currentTab]);
+
 
   const myInvalid = useMemo(
     () => [
@@ -408,18 +438,9 @@ const TaskScheduler = ({
     setFilteredEvents(filtered);
   }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
-  console.log("3rd dec", loggedInUser?.User_Type)
+  console.log("3rd dec", usertype)
 
-  // const [admin, setAdmin] = useState(true);
-  const [admin, setAdmin] = useState(loggedInUser?.User_Type === "Admin");
 
-  const [types, setTypes] = useState(
-    loggedInUser?.User_Type === "Admin" ? "Admin Only" : "Generic"
-  );
-  
-  const [currentTab, setCurrentTab] = useState(
-    loggedInUser?.User_Type === "Admin" ? 1 : 2 // Default to Admin View (1) or Generic View (2)
-  );
   
 
   const meetings = useMemo(
