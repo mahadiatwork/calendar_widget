@@ -12,7 +12,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
       participant: contact?.participant || null,
     }));
   };
-  console.log({ individualParticipant });
+
   const dayOfMonth = dayjs(data?.startTime).date();
   const dayName = dayjs(data?.startTime).format("dd");
   const monthNumber = dayjs(data?.startTime).format("MM");
@@ -37,12 +37,12 @@ export function transformFormSubmission(data, individualParticipant = null) {
       ]
     : transformScheduleWithToParticipants(data?.scheduledWith || []);
 
+  console.log("data?.occurrence", data?.occurrence);
+
+  // Initialize transformedData
   let transformedData = {
     ...data,
     Event_Title: data?.title,
-    // Remind_At: dayjs(data?.Remind_At)
-    //   .tz("Australia/Adelaide")
-    //   .format("YYYY-MM-DDTHH:mm:ssZ"),
     Start_DateTime: dayjs(data?.start)
       .tz("Australia/Adelaide")
       .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `start` to ISO with timezone
@@ -54,28 +54,10 @@ export function transformFormSubmission(data, individualParticipant = null) {
     Owner: {
       id: data.scheduleFor?.id,
     },
-    Recurring_Activity: {
-      RRULE: `FREQ=${data?.occurrence?.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${
-        data.occurrence === "weekly"
-          ? `;BYDAY=${dayName.toUpperCase()}`
-          : data.occurrence === "monthly"
-          ? `;BYMONTHDAY=${dayOfMonth}`
-          : data.occurrence === "yearly"
-          ? `;BYMONTH=${monthNumber};BYMONTHDAY=${dayOfMonth}`
-          : ""
-      };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}`,
-    },
     $send_notification: data.send_notification,
 
-    // Updated `What_Id` with both name and id from `associateWith`
-    What_Id: data.associateWith
-      ? {
-          id: data.associateWith.id || null, // Assign id from associateWith
-        }
-      : null,
     se_module: "Accounts",
 
-    // Combine the manually set participants and those from `scheduleWith`
     Participants: participants,
     Duration_Min: data.duration.toString(),
     Venue: data.location,
@@ -85,23 +67,39 @@ export function transformFormSubmission(data, individualParticipant = null) {
           .tz("Australia/Adelaide")
           .format("YYYY-MM-DDTHH:mm:ssZ")
       : null,
-    // Reminder_Text:data.send_notification? data.Reminder_Text:null
   };
 
-  if (transformedData.Remind_At == null || transformedData.Remind_At == "Invalid Date" || transformedData.Remind_At == "") {
-    delete transformedData.Remind_At;
+  // Add What_Id only if id exists
+  if (data.associateWith?.id) {
+    transformedData.What_Id = {
+      id: data.associateWith.id,
+    };
+  }
+
+  // Add Recurring_Activity only if data?.occurrence is a valid string
+  if (typeof data?.occurrence === "string" && data?.occurrence.trim()) {
+    transformedData.Recurring_Activity = {
+      RRULE: `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${
+        data.occurrence === "weekly"
+          ? `;BYDAY=${dayName.toUpperCase()}`
+          : data.occurrence === "monthly"
+          ? `;BYMONTHDAY=${dayOfMonth}`
+          : data.occurrence === "yearly"
+          ? `;BYMONTH=${monthNumber};BYMONTHDAY=${dayOfMonth}`
+          : ""
+      };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}`,
+    };
   }
 
   if (
-    transformedData.Recurring_Activity.RRULE ===
-    "FREQ=ONCE;INTERVAL=1;UNTIL=Invalid Date;DTSTART=Invalid Date"
+    transformedData.Remind_At == null ||
+    transformedData.Remind_At == "Invalid Date" ||
+    transformedData.Remind_At == ""
   ) {
-    delete transformedData.Recurring_Activity;
+    delete transformedData.Remind_At;
   }
-  //   delete transformedData.scheduleWith;
-  //   delete transformedData.scheduleFor;
-  //   delete transformedData.description;
 
+  // Remove null or undefined keys
   Object.keys(transformedData).forEach((key) => {
     if (transformedData[key] === null || transformedData[key] === undefined) {
       delete transformedData[key];
@@ -112,3 +110,4 @@ export function transformFormSubmission(data, individualParticipant = null) {
 
   return transformedData;
 }
+
