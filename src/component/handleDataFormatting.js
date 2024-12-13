@@ -76,8 +76,12 @@ export function transformFormSubmission(data, individualParticipant = null) {
     };
   }
 
-  // Add Recurring_Activity only if data?.occurrence is a valid string
-  if (typeof data?.occurrence === "string" && data?.occurrence.trim()) {
+  // Validate and Add Recurring_Activity
+  const validOccurrences = ["daily", "weekly", "monthly", "yearly"]; // Define valid occurrences
+  if (
+    typeof data?.occurrence === "string" &&
+    validOccurrences.includes(data?.occurrence.toLowerCase())
+  ) {
     transformedData.Recurring_Activity = {
       RRULE: `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${
         data.occurrence === "weekly"
@@ -110,4 +114,5 @@ export function transformFormSubmission(data, individualParticipant = null) {
 
   return transformedData;
 }
+
 
