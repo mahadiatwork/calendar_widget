@@ -28,6 +28,8 @@ import {
   Button,
   Checkbox,
   CircularProgress,
+  Dialog,
+  DialogContent,
   FormControl,
   InputLabel,
   ListItemText,
@@ -129,16 +131,16 @@ const TaskScheduler = ({
     { type: "Vacation", resource: 16 },
   ]);
 
-    // const [admin, setAdmin] = useState(true);
-    const [admin, setAdmin] = useState(loggedInUser?.User_Type === "Admin");
+  // const [admin, setAdmin] = useState(true);
+  const [admin, setAdmin] = useState(loggedInUser?.User_Type === "Admin");
 
-    const [types, setTypes] = useState(
-      loggedInUser?.User_Type === "Admin" ? "Admin Only" : "All"
-    );
-    
-    const [currentTab, setCurrentTab] = useState(
-      loggedInUser?.User_Type === "Admin" ? 1 : 0 // Default to Admin View (1) or Generic View (2)
-    );
+  const [types, setTypes] = useState(
+    loggedInUser?.User_Type === "Admin" ? "Admin Only" : "All"
+  );
+
+  const [currentTab, setCurrentTab] = useState(
+    loggedInUser?.User_Type === "Admin" ? 1 : 0 // Default to Admin View (1) or Generic View (2)
+  );
 
   const usertype = loggedInUser?.User_Type;
 
@@ -187,74 +189,80 @@ const TaskScheduler = ({
     send_notification: newEvent?.send_notification || true,
   });
 
-  const changeView = useCallback((event) => {
-    let prevType = types;
-    setTypes();
-    setTypes(prevType);
-    let prevTabNumber = currentTab;
-    setCurrentTab(prevTabNumber);
-    let myView;
+  const changeView = useCallback(
+    (event) => {
+      let prevType = types;
+      setTypes();
+      setTypes(prevType);
+      let prevTabNumber = currentTab;
+      setCurrentTab(prevTabNumber);
+      let myView;
 
-    switch (event.target.value) {
+      switch (event.target.value) {
         case "month":
-            myView = {
-                calendar: { labels: true, type: "month" },
-            };
-            break;
+          myView = {
+            calendar: { labels: true, type: "month" },
+          };
+          break;
         case "week":
-            myView = {
-                schedule: {
-                    type: "week",
-                    allDay: false,
-                    startDay: 1,
-                    endDay: 5,
-                    startTime: "06:00",
-                    endTime: "24:00",
-                },
-            };
-            console.log({ loggedInType: loggedInUser?.User_Type });
-            setAdmin(true);
-            setTypes("All");
-            setTimeout(() => {
-                setAdmin(loggedInUser?.User_Type === "Admin");
-                setTypes(loggedInUser?.User_Type === "Admin" ? "Admin Only" : "Generic");
-                setCurrentTab(loggedInUser?.User_Type === "Admin" ? 1 : 2);
-            }, 500);
-            break;
+          myView = {
+            schedule: {
+              type: "week",
+              allDay: false,
+              startDay: 1,
+              endDay: 5,
+              startTime: "06:00",
+              endTime: "24:00",
+            },
+          };
+          console.log({ loggedInType: loggedInUser?.User_Type });
+          setAdmin(true);
+          setTypes("All");
+          setTimeout(() => {
+            setAdmin(loggedInUser?.User_Type === "Admin");
+            setTypes(
+              loggedInUser?.User_Type === "Admin" ? "Admin Only" : "Generic"
+            );
+            setCurrentTab(loggedInUser?.User_Type === "Admin" ? 1 : 2);
+          }, 500);
+          break;
         case "day":
-            myView = {
-                schedule: {
-                    type: "day",
-                    allDay: false,
-                    startTime: "06:00",
-                    endTime: "24:00",
-                },
-            };
-            console.log({ loggedInType: loggedInUser?.User_Type });
-            setAdmin(true);
-            setTypes("All");
-            setTimeout(() => {
-                setAdmin(loggedInUser?.User_Type === "Admin");
-                setTypes(loggedInUser?.User_Type === "Admin" ? "Admin Only" : "Generic");
-                setCurrentTab(loggedInUser?.User_Type === "Admin" ? 1 : 2);
-            }, 500);
-            break;
+          myView = {
+            schedule: {
+              type: "day",
+              allDay: false,
+              startTime: "06:00",
+              endTime: "24:00",
+            },
+          };
+          console.log({ loggedInType: loggedInUser?.User_Type });
+          setAdmin(true);
+          setTypes("All");
+          setTimeout(() => {
+            setAdmin(loggedInUser?.User_Type === "Admin");
+            setTypes(
+              loggedInUser?.User_Type === "Admin" ? "Admin Only" : "Generic"
+            );
+            setCurrentTab(loggedInUser?.User_Type === "Admin" ? 1 : 2);
+          }, 500);
+          break;
         default:
-            myView = {
-                schedule: {
-                    type: "day",
-                    startTime: "06:00",
-                    endTime: "24:00",
-                    allDay: false,
-                },
-            };
-            break;
-    }
+          myView = {
+            schedule: {
+              type: "day",
+              startTime: "06:00",
+              endTime: "24:00",
+              allDay: false,
+            },
+          };
+          break;
+      }
 
-    setView(event.target.value);
-    setMyView(myView);
-}, [loggedInUser, types, currentTab]);
-
+      setView(event.target.value);
+      setMyView(myView);
+    },
+    [loggedInUser, types, currentTab]
+  );
 
   const myInvalid = useMemo(
     () => [
@@ -438,10 +446,7 @@ const TaskScheduler = ({
     setFilteredEvents(filtered);
   }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
-  console.log("3rd dec", usertype)
-
-
-  
+  console.log("3rd dec", usertype);
 
   const meetings = useMemo(
     () => [
@@ -513,8 +518,6 @@ const TaskScheduler = ({
     []
   );
 
-
-
   const adminOnlyMeetings = useMemo(
     () => [
       "Meeting",
@@ -528,21 +531,20 @@ const TaskScheduler = ({
     []
   );
 
- // Filtered meetings based on the types state
- const filteredMeetings = useMemo(() => {
-  if (types === "All") return meetings; // Show all meetings
-  if (types === "Admin Only") {
-    return meetings.filter((meeting) =>
-      adminOnlyMeetings.includes(meeting.name)
-    );
-  }
-  if (types === "Generic") {
-    // Add specific logic for Generic view if needed
-    return meetings;
-  }
-  return meetings; // Default fallback
-}, [types, meetings, adminOnlyMeetings]);
-
+  // Filtered meetings based on the types state
+  const filteredMeetings = useMemo(() => {
+    if (types === "All") return meetings; // Show all meetings
+    if (types === "Admin Only") {
+      return meetings.filter((meeting) =>
+        adminOnlyMeetings.includes(meeting.name)
+      );
+    }
+    if (types === "Generic") {
+      // Add specific logic for Generic view if needed
+      return meetings;
+    }
+    return meetings; // Default fallback
+  }, [types, meetings, adminOnlyMeetings]);
 
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
@@ -561,21 +563,20 @@ const TaskScheduler = ({
 
     // console.log("tutoring", )
 
-  const handleTabChange = (_, newValue) => {
-
-    console.log({filteredMeetings})
-    setCurrentTab(newValue);
-    if (newValue === 0) {
-      setAdmin(true);
-      setTypes("All"); // Default to show all meeting types
-    } else if (newValue === 1) {
-      setAdmin(true);
-      setTypes("Admin Only");
-    } else if (newValue === 2) {
-      setAdmin(false);
-      setTypes("Generic");
-    }
-  };
+    const handleTabChange = (_, newValue) => {
+      console.log({ filteredMeetings });
+      setCurrentTab(newValue);
+      if (newValue === 0) {
+        setAdmin(true);
+        setTypes("All"); // Default to show all meeting types
+      } else if (newValue === 1) {
+        setAdmin(true);
+        setTypes("Admin Only");
+      } else if (newValue === 2) {
+        setAdmin(false);
+        setTypes("Generic");
+      }
+    };
 
     return (
       <>
@@ -600,6 +601,7 @@ const TaskScheduler = ({
           pages={3}
           className="mbsc-textfield"
           inputProps={props}
+          value={selectedDate} // ✅ Controlled component
           onChange={handleDates}
         />
 
@@ -614,13 +616,22 @@ const TaskScheduler = ({
           </Button>
         </Box>
 
-      <Box sx={{borderColor: "divider",marginTop: 2, marginBottom: 2, display: "flex", justifyContent: "flex-end", marginLeft: 50 }}>
-        <Tabs value={currentTab} onChange={handleTabChange}>
-          <Tab label="All Types" />
-          <Tab label="Admin View" />
-          <Tab label="Generic View" />
-        </Tabs>
-      </Box>
+        <Box
+          sx={{
+            borderColor: "divider",
+            marginTop: 2,
+            marginBottom: 2,
+            display: "flex",
+            justifyContent: "flex-end",
+            marginLeft: 50,
+          }}
+        >
+          <Tabs value={currentTab} onChange={handleTabChange}>
+            <Tab label="All Types" />
+            <Tab label="Admin View" />
+            <Tab label="Generic View" />
+          </Tabs>
+        </Box>
       </>
     );
   }, [view, currentTab, changeView, setAdmin, setTypes]);
@@ -701,6 +712,7 @@ const TaskScheduler = ({
     console.log(args);
     console.log(dayjs(args.date).format("YYYY-MM-DD"));
     let currentDate = dayjs(args.date).format("YYYY-MM-DD");
+    setSelectedDate(currentDate); // ✅ Automatically updates `Datepicker`
     if (view === "day") {
       const beginDate =
         dayjs(currentDate).startOf("day").format("YYYY-MM-DD") +
@@ -1059,35 +1071,37 @@ const TaskScheduler = ({
           setUserFilter={setUserFilter} // Pass user filter setter
         />
 
-        <Modal
+        <Dialog
           open={open}
           onClose={onClose}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
+          fullWidth // ✅ Makes it responsive
+          maxWidth="md" // ✅ Adjust max width (options: 'xs', 'sm', 'md', 'lg', 'xl')
         >
-          <EventForm
-            myEvents={myEvents}
-            setEvents={setEvents}
-            setOpen={setOpen}
-            onClose={onClose}
-            activityType={activityType}
-            setActivityType={setActivityType}
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            formData={formData}
-            handleInputChange={handleInputChange}
-            setFormData={setFormData}
-            users={users}
-            recentColor={recentColor}
-            setRecentColor={setRecentColor}
-            clickedEvent={clickedEvent}
-            setClickedEvent={setClickedEvent}
-            argumentLoader={argumentLoader}
-            snackbarOpen={snackbarOpen}
-            setSnackbarOpen={setSnackbarOpen}
-            loggedInUser={loggedInUser}
-          />
-        </Modal>
+          <DialogContent sx={{ padding: 0 }}>
+            <EventForm
+              myEvents={myEvents}
+              setEvents={setEvents}
+              setOpen={setOpen}
+              onClose={onClose}
+              activityType={activityType}
+              setActivityType={setActivityType}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              formData={formData}
+              handleInputChange={handleInputChange}
+              setFormData={setFormData}
+              users={users}
+              recentColor={recentColor}
+              setRecentColor={setRecentColor}
+              clickedEvent={clickedEvent}
+              setClickedEvent={setClickedEvent}
+              argumentLoader={argumentLoader}
+              snackbarOpen={snackbarOpen}
+              setSnackbarOpen={setSnackbarOpen}
+              loggedInUser={loggedInUser}
+            />
+          </DialogContent>
+        </Dialog>
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={6000}

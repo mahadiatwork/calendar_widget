@@ -95,13 +95,12 @@ const EventForm = ({
 }) => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
-  const [edited,setEdited] = useState(false)
+  const [edited, setEdited] = useState(false);
   const todayDate = getLocalDateTime();
 
   dayjs.extend(utc);
   dayjs.extend(timezone);
   console.log({ myEvents });
-  
 
   console.log({ formData });
 
@@ -301,11 +300,11 @@ const EventForm = ({
     }
   };
 
-  useEffect(()=>{
-    if (formData.id !== '') {
-      setEdited(true)
+  useEffect(() => {
+    if (formData.id !== "") {
+      setEdited(true);
     }
-  },[formData])
+  }, [formData]);
 
   if (argumentLoader) {
     return (
@@ -350,176 +349,183 @@ const EventForm = ({
   return (
     <Box
       sx={{
-        position: "absolute",
+        position: "fixed",
         top: "50%",
         left: "50%",
         transform: "translate(-50%, -50%)",
-        width: 650,
+        width: "90%",
+        maxWidth: "750px",
         bgcolor: "background.paper",
-        border: "2px solid #000",
+        borderRadius: 4,
         boxShadow: 24,
-        p: 2,
-        borderRadius: 5,
+        overflowY: "auto",
+        maxHeight: "90vh", // Ensure the modal is scrollable if content exceeds the viewport
+        zIndex: 100,
+        p: "15px 30px  20px 30px",
       }}
     >
-      <Box height={18}>
+      <Box display="flex" justifyContent="space-between" sx={{ padding: 0 }}>
+        {/* <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: "bold" }}
+          align="center"
+        >
+          Create Activity
+        </Typography> */}
+        <Box></Box>
         <Button
           variant="outlined"
           color="error"
-          onClick={() => handleClose()}
-          sx={{
-            position: "absolute",
-            right: 15,
-            top: 10,
-            p:0.5
-          }}
+          size="small"
+          onClick={handleClose}
           endIcon={<CloseIcon />}
         >
           Cancel
         </Button>
-        {/* <IconButton
-          aria-label="close"
-          onClick={() => handleClose()}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-          }}
-        >
-          <CloseIcon />
-        </IconButton> */}
       </Box>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Box>
         <Tabs
           value={value}
           onChange={handleChange}
           textColor="inherit"
           aria-label="simple tabs example"
+          size="small"
         >
-          <Tab label="General" />
-          <Tab label="Details" />
-          <Tab label="Reccurence" />
+          <Tab label="General" sx={{ fontSize: "9pt" }} />
+          <Tab label="Details" sx={{ fontSize: "9pt" }} />
+          <Tab label="Reccurence" sx={{ fontSize: "9pt" }} F />
         </Tabs>
       </Box>
-      <TabPanel value={value} index={0}>
-        <FirstComponent
-          formData={formData}
-          handleInputChange={handleInputChange}
-          selectedDate={selectedDate}
-          activityType={activityType}
-          setActivityType={setActivityType}
-          users={users}
-          recentColor={recentColor}
-          setRecentColor={setRecentColor}
-          clickedEvent={clickedEvent}
-        />
-        <Box display="flex" justifyContent="space-between" mt={2}>
-          <Button size="small" disabled>
-            Back
-          </Button>{" "}
-          {/* Back is disabled on first tab */}
-          <Box>
-            <Button
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={handleNext}
-              sx={{ mr: 2 }}
-            >
-              Next
-            </Button>
-            <Button
-              size="small"
-              disabled={formData?.scheduledWith?.length > 0 || edited ? false : true}
-              variant="contained"
-              color="secondary"
-              onClick={handleSubmit}
-            >
-              {/* {formData.id !== "" ? "Update" : "Submit"} */}
-              Ok
-              {/* Submit */}
-            </Button>
+      {value === 0 && (
+        <Box sx={{ p: 0, borderRadius: 1 }}>
+          <FirstComponent
+            formData={formData}
+            handleInputChange={handleInputChange}
+            selectedDate={selectedDate}
+            activityType={activityType}
+            setActivityType={setActivityType}
+            users={users}
+            recentColor={recentColor}
+            setRecentColor={setRecentColor}
+            clickedEvent={clickedEvent}
+          />
+          <Box display="flex" justifyContent="space-between" mt={2}>
+            <Button size="small" disabled>
+              Back
+            </Button>{" "}
+            {/* Back is disabled on first tab */}
+            <Box>
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={handleNext}
+                sx={{ mr: 2 }}
+              >
+                Next
+              </Button>
+              <Button
+                size="small"
+                disabled={
+                  formData?.scheduledWith?.length > 0 || edited ? false : true
+                }
+                variant="contained"
+                color="secondary"
+                onClick={handleSubmit}
+              >
+                {/* {formData.id !== "" ? "Update" : "Submit"} */}
+                Ok
+                {/* Submit */}
+              </Button>
+            </Box>
           </Box>
         </Box>
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        {/* <SecondComponent /> */}
-        <Typography variant="h6">Description</Typography>
-        {/* <ReactQuill
+      )}
+      {value === 1 && (
+        <Box sx={{ p: 1, borderRadius: 1 }}>
+          {/* <SecondComponent /> */}
+          {/* <ReactQuill
           theme="snow"
           style={{ height: 250, marginBottom: 80 }}
           value={formData.quillContent}
           onChange={(content) => handleInputChange("quillContent", content)}
         /> */}
-        <TextField
-          multiline
-          rows={10}
-          fullWidth
-          defaultValue={formData.Description}
-          // value={formData.Description}
-          onChange={(e) => handleInputChange("Description", e.target.value)}
-        />
-        <Box display="flex" justifyContent="space-between" mt={2}>
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={handleBack}
-          >
-            Back
-          </Button>
-          <Box>
+          <TextField
+            multiline
+            rows={10}
+            fullWidth
+            defaultValue={formData.Description}
+            // value={formData.Description}
+            onChange={(e) => handleInputChange("Description", e.target.value)}
+          />
+          <Box display="flex" justifyContent="space-between" mt={2}>
             <Button
               size="small"
               variant="contained"
               color="primary"
-              onClick={handleNext}
-              sx={{ mr: 2 }}
+              onClick={handleBack}
             >
-              Next
+              Back
+            </Button>
+            <Box>
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={handleNext}
+                sx={{ mr: 2 }}
+              >
+                Next
+              </Button>
+              <Button
+                size="small"
+                disabled={
+                  formData?.scheduledWith?.length > 0 || edited ? false : true
+                }
+                variant="contained"
+                color="secondary"
+                onClick={handleSubmit}
+              >
+                {/* {formData.id !== "" ? "Update" : "Submit"} */}
+                Ok
+                {/* Submit */}
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      )}
+      {value === 2 && (
+        <Box sx={{ p: 2, borderRadius: 1 }}>
+          <ThirdComponent
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
+          <Box display="flex" justifyContent="space-between" mt={2}>
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={handleBack}
+            >
+              Back
             </Button>
             <Button
               size="small"
-              disabled={formData?.scheduledWith?.length > 0 || edited ? false : true}
+              disabled={
+                formData?.scheduledWith?.length > 0 || edited ? false : true
+              }
               variant="contained"
               color="secondary"
               onClick={handleSubmit}
             >
-              {/* {formData.id !== "" ? "Update" : "Submit"} */}
+              {/* {formData.id !== "" ? "Update" : "Ok"} */}
               Ok
               {/* Submit */}
-            </Button>
+            </Button>{" "}
+            {/* Next is disabled on the last tab */}
           </Box>
         </Box>
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <ThirdComponent
-          formData={formData}
-          handleInputChange={handleInputChange}
-        />
-        <Box display="flex" justifyContent="space-between" mt={2}>
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={handleBack}
-          >
-            Back
-          </Button>
-          <Button
-            size="small"
-            disabled={formData?.scheduledWith?.length > 0 || edited ? false : true}
-            variant="contained"
-            color="secondary"
-            onClick={handleSubmit}
-          >
-            {/* {formData.id !== "" ? "Update" : "Ok"} */}
-            Ok
-            {/* Submit */}
-          </Button>{" "}
-          {/* Next is disabled on the last tab */}
-        </Box>
-      </TabPanel>
+      )}
     </Box>
   );
 };

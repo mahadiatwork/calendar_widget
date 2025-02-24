@@ -43,58 +43,75 @@ const RegardingField = ({ formData, handleInputChange }) => {
   };
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <FormControl fullWidth size="small">
-        <InputLabel id="regarding-label" sx={{ top: "-5px" }}>
-          Regarding
-        </InputLabel>
-        <Select
-          labelId="regarding-label"
-          id="regarding-select"
-          label="Regarding"
-          fullWidth
-          size="small"
-          value={selectedValue}
-          onChange={handleSelectChange}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              padding: 0, 
-            },
-            "& .MuiInputBase-input": {
-              display: "flex",
-              alignItems: "center", 
-            },
-            "& .MuiSelect-select": {
-              padding: "3px 10px", 
-            }
-          }}
-        >
-          {predefinedOptions.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
-          <MenuItem value="Other">Other (Manually enter)</MenuItem>
-        </Select>
-      </FormControl>
-
-      {selectedValue === "Other" && (
-        <TextField
-          label="Enter your custom regarding"
-          fullWidth
-          size="small"
-          value={manualInput}
-          onChange={handleManualInputChange}
-          InputLabelProps={{ shrink: true }}
-          sx={{ mt: 2, "& .MuiOutlinedInput-root": {
-          padding: "2px",
-          "& input": {
-            padding: "0px 10px",
+<Box sx={{ width: "100%", mb: "3px" }}>
+  <FormControl fullWidth size="small">
+    <InputLabel id="regarding-label" shrink sx={{ fontSize: "9pt" }}> {/* ✅ Label text size */}
+      Regarding
+    </InputLabel>
+    <Select
+      labelId="regarding-label"
+      id="regarding-select"
+      label="Regarding"
+      fullWidth
+      size="small"
+      displayEmpty
+      value={selectedValue}
+      onChange={handleSelectChange}
+      MenuProps={{
+        PaperProps: {
+          sx: {
+            fontSize: "9pt", // ✅ Dropdown menu text size
           },
-        },}}
-        />
-      )}
-    </Box>
+        },
+      }}
+      sx={{
+        "& .MuiOutlinedInput-root": {
+          padding: 0,
+        },
+        "& .MuiInputBase-input": {
+          display: "flex",
+          alignItems: "center",
+          fontSize: "9pt", // ✅ Input text size
+        },
+        "& .MuiSelect-select": {
+          padding: "4px 10px",
+          fontSize: "9pt", // ✅ Selected value text size
+        },
+      }}
+    >
+      {predefinedOptions.map((option) => (
+        <MenuItem key={option} value={option} sx={{ fontSize: "9pt" }}> {/* ✅ Menu item text size */}
+          {option}
+        </MenuItem>
+      ))}
+      <MenuItem value="Other" sx={{ fontSize: "9pt" }}>Other (Manually enter)</MenuItem>
+    </Select>
+  </FormControl>
+
+  {selectedValue === "Other" && (
+    <TextField
+      label="Enter your custom regarding"
+      fullWidth
+      size="small"
+      value={manualInput}
+      onChange={handleManualInputChange}
+      InputLabelProps={{ shrink: true }}
+      sx={{
+        mt: 2,
+        mb: "3px",
+        "& .MuiInputLabel-root": { fontSize: "9pt" }, // ✅ Label text size
+        "& .MuiOutlinedInput-root": {
+          padding: "2px",
+        },
+        "& .MuiInputBase-input": {
+          padding: "0px 10px",
+          fontSize: "9pt", // ✅ Input text size
+        },
+      }}
+    />
+  )}
+</Box>
+
   );
 };
 

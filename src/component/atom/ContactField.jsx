@@ -15,16 +15,16 @@ export default function ContactField({
   handleInputChange,
   selectedRowData,
   formData,
-  clickedEvent
+  clickedEvent,
 }) {
-  console.log('tazwer',clickedEvent?.scheduledWith)
+  console.log("tazwer", clickedEvent?.scheduledWith);
   const [contacts, setContacts] = useState([]); // Contacts fetched from Zoho
   const [selectedParticipants, setSelectedParticipants] = useState(
     clickedEvent?.scheduledWith || []
-  ); 
+  );
   const [inputValue, setInputValue] = useState(""); // Store the input text
   const [notFoundMessage, setNotFoundMessage] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
 
   // Sync selectedParticipants with value and selectedRowData
   useEffect(() => {
@@ -37,8 +37,6 @@ export default function ContactField({
       setSelectedParticipants(defaultParticipants);
     }
   }, [formData.scheduledWith]);
-  
-
 
   const handleSearch = async (query) => {
     setNotFoundMessage(""); // Reset the message
@@ -58,7 +56,10 @@ export default function ContactField({
             id: contact.id,
           }));
 
-          const mergedContacts = [...formattedContacts, ...selectedParticipants];
+          const mergedContacts = [
+            ...formattedContacts,
+            ...selectedParticipants,
+          ];
           const uniqueContacts = mergedContacts.filter(
             (contact, index, self) =>
               index === self.findIndex((c) => c.id === contact.id)
@@ -71,7 +72,9 @@ export default function ContactField({
         }
       } catch (error) {
         console.error("Error during search:", error);
-        setNotFoundMessage("An error occurred while searching. Please try again.");
+        setNotFoundMessage(
+          "An error occurred while searching. Please try again."
+        );
       } finally {
         setLoading(false); // End loading
       }
@@ -91,13 +94,15 @@ export default function ContactField({
   };
 
   const handleSelectionChange = (event, newValue) => {
-    console.log({newValue})
-    
-    console.log(newValue.map((contact) => ({
-      Full_Name: contact.Full_Name,
-      participant: contact.id,
-      type: "contact",
-    })))
+    console.log({ newValue });
+
+    console.log(
+      newValue.map((contact) => ({
+        Full_Name: contact.Full_Name,
+        participant: contact.id,
+        type: "contact",
+      }))
+    );
     handleInputChange(
       "scheduledWith",
       newValue.map((contact) => ({
@@ -106,11 +111,13 @@ export default function ContactField({
         type: "contact",
       }))
     );
-    setSelectedParticipants(newValue.map((contact) => ({
-      Full_Name: contact.Full_Name,
-      participant: contact.id,
-      type: "contact",
-    })));
+    setSelectedParticipants(
+      newValue.map((contact) => ({
+        Full_Name: contact.Full_Name,
+        participant: contact.id,
+        type: "contact",
+      }))
+    );
   };
 
   console.log({ data: clickedEvent?.scheduledWith });
@@ -124,16 +131,20 @@ export default function ContactField({
         value={selectedParticipants}
         onChange={handleSelectionChange}
         inputValue={inputValue}
-        onInputChange={handleInputChangeWithDelay} // Use the custom handler
-        loading={loading} // Show loading indicator during search
+        onInputChange={handleInputChangeWithDelay}
+        loading={loading}
         noOptionsText={
           notFoundMessage ? (
             <Box display="flex" alignItems="center" color="error.main">
               <ErrorOutlineIcon sx={{ mr: 1 }} />
-              <Typography variant="body2">{notFoundMessage}</Typography>
+              <Typography variant="body2" sx={{ fontSize: "9pt" }}>
+                {" "}
+                {/* ✅ Text inside No Options */}
+                {notFoundMessage}
+              </Typography>
             </Box>
           ) : (
-            "No options"
+            <Typography sx={{ fontSize: "9pt" }}>No options</Typography> // ✅ No options text
           )
         }
         renderInput={(params) => (
@@ -146,27 +157,32 @@ export default function ContactField({
             InputLabelProps={{ shrink: true }}
             placeholder="Type and press space to search..."
             sx={{
-              "& > div":{py:'0 !important'},
+              "& > div": { py: "0 !important" },
+              fontSize: "9pt",
               "& .MuiOutlinedInput-root": {
                 padding: "0px", // Reduce padding inside the input field
                 minHeight: "30px", // Adjust the height of the input box
-                height:"30px"
+                height: "30px",
               },
               "& .MuiInputBase-input": {
                 padding: "0px 0px", // Adjust the inner input padding
                 minHeight: "30px", // Match the input height
-                height:'30px',
+                height: "30px",
                 display: "flex",
                 alignItems: "center",
+                fontSize: "9pt", // ✅ Input text size
+              },
+              "& .MuiInputLabel-root": {
+                fontSize: "9pt", // ✅ Label text size
               },
               "& .MuiChip-root": {
-                height: '1.5rem', // Reduce the size of selected option chips
+                height: "1.5rem", // Reduce the size of selected option chips
                 margin: "1px", // Adjust margin between chips
-                fontSize: "12px", // Reduce chip text size
+                fontSize: "9pt", // ✅ Chip text size
               },
-              "& input":{
-                py:'0 !important'
-              }
+              "& input": {
+                py: "0 !important",
+              },
             }}
           />
         )}

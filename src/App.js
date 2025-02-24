@@ -30,7 +30,6 @@ function App() {
 
   useEffect(() => {
     ZOHO.embeddedApp.on("PageLoad", async function (data) {
-      console.log("radicals", data);
       // setRecordId(data.EntityId[0]);
       // setModuleName(data.Entity);
     });

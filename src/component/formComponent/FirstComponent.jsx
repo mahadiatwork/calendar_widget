@@ -210,9 +210,9 @@ const FirstComponent = ({
     } else if (field === "Remind_Participants") {
       const newSendReminders = !sendReminders;
       setSendReminders(newSendReminders);
-  
+
       console.log({ newSendReminders });
-  
+
       if (newSendReminders) {
         // If reminders are enabled
         handleInputChange("Remind_Participants", [
@@ -227,7 +227,6 @@ const FirstComponent = ({
       }
     }
   };
-  
 
   const handleReminderChange = (value) => {
     setReminderMinutes(value);
@@ -257,7 +256,11 @@ const FirstComponent = ({
 
         <Grid size={18}>
           <FormControl fullWidth size="small">
-            <InputLabel id="demo-simple-select-standard-label">
+            <InputLabel
+              id="demo-simple-select-standard-label"
+              shrink
+              sx={{ fontSize: "9pt" }} // ✅ Label text size
+            >
               Activity type
             </InputLabel>
             <Select
@@ -265,11 +268,11 @@ const FirstComponent = ({
               id="demo-simple-select-standard"
               label="Activity type"
               fullWidth
+              displayEmpty
               value={formData.Type_of_Activity}
               InputLabelProps={{ shrink: true }}
               onChange={handleActivityChange}
               MenuProps={{
-                //   disablePortal: true,  // This ensures the dropdown is not restricted to the modal's container
                 PaperProps: {
                   style: {
                     zIndex: 1300, // Increase this if necessary, depending on the z-index of your popup
@@ -279,54 +282,40 @@ const FirstComponent = ({
               sx={{
                 "& .MuiSelect-select": {
                   padding: "4px 10px", // Adjust the padding to shrink the Select content
+                  fontSize: "9pt", // ✅ Dropdown selected text size
                 },
                 "& .MuiOutlinedInput-root": {
-                  // height: '40px', // Set a consistent height
                   padding: 0, // Ensure no extra padding
                 },
                 "& .MuiInputBase-input": {
                   display: "flex",
                   alignItems: "center", // Align the content vertically
+                  fontSize: "9pt", // ✅ Input text size
                 },
               }}
             >
               {activityType.map((item, index) => (
-                <MenuItem value={item.type} key={index}>
+                <MenuItem
+                  value={item.type}
+                  key={index}
+                  sx={{ fontSize: "9pt" }}
+                >
+                  {" "}
+                  {/* ✅ MenuItem text size */}
                   {item.type}
                 </MenuItem>
               ))}
-              {/* <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem> */}
             </Select>
           </FormControl>
         </Grid>
 
         <Grid size={7}>
-          {/* <Datepicker
-            controls={["calendar", "time"]}
-            display="center"
-            inputComponent={() =>
-              customInputComponent(
-                "start",
-                "Start Time",
-                setOpenStartDatepicker
-              )
-            }
-            returnFormat="iso8601"
-            onClose={() => setOpenStartDatepicker(false)}
-            onChange={(e) => handleInputChange("start", e.value)}
-            isOpen={openStartDatepicker}
-          /> */}
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DateTimePicker
               label="Start Time"
               value={startValue}
               disabled={formData.Banner ? true : false}
-              slotProps={{ textField: { size: "small" } }}
+              // slotProps={{ textField: { size: "small" } }}
               onChange={(e) => {
                 const addedHour = new Date(dayjs(e.$d).add(1, "hour").toDate());
                 handleInputChange("start", e.$d);
@@ -335,7 +324,16 @@ const FirstComponent = ({
                 console.log(e.$d);
                 console.log(addedHour);
               }}
-              sx={{ "& input": { py: 0 } }}
+              sx={{
+                "& input": { py: 0 },
+                width: "100%",
+                "& .MuiInputBase-input": {
+                  fontSize: "9pt", // ✅ Set input text size
+                },
+                "& .MuiInputLabel-root": {
+                  fontSize: "9pt", // ✅ Set label text size
+                },
+              }}
               renderInput={(params) => <TextField {...params} size="small" />}
               format="DD/MM/YYYY hh:mm A" // Ensures 24-hour format for clarity
             />
@@ -360,7 +358,16 @@ const FirstComponent = ({
               disabled={formData.Banner ? true : false}
               slotProps={{ textField: { size: "small" } }}
               onChange={(e) => handleEndDateChange(e)}
-              sx={{ "& input": { py: 0 } }}
+              sx={{
+                "& input": { py: 0 },
+                width: "100%",
+                "& .MuiInputBase-input": {
+                  fontSize: "9pt", // ✅ Set input text size
+                },
+                "& .MuiInputLabel-root": {
+                  fontSize: "9pt", // ✅ Set label text size
+                },
+              }}
               renderInput={(params) => <TextField {...params} size="small" />}
               format="DD/MM/YYYY hh:mm A" // Ensures 24-hour format for clarity
             />
@@ -370,7 +377,7 @@ const FirstComponent = ({
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
-              // sx={{ top: "-5px" }}
+              sx={{ fontSize: "9pt" }}
             >
               Duration
             </InputLabel>
@@ -389,6 +396,7 @@ const FirstComponent = ({
               sx={{
                 "& .MuiSelect-select": {
                   padding: "4px 5px", // Adjust the padding to shrink the Select content
+                  fontSize: "9pt", // ✅ Set dropdown text size
                 },
                 "& .MuiOutlinedInput-root": {
                   // height: '40px', // Set a consistent height
@@ -397,6 +405,12 @@ const FirstComponent = ({
                 "& .MuiInputBase-input": {
                   display: "flex",
                   alignItems: "center", // Align the content vertically
+                },
+                "& .MuiInputLabel-root": {
+                  fontSize: "9pt", // ✅ Set label text size
+                },
+                "& .MuiMenuItem-root": {
+                  fontSize: "9pt", // ✅ Set menu items text size
                 },
               }}
             >
@@ -409,9 +423,16 @@ const FirstComponent = ({
           </FormControl>
         </Grid>
 
-        <Grid size={9} alignItems={"center"}>
+        <Grid
+          size={9}
+          alignItems={"center"}
+          sx={{ display: "flex", margin: "-10px 0px" }}
+        >
           <FormControlLabel
-            sx={{ height: "35px" }}
+            sx={{
+              height: "35px",
+              "& .MuiTypography-root": { fontSize: "9pt" }, // ✅ Set checkbox label text size
+            }}
             control={
               <Checkbox
                 size="small"
@@ -421,7 +442,53 @@ const FirstComponent = ({
             }
             label="Banner/Timeless"
           />
+
+          <Box display="flex" alignItems="center" p={0}>
+            <Typography
+              variant="body1"
+              sx={{ fontSize: "9pt", minWidth: "60px" }}
+            >
+              {" "}
+              {/* ✅ Set text size */}
+              Color :
+            </Typography>
+
+            <Box
+              sx={{
+                width: "20px",
+                height: "20px",
+                backgroundColor: formData.color,
+                border: "1px solid #ccc",
+                display: "inline-block",
+                cursor: "pointer",
+                marginLeft: 1,
+              }}
+              onClick={() => setDisplayColorPicker(!displayColorPicker)}
+            >
+              {displayColorPicker && (
+                <Box sx={{ position: "absolute", zIndex: "2" }}>
+                  <Box
+                    sx={{
+                      position: "fixed",
+                      right: "0px",
+                      bottom: "0px",
+                      left: "0px",
+                    }}
+                    onClick={() => setDisplayColorPicker(false)}
+                  >
+                    <CustomColorPicker
+                      recentColors={recentColor}
+                      setDisplayColorPicker={setDisplayColorPicker}
+                      handleColorChange={handleColorChange}
+                      formData={formData}
+                    />
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </Box>
         </Grid>
+
         {/* <Grid size={9} alignItems={"center"}>
           <FormControlLabel
             sx={{ height: "35px" }}
@@ -450,29 +517,57 @@ const FirstComponent = ({
             clickedEvent={clickedEvent}
           />
         </Grid>
-        <Grid item xs={6}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={!sendNotification} // Checked when invites are disabled
-                onChange={() => handleCheckboxChange("send_notification")} // Correct field name
-              />
-            }
-            label="Don't send invites"
-          />
-        </Grid>
+        <Grid
+          container
+          spacing={2}
+          alignItems="center"
+          sx={{ margin: "-10px 0px" }}
+        >
+          <Grid item xs={4}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!sendNotification}
+                  onChange={() => handleCheckboxChange("send_notification")}
+                />
+              }
+              label="Don't send invites"
+              sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }} // Adjust font size
+            />
+          </Grid>
 
-        {/* Don't send reminders */}
-        <Grid item xs={6}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={!sendReminders} // Checked when reminders are disabled
-                onChange={() => handleCheckboxChange("Remind_Participants")}
-              />
-            }
-            label="Don't send reminders"
-          />
+          <Grid item xs={4}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={!sendReminders}
+                  onChange={() => handleCheckboxChange("Remind_Participants")}
+                />
+              }
+              label="Don't send reminders"
+              sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
+            />
+          </Grid>
+
+          <Grid item xs={4}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.create_sperate_contact}
+                  disabled={formData.id !== "" ? true : false}
+                  onChange={(e) => {
+                    handleInputChange(
+                      "create_sperate_contact",
+                      e.target.checked
+                    );
+                    console.log(e.target.checked);
+                  }}
+                />
+              }
+              label="Create separate activity for each contact"
+              sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
+            />
+          </Grid>
         </Grid>
 
         <Grid size={18}>
@@ -483,7 +578,7 @@ const FirstComponent = ({
           />
         </Grid>
         <Grid size={18}>
-          <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
+          <FormControl fullWidth size="small" sx={{ mb: "3px" }}>
             <Autocomplete
               id="schedule-for-autocomplete"
               size="small"
@@ -494,9 +589,9 @@ const FirstComponent = ({
               value={formData?.scheduleFor || ""}
               onChange={(event, newValue) => {
                 handleInputChange("scheduleFor", {
-                  name: newValue.full_name,
-                  id: newValue.id,
-                  email: newValue.email,
+                  name: newValue?.full_name || "",
+                  id: newValue?.id || "",
+                  email: newValue?.email || "",
                 });
               }}
               renderInput={(params) => (
@@ -506,21 +601,44 @@ const FirstComponent = ({
                   label="Schedule for ..."
                   InputLabelProps={{ shrink: true }}
                   sx={{
+                    "& .MuiTypography-root": { fontSize: "9pt" }, // ✅ Label text size
                     "& .MuiOutlinedInput-root": {
-                      padding: "0px", // Remove padding around the input
-                      minHeight: "28px", // Set a minimum height for the input field
-                      height: "28px", // Set the desired height
+                      padding: "0px",
+                      height: "31px",
                     },
                     "& .MuiInputBase-input": {
-                      padding: "1px 6px", // Adjust padding inside the input
-                      minHeight: "30px", // Match the input's height
+                      padding: "4px 6px",
                       display: "flex",
                       alignItems: "center",
-                      fontSize: "14px", // Optionally reduce the font size for more compact design
+                      fontSize: "9pt", // ✅ Input text size
                     },
                   }}
                 />
               )}
+              componentsProps={{
+                popper: {
+                  modifiers: [
+                    {
+                      name: "preventOverflow",
+                      options: {
+                        boundary: "window",
+                      },
+                    },
+                  ],
+                },
+                paper: {
+                  sx: {
+                    fontSize: "9pt", // ✅ Dropdown container text size
+                  },
+                },
+                popperDisablePortal: true, // ✅ Ensures styles apply correctly to popper
+              }}
+              sx={{
+                "& .MuiAutocomplete-option": {
+                  fontSize: "9pt", // ✅ Each option text size
+                  padding: "4px 8px",
+                },
+              }}
             />
           </FormControl>
         </Grid>
@@ -533,10 +651,10 @@ const FirstComponent = ({
         </Grid>
 
         <Grid size={4}>
-          <FormControl fullWidth size="small" sx={{ minHeight: "20px" }}>
+          <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
-              sx={{ top: "-5px" }}
+              sx={{ fontSize: "9pt" }} // ✅ Label text size
             >
               Priority
             </InputLabel>
@@ -547,23 +665,38 @@ const FirstComponent = ({
               fullWidth
               value={formData.priority}
               onChange={(e) => handleInputChange("priority", e.target.value)}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    fontSize: "9pt", // ✅ Dropdown menu text size
+                  },
+                },
+              }}
               sx={{
                 "& .MuiSelect-select": {
-                  padding: "3px 10px", // Adjust the padding to shrink the Select content
+                  padding: "4px 10px", // Adjust padding for dropdown content
+                  fontSize: "9pt", // ✅ Selected value text size
                 },
                 "& .MuiOutlinedInput-root": {
-                  // height: '40px', // Set a consistent height
                   padding: 0, // Ensure no extra padding
                 },
                 "& .MuiInputBase-input": {
                   display: "flex",
-                  alignItems: "center", // Align the content vertically
+                  alignItems: "center", // Align content vertically
+                  fontSize: "9pt", // ✅ Input text size
                 },
               }}
             >
-              <MenuItem value={"low"}>Low</MenuItem>
-              <MenuItem value={"medium"}>Medium</MenuItem>
-              <MenuItem value={"high"}>High</MenuItem>
+              <MenuItem value={"low"} sx={{ fontSize: "9pt" }}>
+                Low
+              </MenuItem>{" "}
+              {/* ✅ Menu item text size */}
+              <MenuItem value={"medium"} sx={{ fontSize: "9pt" }}>
+                Medium
+              </MenuItem>
+              <MenuItem value={"high"} sx={{ fontSize: "9pt" }}>
+                High
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -571,7 +704,7 @@ const FirstComponent = ({
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
-              sx={{ top: "-5px" }}
+              sx={{  fontSize: "9pt" }} // ✅ Label text size
             >
               Ring Alarm
             </InputLabel>
@@ -580,7 +713,7 @@ const FirstComponent = ({
               id="demo-simple-select-standard"
               label="Ring Alarm"
               fullWidth
-              disabled={!formData.send_notification ? true : false}
+              disabled={!formData.send_notification}
               value={formData.Reminder_Text || ""} // Use `Reminder_Text` to display selected text
               onChange={(e) => {
                 // Find the selected ring object
@@ -598,21 +731,36 @@ const FirstComponent = ({
                   ]);
                 }
               }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    fontSize: "9pt", // ✅ Dropdown menu text size
+                  },
+                },
+              }}
               sx={{
                 "& .MuiSelect-select": {
-                  padding: "3px 10px", // Adjust the padding to shrink the Select content
+                  padding: "3px 10px", // Adjust padding for dropdown content
+                  fontSize: "9pt", // ✅ Selected value text size
                 },
                 "& .MuiOutlinedInput-root": {
                   padding: 0, // Ensure no extra padding
                 },
                 "& .MuiInputBase-input": {
                   display: "flex",
-                  alignItems: "center", // Align the content vertically
+                  alignItems: "center", // Align content vertically
+                  fontSize: "9pt", // ✅ Input text size
                 },
               }}
             >
               {ringAlarm.map((ring, index) => (
-                <MenuItem key={index} value={ring.name}>
+                <MenuItem
+                  key={index}
+                  value={ring.name}
+                  sx={{ fontSize: "9pt" }}
+                >
+                  {" "}
+                  {/* ✅ Menu item text size */}
                   {ring.name}
                 </MenuItem>
               ))}
@@ -636,75 +784,6 @@ const FirstComponent = ({
             value={formData.location}
             onChange={(e) => handleInputChange("location", e.target.value)}
           />
-        </Grid>
-
-        <Grid size={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={formData.create_sperate_contact}
-                disabled={formData.id !== "" ? true : false}
-                onChange={(e) => {
-                  handleInputChange("create_sperate_contact", e.target.checked);
-                  console.log(e.target.checked);
-                }}
-              />
-            }
-            label="Create separate activity for each contact"
-          />
-        </Grid>
-
-        <Grid size={6} sx={{ display: "flex", alignItems: "center" }}>
-          <Box display="flex" alignItems="center" p={0}>
-            <Typography variant="body1" sx={{ minWidth: "60px" }}>
-              Color
-            </Typography>
-            {/* <input
-              type="color"
-              name="color"
-              value={formData.color}
-              onChange={(e) => handleInputChange("color", e.target.value)}
-            /> */}
-            <Box
-              sx={{
-                width: "20px",
-                height: "20px",
-                backgroundColor: formData.color,
-                border: "1px solid #ccc",
-                display: "inline-block",
-                cursor: "pointer",
-                marginLeft: 1,
-              }}
-              onClick={() => setDisplayColorPicker(!displayColorPicker)}
-            >
-              {displayColorPicker && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    zIndex: "2",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      position: "fixed",
-
-                      right: "0px",
-                      bottom: "0px",
-                      left: "0px",
-                    }}
-                    onClick={() => setDisplayColorPicker(false)}
-                  >
-                    <CustomColorPicker
-                      recentColors={recentColor}
-                      setDisplayColorPicker={setDisplayColorPicker}
-                      handleColorChange={handleColorChange}
-                      formData={formData}
-                    />
-                  </Box>
-                </Box>
-              )}
-            </Box>
-          </Box>
         </Grid>
       </Grid>
     </Box>

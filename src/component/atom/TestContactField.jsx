@@ -178,256 +178,161 @@ export default function TestContactField({
 
   return (
     <Box>
-      {/* Single-line display for selected contacts */}
-      <Box display="flex" alignItems="center" gap={2}>
-        <TextField
-          fullWidth
-          value={selectedParticipants
-            .map((c) => c.Full_Name || `${c.First_Name} ${c.Last_Name}`)
-            .join(", ")}
-          variant="outlined"
-          placeholder="Selected contacts"
-          InputProps={{
-            readOnly: true,
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              padding: "2px",
-              "& input": {
-                padding: "2px 10px",
-              },
+    {/* Single-line display for selected contacts */}
+    <Box display="flex" alignItems="center" gap={2}>
+      <TextField
+        fullWidth
+        value={selectedParticipants
+          .map((c) => c.Full_Name || `${c.First_Name} ${c.Last_Name}`)
+          .join(", ")}
+        variant="outlined"
+        placeholder="Selected contacts"
+        InputProps={{
+          readOnly: true,
+        }}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            padding: "2px",
+            "& input": {
+              padding: "4px 10px",
+              fontSize: "9pt", // ✅ Input text size
             },
-          }}
-          size="small"
-        />
-        <Button
-          variant="contained"
-          size="small"
-          onClick={handleOpen}
-          sx={{ width: "100px" }}
-        >
-          Contacts
-        </Button>
-      </Box>
-
-      {/* Modal */}
-      <Dialog open={isModalOpen} onClose={handleCancel} fullWidth maxWidth="md">
-        <DialogContent>
-          {/* Search Controls */}
-          <Box display="flex" gap={2} mb={2}>
-            <TextField
-              select
-              label="Search By"
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-              fullWidth
-              size="small"
-            >
-              <MenuItem value="First_Name">First Name</MenuItem>
-              <MenuItem value="Last_Name">Last Name</MenuItem>
-              <MenuItem value="Email">Email</MenuItem>
-              <MenuItem value="Mobile">Mobile</MenuItem>
-              <MenuItem value="ID_Number">MS File Number</MenuItem>
-              <MenuItem value="Full_Name">Full Name</MenuItem>
-            </TextField>
-            <TextField
-              label="Search Text"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              fullWidth
-              size="small"
-            />
-            <Button
-              variant="contained"
-              onClick={handleSearch}
-              sx={{ width: "150px" }} // Wider search button
-            >
-              Search
-            </Button>
-          </Box>
-
-          {/* Search Results Table */}
-          <TableContainer
-            sx={{
-              maxHeight: 300, // Limit height to 300px
-              overflowY: "auto", // Enable vertical scrolling
-            }}
+          },
+        }}
+        size="small"
+      />
+      <Button
+        variant="contained"
+        size="small"
+        onClick={handleOpen}
+        sx={{ width: "100px", fontSize: "9pt" }} // ✅ Button text size
+      >
+        Contacts
+      </Button>
+    </Box>
+  
+    {/* Modal */}
+    <Dialog open={isModalOpen} onClose={handleCancel} fullWidth maxWidth="md">
+      <DialogContent>
+        {/* Search Controls */}
+        <Box display="flex" gap={2} mb={2}>
+          <TextField
+            select
+            label="Search By"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+            fullWidth
+            size="small"
+            sx={{ "& .MuiInputLabel-root": { fontSize: "9pt" }, fontSize: "9pt" }} // ✅ Label & input text size
           >
+            <MenuItem value="First_Name" sx={{ fontSize: "9pt" }}>First Name</MenuItem>
+            <MenuItem value="Last_Name" sx={{ fontSize: "9pt" }}>Last Name</MenuItem>
+            <MenuItem value="Email" sx={{ fontSize: "9pt" }}>Email</MenuItem>
+            <MenuItem value="Mobile" sx={{ fontSize: "9pt" }}>Mobile</MenuItem>
+            <MenuItem value="ID_Number" sx={{ fontSize: "9pt" }}>MS File Number</MenuItem>
+            <MenuItem value="Full_Name" sx={{ fontSize: "9pt" }}>Full Name</MenuItem>
+          </TextField>
+          <TextField
+            label="Search Text"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            fullWidth
+            size="small"
+            sx={{ "& .MuiInputLabel-root": { fontSize: "9pt" }, fontSize: "9pt" }} // ✅ Label & input text size
+          />
+          <Button
+            variant="contained"
+            onClick={handleSearch}
+            sx={{ width: "150px", fontSize: "9pt" }} // ✅ Button text size
+          >
+            Search
+          </Button>
+        </Box>
+  
+        {/* Search Results Table */}
+        <TableContainer sx={{ maxHeight: 300, overflowY: "auto" }}>
+          <Table size="small" sx={{ tableLayout: "fixed", fontSize: "9pt" }}>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ position: "sticky", top: 0, zIndex: 1, backgroundColor: "background.paper", fontWeight: "bold", width: "50px", fontSize: "9pt" }}></TableCell>
+                <TableCell sx={{ position: "sticky", top: 0, zIndex: 1, backgroundColor: "background.paper", fontWeight: "bold", fontSize: "9pt" }}>First Name</TableCell>
+                <TableCell sx={{ position: "sticky", top: 0, zIndex: 1, backgroundColor: "background.paper", fontWeight: "bold", fontSize: "9pt" }}>Last Name</TableCell>
+                <TableCell sx={{ position: "sticky", top: 0, zIndex: 1, backgroundColor: "background.paper", fontWeight: "bold", width: "30%", fontSize: "9pt" }}>Email</TableCell>
+                <TableCell sx={{ position: "sticky", top: 0, zIndex: 1, backgroundColor: "background.paper", fontWeight: "bold", fontSize: "9pt" }}>Mobile</TableCell>
+                <TableCell sx={{ position: "sticky", top: 0, zIndex: 1, backgroundColor: "background.paper", fontWeight: "bold", fontSize: "9pt" }}>MS File Number</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredContacts.length > 0 ? (
+                filteredContacts.map((contact) => (
+                  <TableRow key={contact.id} sx={{ "& .MuiTableCell-root": { padding: "4px 6px", fontSize: "9pt" } }}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedParticipants.some((c) => c.id === contact.id)}
+                        onChange={() => toggleContactSelection(contact)}
+                      />
+                    </TableCell>
+                    <TableCell>{contact.First_Name}</TableCell>
+                    <TableCell>{contact.Last_Name}</TableCell>
+                    <TableCell>{contact.Email}</TableCell>
+                    <TableCell>{contact.Mobile}</TableCell>
+                    <TableCell>{contact.ID_Number}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ padding: "8px", fontStyle: "italic", fontSize: "9pt" }}>
+                    No data found. Please try another search.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+  
+        <Box mt={3}>
+          <Typography variant="h6" sx={{ fontSize: "9pt" }}>Selected Contacts:</Typography>
+          <TableContainer>
             <Table size="small" sx={{ tableLayout: "fixed", fontSize: "9pt" }}>
               <TableHead>
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 1,
-                      backgroundColor: "background.paper",
-                      fontWeight: "bold",
-                      width: "50px",
-                    }}
-                  ></TableCell>
-                  <TableCell
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 1,
-                      backgroundColor: "background.paper",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    First Name
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 1,
-                      backgroundColor: "background.paper",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Last Name
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 1,
-                      backgroundColor: "background.paper",
-                      fontWeight: "bold",
-                      width: "30%",
-                    }}
-                  >
-                    Email
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 1,
-                      backgroundColor: "background.paper",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Mobile
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 1,
-                      backgroundColor: "background.paper",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    MS File Number
-                  </TableCell>
+                  <TableCell sx={{ width: "50px", fontWeight: "bold", fontSize: "9pt" }}></TableCell>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>First Name</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>Last Name</TableCell>
+                  <TableCell sx={{ width: "30%", fontWeight: "bold", fontSize: "9pt" }}>Email</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>Mobile</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>MS File Number</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredContacts.length > 0 ? (
-                  filteredContacts.map((contact) => (
-                    <TableRow
-                      key={contact.id}
-                      sx={{ "& .MuiTableCell-root": { padding: "4px 6px" } }}
-                    >
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedParticipants.some(
-                            (c) => c.id === contact.id
-                          )}
-                          onChange={() => toggleContactSelection(contact)}
-                        />
-                      </TableCell>
-                      <TableCell>{contact.First_Name}</TableCell>
-                      <TableCell>{contact.Last_Name}</TableCell>
-                      <TableCell>{contact.Email}</TableCell>
-                      <TableCell>{contact.Mobile}</TableCell>
-                      <TableCell>{contact.ID_Number}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      align="center"
-                      sx={{
-                        padding: "8px",
-                        fontStyle: "italic",
-                        fontSize: "9pt",
-                      }}
-                    >
-                      No data found. Please try another search.
+                {selectedParticipants.map((contact) => (
+                  <TableRow key={contact.id} sx={{ "& .MuiTableCell-root": { padding: "4px 6px", fontSize: "9pt" } }}>
+                    <TableCell>
+                      <Checkbox checked onChange={() => toggleContactSelection(contact)} />
                     </TableCell>
+                    <TableCell>{contact.First_Name}</TableCell>
+                    <TableCell>{contact.Last_Name}</TableCell>
+                    <TableCell>{contact.Email}</TableCell>
+                    <TableCell>{contact.Mobile}</TableCell>
+                    <TableCell>{contact.ID_Number}</TableCell>
                   </TableRow>
-                )}
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
-          <Box mt={3}>
-            <Typography variant="h6">Selected Contacts:</Typography>
-            <TableContainer>
-              <Table
-                size="small"
-                sx={{ tableLayout: "fixed", fontSize: "9pt" }}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      sx={{ width: "50px", fontWeight: "bold" }}
-                    ></TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
-                      First Name
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Last Name</TableCell>
-                    <TableCell sx={{ width: "30%", fontWeight: "bold" }}>
-                      Email
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Mobile</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
-                      MS File Number
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {selectedParticipants.map((contact) => (
-                    <TableRow
-                      key={contact.id}
-                      sx={{ "& .MuiTableCell-root": { padding: "4px 6px" } }}
-                    >
-                      <TableCell>
-                        <Checkbox
-                          checked
-                          onChange={() => toggleContactSelection(contact)}
-                        />
-                      </TableCell>
-                      <TableCell>{contact.First_Name}</TableCell>
-                      <TableCell>{contact.Last_Name}</TableCell>
-                      <TableCell>{contact.Email}</TableCell>
-                      <TableCell>{contact.Mobile}</TableCell>
-                      <TableCell>{contact.ID_Number}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={handleCancel} variant="outlined">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleOk}
-            variant="contained"
-            color="primary"
-            disabled={selectedParticipants.length === 0}
-          >
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        </Box>
+      </DialogContent>
+  
+      <DialogActions>
+        <Button onClick={handleCancel} variant="outlined" sx={{ fontSize: "9pt" }}>
+          Cancel
+        </Button>
+        <Button onClick={handleOk} variant="contained" color="primary" disabled={selectedParticipants.length === 0} sx={{ fontSize: "9pt" }}>
+          OK
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </Box>
+  
   );
 }
