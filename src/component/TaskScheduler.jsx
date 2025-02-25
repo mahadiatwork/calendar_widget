@@ -108,7 +108,7 @@ const TaskScheduler = ({
   loggedInUser,
 }) => {
   const [clickedEvent, setClickedEvent] = useState(null);
-  const [selectedDate, setSelectedDate] = useState();
+  const [selectedDate, setSelectedDate] = useState(null);
   const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
   const [argumentLoader, setArgumentLoader] = useState(false);
@@ -156,6 +156,7 @@ const TaskScheduler = ({
   const [isTooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipAnchor, setTooltipAnchor] = useState(null);
   const [hoverInEvents, setHoverInEvents] = useState();
+  const [loading, setLoading] = useState(false);
   const [myView, setMyView] = useState({
     calendar: { labels: true, type: "month" },
   });
@@ -601,8 +602,8 @@ const TaskScheduler = ({
           pages={3}
           className="mbsc-textfield"
           inputProps={props}
-          value={selectedDate} // ✅ Controlled component
           onChange={handleDates}
+          value={selectedDate}
         />
 
         <Box display={"flex"}>
@@ -634,7 +635,7 @@ const TaskScheduler = ({
         </Box>
       </>
     );
-  }, [view, currentTab, changeView, setAdmin, setTypes]);
+  }, [view, currentTab, changeView, setAdmin, setTypes, selectedDate]);
 
   useEffect(() => {
     for (const event of myEvents) {
@@ -709,10 +710,12 @@ const TaskScheduler = ({
   };
 
   const onDateChange = async (args) => {
-    console.log(args);
+    console.log("hello darkness");
+
     console.log(dayjs(args.date).format("YYYY-MM-DD"));
     let currentDate = dayjs(args.date).format("YYYY-MM-DD");
-    setSelectedDate(currentDate); // ✅ Automatically updates `Datepicker`
+  
+    // setSelectedDate(null); // ✅ Automatically updates `Datepicker`
     if (view === "day") {
       const beginDate =
         dayjs(currentDate).startOf("day").format("YYYY-MM-DD") +
@@ -720,7 +723,7 @@ const TaskScheduler = ({
       const closeDate =
         dayjs(currentDate).endOf("day").format("YYYY-MM-DD") +
         "T23:59:59+10:30";
-      setSelectedDate(beginDate);
+      setSelectedDate(currentDate);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
     } else if (view === "week") {
@@ -730,7 +733,6 @@ const TaskScheduler = ({
       const closeDate =
         dayjs(currentDate).endOf("week").format("YYYY-MM-DD") +
         "T23:59:59+10:30";
-      // setSelectedDate(beginDate);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
     } else {
@@ -740,11 +742,12 @@ const TaskScheduler = ({
       const closeDate =
         dayjs(currentDate).endOf("month").format("YYYY-MM-DD") +
         "T23:59:59+10:30";
-      // setSelectedDate(beginDate);
+      setSelectedDate(beginDate);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
+    
     }
-
+    console.log({selectedDate})
     // return;
     // let currentDate = dayjs(args.date).format("YYYY-MM-DDTHH:mm:ss") + "-10:30";
     // const beginDate =
@@ -784,7 +787,6 @@ const TaskScheduler = ({
     // setAppointmentTime(time);
     // setAppointmentReason(event.reason);
     // setTooltipColor(doctor.color);
-    console.log({ hoverInEvents });
     setTooltipAnchor(args.domEvent.target.closest(".mbsc-schedule-event"));
     setTooltipOpen(true);
   }, []);
@@ -794,7 +796,6 @@ const TaskScheduler = ({
   }, []);
   const handleEventHoverIn = useCallback(
     (args) => {
-      console.log("hoverInargs", args);
       // setHoverInEvents(args.event)
       openTooltip(args);
     },
