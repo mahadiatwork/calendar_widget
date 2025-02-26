@@ -50,8 +50,8 @@ const FirstComponent = ({
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [startValue, setStartValue] = useState(dayjs(formData.start));
   const [endValue, setEndValue] = useState(dayjs(formData.end));
-  const [sendNotification, setSendNotification] = useState(true);
-  const [sendReminders, setSendReminders] = useState(true); // Initially, reminders are enabled
+  const [sendNotification, setSendNotification] = useState(formData?.Send_Invites);
+  const [sendReminders, setSendReminders] = useState(false); // Initially, reminders are enabled
   const [reminderMinutes, setReminderMinutes] = useState(15);
 
   const ringAlarm = [
@@ -207,10 +207,11 @@ const FirstComponent = ({
       const newSendNotification = !sendNotification;
       setSendNotification(newSendNotification);
       handleInputChange("send_notification", newSendNotification);
+      handleInputChange("Send_Invites", newSendNotification);
     } else if (field === "Remind_Participants") {
       const newSendReminders = !sendReminders;
       setSendReminders(newSendReminders);
-
+      handleInputChange("Send_Reminders", newSendReminders);
       console.log({ newSendReminders });
 
       if (newSendReminders) {
@@ -224,6 +225,7 @@ const FirstComponent = ({
         handleInputChange("Remind_Participants", []);
         handleInputChange("Reminder_Text", "None");
         handleInputChange("Remind_At", []);
+        handleInputChange("Send_Reminders", false);
       }
     }
   };
@@ -527,11 +529,11 @@ const FirstComponent = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={!sendNotification}
+                  checked={sendNotification}
                   onChange={() => handleCheckboxChange("send_notification")}
                 />
               }
-              label="Don't send invites"
+              label="Send invites"
               sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }} // Adjust font size
             />
           </Grid>
@@ -540,11 +542,11 @@ const FirstComponent = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={!sendReminders}
+                  checked={sendReminders}
                   onChange={() => handleCheckboxChange("Remind_Participants")}
                 />
               }
-              label="Don't send reminders"
+              label="Send reminders"
               sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
             />
           </Grid>
@@ -713,7 +715,7 @@ const FirstComponent = ({
               id="demo-simple-select-standard"
               label="Ring Alarm"
               fullWidth
-              disabled={!formData.send_notification}
+              disabled={!formData.Remind_Participants}
               value={formData.Reminder_Text || ""} // Use `Reminder_Text` to display selected text
               onChange={(e) => {
                 // Find the selected ring object

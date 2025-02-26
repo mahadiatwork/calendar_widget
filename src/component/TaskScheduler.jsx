@@ -187,7 +187,7 @@ const TaskScheduler = ({
     create_sperate_contact: false,
     Regarding: newEvent?.Regarding || "",
     Reminder_Text: newEvent?.Reminder_Text || "",
-    send_notification: newEvent?.send_notification || true,
+    send_notification: newEvent?.send_notification || false,
   });
 
   const changeView = useCallback(
@@ -668,7 +668,7 @@ const TaskScheduler = ({
       color: "#d1891f",
       Banner: false,
       Description: "",
-      send_notification: true,
+      send_notification: false,
     });
     setClickedEvent(null);
   };
@@ -703,6 +703,7 @@ const TaskScheduler = ({
       Description: args?.event?.Description,
       Reminder_Text: args?.event?.Reminder_Text,
       send_notification: args?.event?.send_notification,
+      Send_Invites: args?.event?.send_notification,
       Regarding: args?.event?.Regarding,
     });
     setOpen(true);

@@ -186,7 +186,7 @@ const EventForm = ({
             color: "#d1891f",
             Banner: false,
             Description: "",
-            send_notification: true,
+            send_notification: false,
           });
           setClickedEvent(null);
           setOpen(false);
@@ -242,7 +242,7 @@ const EventForm = ({
           color: "#d1891f",
           Banner: false,
           Description: "",
-          send_notification: true,
+          send_notification: false,
         });
         setClickedEvent(null);
         setOpen(false);
@@ -286,7 +286,7 @@ const EventForm = ({
                 color: "#d1891f",
                 Banner: false,
                 Description: "",
-                send_notification: true,
+                send_notification: false,
               });
               setClickedEvent(null);
               setOpen(false);
