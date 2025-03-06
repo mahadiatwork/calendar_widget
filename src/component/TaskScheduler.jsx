@@ -17,7 +17,6 @@ import {
   Textarea,
   Toast,
 } from "@mobiscroll/react";
-import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import "./test.css";
@@ -26,20 +25,13 @@ import {
   Alert,
   Box,
   Button,
-  Checkbox,
   CircularProgress,
   Dialog,
   DialogContent,
-  FormControl,
-  InputLabel,
-  ListItemText,
-  MenuItem,
   Modal,
-  OutlinedInput,
   Snackbar,
   Tab,
   Tabs,
-  TextField,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
@@ -715,7 +707,7 @@ const TaskScheduler = ({
 
     console.log(dayjs(args.date).format("YYYY-MM-DD"));
     let currentDate = dayjs(args.date).format("YYYY-MM-DD");
-  
+
     // setSelectedDate(null); // ✅ Automatically updates `Datepicker`
     if (view === "day") {
       const beginDate =
@@ -746,9 +738,8 @@ const TaskScheduler = ({
       setSelectedDate(beginDate);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
-    
     }
-    console.log({selectedDate})
+    console.log({ selectedDate });
     // return;
     // let currentDate = dayjs(args.date).format("YYYY-MM-DDTHH:mm:ss") + "-10:30";
     // const beginDate =

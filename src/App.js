@@ -43,12 +43,12 @@ function App() {
     if (zohoLoaded) {
       ZOHO.CRM.CONFIG.getCurrentUser().then(function (data) {
         ZOHO.CRM.API.getRecord({
-          Entity: "users", approved: "both", RecordID: data?.users[0]?.id
-         })
-         .then(function(data){
+          Entity: "users",
+          approved: "both",
+          RecordID: data?.users[0]?.id,
+        }).then(function (data) {
           setLoggedInUser(data?.users[0]);
-         })
-         
+        });
       });
 
       ZOHO.CRM.API.getAllRecords({
@@ -208,7 +208,7 @@ function App() {
     }
   }, [startDateTime, endDateTime]);
 
-  console.log({ loggedInUser: loggedInUser });
+  // console.log({ loggedInUser: loggedInUser });
   return (
     <div>
       <TaskScheduler
