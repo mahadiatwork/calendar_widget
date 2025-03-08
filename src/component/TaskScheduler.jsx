@@ -5,16 +5,11 @@ import {
   CalendarToday,
   Datepicker,
   Draggable,
-  Dropcontainer,
-  Dropdown,
   Eventcalendar,
-  Input,
   Popup,
   Segmented,
   SegmentedGroup,
-  Select,
   setOptions,
-  Textarea,
   Toast,
 } from "@mobiscroll/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -100,7 +95,9 @@ const TaskScheduler = ({
   loggedInUser,
 }) => {
   const [clickedEvent, setClickedEvent] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs().format("YYYY-MM-DD")
+  );
   const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
   const [argumentLoader, setArgumentLoader] = useState(false);
@@ -557,7 +554,7 @@ const TaskScheduler = ({
     // console.log("tutoring", )
 
     const handleTabChange = (_, newValue) => {
-      console.log({ filteredMeetings });
+      // console.log({ filteredMeetings });
       setCurrentTab(newValue);
       if (newValue === 0) {
         setAdmin(true);
@@ -572,60 +569,73 @@ const TaskScheduler = ({
     };
 
     return (
-      <>
-        <CalendarNav className="cal-header-nav" />
-        <div className="cal-header-picker">
+      <span
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+        }}
+      >
+        <span
+          style={{
+            display: "flex",
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          <CalendarNav className="cal-header-nav" />
+
           <SegmentedGroup value={view} onChange={changeView}>
             <Segmented value="month">Month</Segmented>
             <Segmented value="week">Week</Segmented>
             <Segmented value="day">Day</Segmented>
           </SegmentedGroup>
-        </div>
-        <CalendarPrev className="cal-header-prev" />
-        <CalendarToday className="cal-header-today" />
-        <CalendarNext className="cal-header-next" />
 
-        <Datepicker
-          controls={["calendar"]}
-          calendarType="month"
-          dateFormat="DD/MM/YYYY"
-          display="top"
-          calendarScroll={"vertical"}
-          pages={3}
-          className="mbsc-textfield"
-          inputProps={props}
-          onChange={handleDates}
-          value={selectedDate}
-        />
+          <CalendarPrev className="cal-header-prev" />
+          <CalendarToday className="cal-header-today" />
+          <CalendarNext className="cal-header-next" />
+        </span>
+        <span
+          style={{
+            display: "flex",
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          <Datepicker
+            controls={["calendar"]}
+            calendarType="month"
+            dateFormat="DD/MM/YYYY"
+            display="top"
+            calendarScroll={"vertical"}
+            pages={3}
+            className="mbsc-textfield"
+            inputProps={props}
+            onChange={handleDates}
+            value={selectedDate}
+          />
 
-        <Box display={"flex"}>
           <Button
             variant="contained"
             size="small"
-            onClick={() => setDrawerOpen(true)}
+            onClick={() => {
+              setDrawerOpen(true);
+            }}
             sx={{ right: 8 }}
           >
             Filter
           </Button>
-        </Box>
+        </span>
 
-        <Box
-          sx={{
-            borderColor: "divider",
-            marginTop: 2,
-            marginBottom: 2,
-            display: "flex",
-            justifyContent: "flex-end",
-            marginLeft: 50,
-          }}
-        >
+        <span>
           <Tabs value={currentTab} onChange={handleTabChange}>
             <Tab label="All Types" />
             <Tab label="Admin View" />
             <Tab label="Generic View" />
           </Tabs>
-        </Box>
-      </>
+        </span>
+      </span>
     );
   }, [view, currentTab, changeView, setAdmin, setTypes, selectedDate]);
 
@@ -825,288 +835,291 @@ const TaskScheduler = ({
   // }
 
   return (
-    <div className="mbsc-grid mbsc-no-padding">
-      <div className="mbsc-row">
-        <div className="mbsc-col-sm-12 docs-appointment-calendar">
-          <Eventcalendar
-            data={filteredEvents}
-            view={myView}
-            resources={admin && filteredMeetings}
-            invalid={myInvalid}
-            // startDay={(e)=>{console.log('faky',e)}}
-            // refDate={calendarRef}
-            // onPageChange={(e) => handlePageChange(e)}
-            onSelectedDateChange={onDateChange}
-            dragToMove={true}
-            dragToCreate={true}
-            eventOverlap={false}
-            externalDrop={true}
-            externalDrag={true}
-            selectedDate={selectedDate}
-            colors={myColors}
-            onCellDoubleClick={handleCellDoubleClick}
-            onEventClick={handleEventClick}
-            renderHeader={customWithNavButtons}
-            onEventCreate={handleEventCreate}
-            onEventCreated={handleEventCreated}
-            onEventCreateFailed={handleEventCreateFailed}
-            onEventUpdateFailed={handleEventUpdateFailed}
-            onEventDelete={handleEventDelete}
-            onEventDragEnter={handleEventDragEnter}
-            onEventDragLeave={handleEventDragLeave}
-            onEventHoverIn={handleEventHoverIn}
-            onEventHoverOut={handleEventHoverOut}
-            className="mbsc-schedule-date-header-text mbsc-schedule-resource-title"
-          />
-          <Popup
-            anchor={tooltipAnchor}
-            contentPadding={false}
-            display="anchored"
-            isOpen={isTooltipOpen}
-            scrollLock={false}
-            showOverlay={false}
-            touchUi={false}
-            width={350}
-            onClose={handleTooltipClose}
-          >
-            <div
-              className="mds-tooltip"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                alignItems={"center"}
-                mb={2}
-                px={1.5}
-                mt={1.5}
-              >
-                <Typography
-                  variant="p"
-                  sx={{
-                    fontSize: "medium",
-                    fontWeight: "bolder",
-                    textAlign: "left",
-                  }}
-                  display={"inline-block"}
-                  minWidth={"120px"}
-                >
-                  Title
-                </Typography>
-                <Typography variant="p">{hoverInEvents?.title}</Typography>
-              </Box>
-              <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                alignItems={"center"}
-                mb={2}
-                px={1.5}
-              >
-                <Typography
-                  variant="p"
-                  sx={{
-                    fontSize: "medium",
-                    fontWeight: "bolder",
-                    textAlign: "left",
-                  }}
-                  display={"inline-block"}
-                  maxWidth={"120px"}
-                >
-                  Priority
-                </Typography>
-                <Typography variant="p">{hoverInEvents?.priority}</Typography>
-              </Box>
-              <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                alignItems={"center"}
-                mb={2}
-                px={1.5}
-              >
-                <Typography
-                  variant="p"
-                  sx={{
-                    fontSize: "medium",
-                    fontWeight: "bolder",
-                    textAlign: "left",
-                  }}
-                  display={"inline-block"}
-                  maxWidth={"120px"}
-                >
-                  Start time
-                </Typography>
-                <Typography variant="p">
-                  {dayjs(hoverInEvents?.start).format("DD/MM/YYYY hh:mm A")}
-                </Typography>
-              </Box>
-              <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                alignItems={"center"}
-                mb={2}
-                px={1.5}
-              >
-                <Typography
-                  variant="p"
-                  sx={{
-                    fontSize: "medium",
-                    fontWeight: "bolder",
-                    textAlign: "left",
-                  }}
-                  display={"inline-block"}
-                  maxWidth={"120px"}
-                >
-                  End time
-                </Typography>
-                <Typography variant="p">
-                  {dayjs(hoverInEvents?.end).format("DD/MM/YYYY hh:mm A")}
-                </Typography>
-              </Box>
-              <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                alignItems={"center"}
-                mb={2}
-                px={1.5}
-              >
-                <Typography
-                  variant="p"
-                  sx={{
-                    fontSize: "medium",
-                    fontWeight: "bolder",
-                    textAlign: "left",
-                  }}
-                  display={"inline-block"}
-                  maxWidth={"120px"}
-                >
-                  Description
-                </Typography>
-                <Typography
-                  variant="p"
-                  sx={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: "8",
-                    WebkitBoxOrient: "vertical",
-                    ml: 2,
-                    textAlign: "right",
-                  }}
-                >
-                  {hoverInEvents?.Description}
-                </Typography>
-              </Box>
-              <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                alignItems={"center"}
-                mb={2}
-                px={1.5}
-              >
-                <Typography
-                  variant="p"
-                  sx={{
-                    fontSize: "medium",
-                    fontWeight: "bolder",
-                    textAlign: "left",
-                  }}
-                  display={"inline-block"}
-                  minWidth={"120px"}
-                >
-                  Regarding
-                </Typography>
-                <Typography variant="p">{hoverInEvents?.Regarding}</Typography>
-              </Box>
-              <Box
-                display={"flex"}
-                justifyContent={"space-between"}
-                alignItems={"center"}
-                mb={2}
-                px={1.5}
-              >
-                <Typography
-                  variant="p"
-                  sx={{
-                    fontSize: "medium",
-                    fontWeight: "bolder",
-                    textAlign: "left",
-                  }}
-                  display={"inline-block"}
-                  minWidth={"120px"}
-                >
-                  Scheduled With
-                </Typography>
-                <ul style={{ width: "100%" }}>
-                  {hoverInEvents?.scheduledWith.length > 0 &&
-                    hoverInEvents?.scheduledWith.map((item, index) => (
-                      <li>{item?.Full_Name}</li>
-                    ))}
-                </ul>
-              </Box>
-            </div>
-          </Popup>
-          <Toast
-            isOpen={isToastOpen}
-            message={toastMessage}
-            onClose={handleCloseToast}
-          />
-        </div>
-        <DrawerComponent
-          open={drawerOpen}
-          setOpen={setDrawerOpen}
-          priorityFilter={priorityFilter}
-          setPriorityFilter={setPriorityFilter}
-          activityTypeFilter={activityTypeFilter}
-          setActivityTypeFilter={setActivityTypeFilter}
-          users={users} // Pass users list here
-          userFilter={userFilter} // Pass user filter state
-          setUserFilter={setUserFilter} // Pass user filter setter
-        />
-
-        <Dialog
-          open={open}
-          onClose={onClose}
-          fullWidth // ✅ Makes it responsive
-          maxWidth="md" // ✅ Adjust max width (options: 'xs', 'sm', 'md', 'lg', 'xl')
-        >
-          <DialogContent sx={{ padding: 0 }}>
-            <EventForm
-              myEvents={myEvents}
-              setEvents={setEvents}
-              setOpen={setOpen}
-              onClose={onClose}
-              activityType={activityType}
-              setActivityType={setActivityType}
+    <div style={{ padding: "1em" }}>
+      <div
+        // className="mbsc-grid mbsc-no-padding"
+        style={{
+          borderTop: "1px solid #ccc",
+          borderLeft: "1px solid #ccc",
+          borderRight: "1px solid #ccc",
+          borderRadius: "6px",
+          overflow: "hidden",
+        }}
+      >
+        <div className="mbsc-row">
+          <div className="mbsc-col-sm-12 docs-appointment-calendar">
+            <Eventcalendar
+              data={filteredEvents}
+              view={myView}
+              resources={admin && filteredMeetings}
+              invalid={myInvalid}
+              // startDay={(e)=>{console.log('faky',e)}}
+              // refDate={calendarRef}
+              // onPageChange={(e) => handlePageChange(e)}
+              onSelectedDateChange={onDateChange}
+              dragToMove={true}
+              dragToCreate={true}
+              eventOverlap={false}
+              externalDrop={true}
+              externalDrag={true}
               selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              formData={formData}
-              handleInputChange={handleInputChange}
-              setFormData={setFormData}
-              users={users}
-              recentColor={recentColor}
-              setRecentColor={setRecentColor}
-              clickedEvent={clickedEvent}
-              setClickedEvent={setClickedEvent}
-              argumentLoader={argumentLoader}
-              snackbarOpen={snackbarOpen}
-              setSnackbarOpen={setSnackbarOpen}
-              loggedInUser={loggedInUser}
+              colors={myColors}
+              onCellDoubleClick={handleCellDoubleClick}
+              onEventClick={handleEventClick}
+              renderHeader={customWithNavButtons}
+              onEventCreate={handleEventCreate}
+              onEventCreated={handleEventCreated}
+              onEventCreateFailed={handleEventCreateFailed}
+              onEventUpdateFailed={handleEventUpdateFailed}
+              onEventDelete={handleEventDelete}
+              onEventDragEnter={handleEventDragEnter}
+              onEventDragLeave={handleEventDragLeave}
+              onEventHoverIn={handleEventHoverIn}
+              onEventHoverOut={handleEventHoverOut}
+              className="mbsc-schedule-date-header-text mbsc-schedule-resource-title"
             />
-          </DialogContent>
-        </Dialog>
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={6000}
-          onClose={(even, reason) => {
-            if (reason === "clickaway") {
-              return;
-            }
+            <Popup
+              anchor={tooltipAnchor}
+              contentPadding={false}
+              display="anchored"
+              isOpen={isTooltipOpen}
+              scrollLock={false}
+              showOverlay={false}
+              touchUi={false}
+              width={350}
+              onClose={handleTooltipClose}
+            >
+              <div
+                className="mds-tooltip"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                  mt={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    minWidth={"120px"}
+                  >
+                    Title
+                  </Typography>
+                  <Typography variant="p">{hoverInEvents?.title}</Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    Priority
+                  </Typography>
+                  <Typography variant="p">{hoverInEvents?.priority}</Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    Start time
+                  </Typography>
+                  <Typography variant="p">
+                    {dayjs(hoverInEvents?.start).format("DD/MM/YYYY hh:mm A")}
+                  </Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    End time
+                  </Typography>
+                  <Typography variant="p">
+                    {dayjs(hoverInEvents?.end).format("DD/MM/YYYY hh:mm A")}
+                  </Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    Description
+                  </Typography>
+                  <Typography
+                    variant="p"
+                    sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: "8",
+                      WebkitBoxOrient: "vertical",
+                      ml: 2,
+                      textAlign: "right",
+                    }}
+                  >
+                    {hoverInEvents?.Description}
+                  </Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    minWidth={"120px"}
+                  >
+                    Regarding
+                  </Typography>
+                  <Typography variant="p">
+                    {hoverInEvents?.Regarding}
+                  </Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    minWidth={"120px"}
+                  >
+                    Scheduled With
+                  </Typography>
+                  <ul style={{ width: "100%" }}>
+                    {hoverInEvents?.scheduledWith.length > 0 &&
+                      hoverInEvents?.scheduledWith.map((item, index) => (
+                        <li>{item?.Full_Name}</li>
+                      ))}
+                  </ul>
+                </Box>
+              </div>
+            </Popup>
+            <Toast
+              isOpen={isToastOpen}
+              message={toastMessage}
+              onClose={handleCloseToast}
+            />
+          </div>
+          <DrawerComponent
+            open={drawerOpen}
+            setOpen={setDrawerOpen}
+            priorityFilter={priorityFilter}
+            setPriorityFilter={setPriorityFilter}
+            activityTypeFilter={activityTypeFilter}
+            setActivityTypeFilter={setActivityTypeFilter}
+            users={users} // Pass users list here
+            userFilter={userFilter} // Pass user filter state
+            setUserFilter={setUserFilter} // Pass user filter setter
+          />
 
-            setSnackbarOpen(false);
-          }}
-        >
-          <Alert
+          <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth // ✅ Makes it responsive
+            maxWidth="md" // ✅ Adjust max width (options: 'xs', 'sm', 'md', 'lg', 'xl')
+          >
+            <DialogContent sx={{ padding: 0 }}>
+              <EventForm
+                myEvents={myEvents}
+                setEvents={setEvents}
+                setOpen={setOpen}
+                onClose={onClose}
+                activityType={activityType}
+                setActivityType={setActivityType}
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                setFormData={setFormData}
+                users={users}
+                recentColor={recentColor}
+                setRecentColor={setRecentColor}
+                clickedEvent={clickedEvent}
+                setClickedEvent={setClickedEvent}
+                argumentLoader={argumentLoader}
+                snackbarOpen={snackbarOpen}
+                setSnackbarOpen={setSnackbarOpen}
+                loggedInUser={loggedInUser}
+              />
+            </DialogContent>
+          </Dialog>
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={6000}
             onClose={(even, reason) => {
               if (reason === "clickaway") {
                 return;
@@ -1114,46 +1127,56 @@ const TaskScheduler = ({
 
               setSnackbarOpen(false);
             }}
-            severity="success"
-            variant="filled"
-            sx={{ width: "100%" }}
           >
-            Event created successfully !
-          </Alert>
-        </Snackbar>
-        <Modal
-          open={loader}
-          onClose={() => setLoader(false)}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "background.paper",
-              border: "2px solid #000",
-              boxShadow: 24,
-              p: 4,
-            }}
-          >
-            <Typography
-              id="modal-modal-title"
-              variant="h6"
-              component="h2"
-              textAlign={"center"}
+            <Alert
+              onClose={(even, reason) => {
+                if (reason === "clickaway") {
+                  return;
+                }
+
+                setSnackbarOpen(false);
+              }}
+              severity="success"
+              variant="filled"
+              sx={{ width: "100%" }}
             >
-              Fetching data ...
-            </Typography>
-            <Box textAlign={"center"} mt={3}>
-              <CircularProgress />
+              Event created successfully !
+            </Alert>
+          </Snackbar>
+          <Modal
+            open={loader}
+            onClose={() => setLoader(false)}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 400,
+                bgcolor: "background.paper",
+                border: "2px solid #000",
+                boxShadow: 24,
+                p: 4,
+              }}
+            >
+              <Typography
+                id="modal-modal-title"
+                variant="h6"
+                component="h2"
+                textAlign={"center"}
+              >
+                Fetching data ...
+              </Typography>
+              <Box textAlign={"center"} mt={3}>
+                <CircularProgress />
+              </Box>
             </Box>
-          </Box>
-        </Modal>
-        {/* {loader && } */}
+          </Modal>
+          {/* {loader && } */}
+        </div>
       </div>
     </div>
   );
