@@ -476,7 +476,7 @@ const TaskScheduler = ({
 
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
-    const handleDates = (e) => {
+    const handleDatepickerDates = (e) => {
       let currentDate = dayjs(e.value).format("YYYY-MM-DD");
       const beginDate =
         dayjs(currentDate).startOf("day").format("YYYY-MM-DD") +
@@ -533,7 +533,7 @@ const TaskScheduler = ({
             pages={3}
             className="mbsc-textfield"
             inputProps={props}
-            onChange={handleDates}
+            onChange={handleDatepickerDates}
             value={selectedDate}
           />
 
@@ -662,7 +662,7 @@ const TaskScheduler = ({
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
     }
-    console.log({ selectedDate });
+
     // return;
     // let currentDate = dayjs(args.date).format("YYYY-MM-DDTHH:mm:ss") + "-10:30";
     // const beginDate =
