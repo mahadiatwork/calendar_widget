@@ -192,7 +192,8 @@ const EventForm = ({
           setOpen(false);
         }
       });
-    } else {
+    }
+    if (formData.id === "") {
       if (formData.create_sperate_contact) {
         formData?.scheduledWith.forEach((item, index) => {
           const transformedData = transformFormSubmission(formData, item);

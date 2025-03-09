@@ -160,7 +160,7 @@ const TaskScheduler = ({
     switch (event.target.value) {
       case "month":
         myView = {
-          calendar: { labels: true, type: "month" },
+          calendar: { type: "month", labels: true },
         };
         break;
       case "week":
@@ -173,6 +173,7 @@ const TaskScheduler = ({
             startDay: 1,
             endDay: 5,
           },
+          calendar: { type: "week" },
         };
         break;
       case "day":
