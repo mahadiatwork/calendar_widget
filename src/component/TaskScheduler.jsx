@@ -4,7 +4,6 @@ import {
   CalendarPrev,
   CalendarToday,
   Datepicker,
-  Draggable,
   Eventcalendar,
   Popup,
   Segmented,
@@ -33,7 +32,6 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import DrawerComponent from "./DrawerComponent";
-// import { formatDate } from "@mobiscroll/react/dist/src/core/util/datetime.js";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -90,46 +88,19 @@ const TaskScheduler = ({
   ]);
 
   const usertype = loggedInUser?.User_Type;
-  // console.log("3rd dec", usertype);
-  // const [admin, setAdmin] = useState(true);
-  // const [admin, setAdmin] = useState(loggedInUser?.User_Type === "Admin");
-  const [admin, setAdmin] = useState(() => {
-    if (usertype === SUPER_ADMIN || usertype === ADMIN) {
-      return true;
-    }
-    return false;
-  });
-
   const [types, setTypes] = useState();
+
   useEffect(() => {
-    if (usertype === SUPER_ADMIN) {
-      setTypes(SUPER_ADMIN);
-      // return SUPER_ADMIN;
-    } else if (usertype === ADMIN) {
-      setTypes(ADMIN);
-      // return ADMIN;
-    } else {
-      setTypes(GENERIC);
-      // return GENERIC;
+    if (usertype !== undefined) {
+      if (usertype === SUPER_ADMIN) {
+        setTypes(SUPER_ADMIN);
+      } else if (usertype === ADMIN) {
+        setTypes(ADMIN);
+      } else {
+        setTypes(GENERIC);
+      }
     }
-    // admin == superadmin All
-    // admin = Admin   Admin
-    // admin other  Generic
-    // loggedInUser?.User_Type === "Admin" ? ADMIN : SUPER_ADMIN;
   }, [usertype]);
-
-  console.log({ types, usertype, ADMIN });
-
-  const [currentTab, setCurrentTab] = useState(() => {
-    if (usertype === SUPER_ADMIN) {
-      return 2;
-    }
-    if (usertype === ADMIN) {
-      return 1;
-    }
-    return 0;
-    // loggedInUser?.User_Type === "Admin" ? 1 : 0 // Default to Admin View (1) or Generic View (2)
-  });
 
   const [myColors, setColors] = useState([]);
   const [open, setOpen] = useState(false);
@@ -143,7 +114,7 @@ const TaskScheduler = ({
   const [isTooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipAnchor, setTooltipAnchor] = useState(null);
   const [hoverInEvents, setHoverInEvents] = useState();
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [myView, setMyView] = useState({
     calendar: { labels: true, type: "month" },
   });
@@ -184,10 +155,6 @@ const TaskScheduler = ({
   */
 
   const changeView = useCallback((event) => {
-    // let prevType = types;
-    // setTypes(prevType);
-    // let prevTabNumber = currentTab;
-    // setCurrentTab(prevTabNumber);
     let myView;
 
     switch (event.target.value) {
@@ -201,14 +168,12 @@ const TaskScheduler = ({
           schedule: {
             type: "week",
             allDay: false,
-            startDay: 1,
-            endDay: 5,
             startTime: "06:00",
             endTime: "24:00",
+            startDay: 1,
+            endDay: 5,
           },
         };
-        setAdmin(true);
-        // setTypes(SUPER_ADMIN);
         break;
       case "day":
         myView = {
@@ -219,30 +184,14 @@ const TaskScheduler = ({
             endTime: "24:00",
           },
         };
-        setTypes(ADMIN);
-        setTimeout(() => {
-          console.log({ usertype });
-          // setAdmin(loggedInUser?.User_Type === "Admin");
-          if (usertype === SUPER_ADMIN) {
-            setTypes(SUPER_ADMIN);
-            // return SUPER_ADMIN;
-          } else if (usertype === ADMIN) {
-            setTypes(ADMIN);
-            // return ADMIN;
-          } else {
-            setTypes(GENERIC);
-            // return GENERIC;
-          }
-          // setCurrentTab(loggedInUser?.User_Type === "Admin" ? 1 : 2);
-        }, 500);
         break;
       default:
         myView = {
           schedule: {
             type: "day",
+            allDay: false,
             startTime: "06:00",
             endTime: "24:00",
-            allDay: false,
           },
         };
         break;
@@ -275,11 +224,14 @@ const TaskScheduler = ({
     setOpen(true);
   }, []);
 
-  const handleEventCreated = useCallback((args) => {
-    setToastMessage(args.event.title + " added");
-    setToastOpen(true);
-    setEvents((prevEvents) => [...prevEvents, args.event]);
-  }, []);
+  const handleEventCreated = useCallback(
+    (args) => {
+      setToastMessage(args.event.title + " added");
+      setToastOpen(true);
+      setEvents((prevEvents) => [...prevEvents, args.event]);
+    },
+    [setEvents]
+  );
 
   const handleFailed = useCallback((event) => {
     if (event.start <= today) {
@@ -304,13 +256,16 @@ const TaskScheduler = ({
     [handleFailed]
   );
 
-  const handleEventDelete = useCallback((args) => {
-    setToastMessage(args.event.title + " unscheduled");
-    setToastOpen(true);
-    setEvents((prevEvents) =>
-      prevEvents.filter((item) => item.id !== args.event.id)
-    );
-  }, []);
+  const handleEventDelete = useCallback(
+    (args) => {
+      setToastMessage(args.event.title + " unscheduled");
+      setToastOpen(true);
+      setEvents((prevEvents) =>
+        prevEvents.filter((item) => item.id !== args.event.id)
+      );
+    },
+    [setEvents]
+  );
 
   const handleEventDragEnter = useCallback(() => {
     setColors([
@@ -418,106 +373,105 @@ const TaskScheduler = ({
     setFilteredEvents(filtered);
   }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
-  const meetings = useMemo(
-    () => [
-      {
-        id: 1,
-        name: "Meeting",
-      },
-      {
-        id: 2,
-        name: "To-do",
-      },
-      {
-        id: 3,
-        name: "Appointment",
-      },
-      {
-        id: 4,
-        name: "Boardroom",
-      },
-      {
-        id: 5,
-        name: "Call Billing",
-      },
-      {
-        id: 6,
-        name: "Email Billing",
-      },
-      {
-        id: 7,
-        name: "Initial Consultation",
-      },
-      {
-        id: 8,
-        name: "Call",
-      },
-      {
-        id: 9,
-        name: "Mail",
-      },
-      {
-        id: 10,
-        name: "Meeting Billing",
-      },
-      {
-        id: 11,
-        name: "Personal Activity",
-      },
-      {
-        id: 12,
-        name: "Room 1",
-      },
-      {
-        id: 13,
-        name: "Room 2",
-      },
-      {
-        id: 14,
-        name: "Room 3",
-      },
-      {
-        id: 15,
-        name: "To Do Billing",
-      },
-      {
-        id: 16,
-        name: "Vacation",
-      },
-    ],
-    []
-  );
+  const meetings = [
+    {
+      id: 1,
+      name: "Meeting",
+    },
+    {
+      id: 2,
+      name: "To-do",
+    },
+    {
+      id: 3,
+      name: "Appointment",
+    },
+    {
+      id: 4,
+      name: "Boardroom",
+    },
+    {
+      id: 5,
+      name: "Call Billing",
+    },
+    {
+      id: 6,
+      name: "Email Billing",
+    },
+    {
+      id: 7,
+      name: "Initial Consultation",
+    },
+    {
+      id: 8,
+      name: "Call",
+    },
+    {
+      id: 9,
+      name: "Mail",
+    },
+    {
+      id: 10,
+      name: "Meeting Billing",
+    },
+    {
+      id: 11,
+      name: "Personal Activity",
+    },
+    {
+      id: 12,
+      name: "Room 1",
+    },
+    {
+      id: 13,
+      name: "Room 2",
+    },
+    {
+      id: 14,
+      name: "Room 3",
+    },
+    {
+      id: 15,
+      name: "To Do Billing",
+    },
+    {
+      id: 16,
+      name: "Vacation",
+    },
+  ];
 
-  const adminOnlyMeetings = useMemo(
-    () => [
-      "Meeting",
-      "Appointment",
-      "Boardroom",
-      "Room 1",
-      "Room 2",
-      "Room 3",
-      "Vacation",
-    ],
-    []
-  );
+  const adminMeetings = [
+    "Meeting",
+    "Appointment",
+    "Boardroom",
+    "Room 1",
+    "Room 2",
+    "Room 3",
+    "Vacation",
+  ];
 
   // Filtered meetings based on the types state
-  const filteredMeetings = useMemo(() => {
-    if (types === SUPER_ADMIN) return meetings; // Show all meetings
+  const filteredMeetings = (types) => {
+    if (types === SUPER_ADMIN) {
+      return meetings; // Show all meetings
+    }
 
     if (types === ADMIN) {
-      return meetings.filter((meeting) =>
-        adminOnlyMeetings.includes(meeting.name)
+      const filteredMeetings = meetings.filter((meeting) =>
+        adminMeetings.includes(meeting.name)
       );
+      return filteredMeetings;
     }
 
     if (types === GENERIC) {
       // Add specific logic for Generic view if needed
-      return [];
+      return [{ id: 1 }];
     }
 
-    return meetings; // Default fallback
-  }, [types, meetings, adminOnlyMeetings]);
+    return [{ id: 1 }]; // Default fallback
+  };
+
+  const resources = filteredMeetings(types);
 
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
@@ -532,23 +486,6 @@ const TaskScheduler = ({
       setSelectedDate(e.value);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
-    };
-
-    // console.log("tutoring", )
-
-    const handleTabChange = (_, newValue) => {
-      // console.log({ filteredMeetings });
-      setCurrentTab(newValue);
-      if (newValue === 0) {
-        setAdmin(true);
-        setTypes(SUPER_ADMIN); // Default to show all meeting types
-      } else if (newValue === 1) {
-        setAdmin(true);
-        setTypes(ADMIN);
-      } else if (newValue === 2) {
-        setAdmin(false);
-        setTypes(GENERIC);
-      }
     };
 
     return (
@@ -610,17 +547,9 @@ const TaskScheduler = ({
             Filter
           </Button>
         </span>
-
-        {/* <span>
-          <Tabs value={currentTab} onChange={handleTabChange}>
-            <Tab label="All Types" />
-            <Tab label="Admin View" />
-            <Tab label="Generic View" />
-          </Tabs>
-        </span> */}
       </span>
     );
-  }, [view, currentTab, changeView, setAdmin, setTypes, selectedDate]);
+  }, [view, changeView, selectedDate, setEndDateTime, setStartDateTime]);
 
   useEffect(() => {
     for (const event of myEvents) {
@@ -838,7 +767,8 @@ const TaskScheduler = ({
             <Eventcalendar
               data={filteredEvents}
               view={myView}
-              resources={admin && filteredMeetings}
+              resources={resources}
+              renderHeader={customWithNavButtons}
               invalid={myInvalid}
               // startDay={(e)=>{console.log('faky',e)}}
               // refDate={calendarRef}
@@ -853,7 +783,6 @@ const TaskScheduler = ({
               colors={myColors}
               onCellDoubleClick={handleCellDoubleClick}
               onEventClick={handleEventClick}
-              renderHeader={customWithNavButtons}
               onEventCreate={handleEventCreate}
               onEventCreated={handleEventCreated}
               onEventCreateFailed={handleEventCreateFailed}
