@@ -36,6 +36,55 @@ function App() {
       });
 
       ZOHO.CRM.API.getAllRecords({
+        Entity: "Events",
+        sort_order: "asc",
+        per_page: 200,
+        page: 1,
+      }).then(function (d) {
+        console.log(d);
+        if (d?.data) {
+          const x = d?.data.map((item, index) => {
+            return {
+              id: item.id,
+              title: item.Event_Title,
+              resource: item.resource,
+              startTime: "",
+              endTime: "",
+              duration: item.Duration_Min,
+              associateWith: {
+                Account_Name: item?.What_Id?.name,
+                id: item?.What_Id?.id,
+              },
+              Type_of_Activity: item.Type_of_Activity,
+              resource: item.resource,
+              scheduleFor: item.Owner,
+              scheduledWith: item?.Participants.map((participant) => ({
+                Full_Name: participant.name,
+                participant: participant.participant,
+                type: participant.type,
+              })),
+              location: item.Venue,
+              priority: item.Event_Priority,
+              Remind_At: item.Remind_At,
+              occurrence: item.Recurring_Activity,
+              start: item.Start_DateTime,
+              end: item.End_DateTime,
+              noEndDate: false,
+              color: item.Colour,
+              Banner: item.Banner,
+              Description: item?.Description,
+              Regarding: item?.Regarding,
+              Reminder_Text: item?.Reminder_Text,
+              send_notification: item?.$send_notification,
+            };
+          });
+          console.log({ x });
+          setMyEvents(x);
+        }
+        // setEvents(d?.data)
+      });
+
+      ZOHO.CRM.API.getAllRecords({
         Entity: "users",
         sort_order: "asc",
         per_page: 100,
@@ -109,6 +158,7 @@ function App() {
         Regarding: item?.Regarding,
         Reminder_Text: item?.Reminder_Text,
         send_notification: item?.$send_notification,
+        Send_Reminders: item?.Send_Reminders
       };
     });
     console.log("searchDataByDate", eventsDataResult, {

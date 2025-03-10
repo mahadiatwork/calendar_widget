@@ -128,6 +128,7 @@ const TaskScheduler = ({
     Regarding: newEvent?.Regarding || "",
     Reminder_Text: newEvent?.Reminder_Text || "",
     send_notification: newEvent?.send_notification || false,
+    Send_Reminders: newEvent?.Send_Reminders || false
   });
   const timer = useRef(null);
 
@@ -379,7 +380,7 @@ const TaskScheduler = ({
     console.log({ modifiedDate });
 
     handleInputChange("Remind_At", modifiedDate);
-    handleInputChange("Reminder_Text", "5 minutes before");
+    handleInputChange("Reminder_Text", "");
     const selectedActivity = activityType.find(
       (item) => item.resource === args.resource
     );

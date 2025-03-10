@@ -13,6 +13,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
     }));
   };
 
+  console.log({mahadiHasan: data})
   const dayOfMonth = dayjs(data?.startTime).date();
   const dayName = dayjs(data?.startTime).format("dd");
   const monthNumber = dayjs(data?.startTime).format("MM");
@@ -54,7 +55,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
     Owner: {
       id: data.scheduleFor?.id,
     },
-    $send_notification: data.send_notification,
+    $send_notification: data?.send_notification,
 
     se_module: "Accounts",
 
@@ -62,8 +63,8 @@ export function transformFormSubmission(data, individualParticipant = null) {
     Duration_Min: data.duration.toString(),
     Venue: data.location,
     Colour: data.color,
-    Remind_At: data.send_notification
-      ? dayjs(data.Remind_At)
+    Remind_At: data.Send_Reminders
+      ? dayjs(data?.Remind_At)
           .tz("Australia/Adelaide")
           .format("YYYY-MM-DDTHH:mm:ssZ")
       : null,
