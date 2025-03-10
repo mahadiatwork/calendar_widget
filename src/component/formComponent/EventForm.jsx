@@ -253,9 +253,6 @@ const EventForm = ({
         setOpen(false);
       } else {
         const transformedData = transformFormSubmission(formData);
-
-
-        return
         ZOHO.CRM.API.insertRecord({
           Entity: "Events",
           APIData: transformedData,
