@@ -53,7 +53,6 @@ const TaskScheduler = ({
   setMyEvents,
   users,
   setStartDateTime,
-  startDateTime,
   setEndDateTime,
   loader,
   setLoader,
@@ -128,7 +127,7 @@ const TaskScheduler = ({
     Regarding: newEvent?.Regarding || "",
     Reminder_Text: newEvent?.Reminder_Text || "",
     send_notification: newEvent?.send_notification || false,
-    Send_Reminders: newEvent?.Send_Reminders || false
+    Send_Reminders: newEvent?.Send_Reminders || false,
   });
   const timer = useRef(null);
 
@@ -149,21 +148,21 @@ const TaskScheduler = ({
     let filtered = myEvents;
 
     if (priorityFilter.length > 0) {
-      filtered = filtered.filter((event) =>
-        priorityFilter.includes(event.priority)
-      );
+      filtered = filtered.filter((obj) => {
+        return priorityFilter.includes(obj.priority);
+      });
     }
 
     if (activityTypeFilter.length > 0) {
-      filtered = filtered.filter((event) =>
-        activityTypeFilter.includes(event.Type_of_Activity)
-      );
+      filtered = filtered.filter((obj) => {
+        return activityTypeFilter.includes(obj.Type_of_Activity);
+      });
     }
 
     if (userFilter.length > 0) {
-      filtered = filtered.filter((event) =>
-        userFilter.includes(event.scheduleFor.name)
-      );
+      filtered = filtered.filter((obj) => {
+        return userFilter.includes(obj.scheduleFor.name);
+      });
     }
 
     setFilteredEvents(filtered);
@@ -182,6 +181,12 @@ const TaskScheduler = ({
 
     switch (event.target.value) {
       case "month":
+        setStartDateTime(
+          dayjs().startOf("month").format("YYYY-MM-DD") + "T00:00:00+10:30"
+        );
+        setEndDateTime(
+          dayjs().endOf("month").format("YYYY-MM-DD") + "T23:59:59+10:30"
+        );
         myView = {
           // schedule: {
           //   type: "month",
@@ -189,14 +194,17 @@ const TaskScheduler = ({
           calendar: { type: "month", labels: true },
           // agenda: { type: "month" },
         };
-        setStartDateTime(
-          dayjs().startOf("month").format("YYYY-MM-DD") + "T00:00:00+10:30"
-        );
-        setEndDateTime(
-          dayjs().endOf("month").format("YYYY-MM-DD") + "T23:59:59+10:30"
-        );
+
         break;
       case "week":
+        setStartDateTime(
+          dayjs().day(1).startOf("week").format("YYYY-MM-DD") +
+            "T00:00:00+10:30"
+        );
+        setEndDateTime(
+          dayjs().day(1).startOf("week").endOf("week").format("YYYY-MM-DD") +
+            "T23:59:59+10:30"
+        );
         myView = {
           schedule: {
             type: "week",
@@ -211,16 +219,11 @@ const TaskScheduler = ({
           // calendar: { labels: true, type: "week", size: 1 },
           // agenda: { type: "week" },
         };
-        setStartDateTime(
-          dayjs().day(1).startOf("week").format("YYYY-MM-DD") +
-            "T00:00:00+10:30"
-        );
-        setEndDateTime(
-          dayjs().day(1).startOf("week").endOf("week").format("YYYY-MM-DD") +
-            "T23:59:59+10:30"
-        );
+
         break;
       case "day":
+        setStartDateTime(dayjs().format("YYYY-MM-DD") + "T00:00:00+10:30");
+        setEndDateTime(dayjs().format("YYYY-MM-DD") + "T23:59:59+10:30");
         myView = {
           schedule: {
             type: "day",
@@ -229,8 +232,7 @@ const TaskScheduler = ({
             endTime: "24:00",
           },
         };
-        setStartDateTime(dayjs().format("YYYY-MM-DD") + "T00:00:00+10:30");
-        setEndDateTime(dayjs().format("YYYY-MM-DD") + "T23:59:59+10:30");
+
         break;
       default:
         myView = {

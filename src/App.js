@@ -59,6 +59,7 @@ function App() {
 
   const searchDataByDate = useCallback(async () => {
     setLoader(true);
+    setMyEvents([]);
     const req_data_meetings1 = {
       url: `https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:${encodeURIComponent(
         startDateTime
@@ -109,10 +110,6 @@ function App() {
         Reminder_Text: item?.Reminder_Text,
         send_notification: item?.$send_notification,
       };
-    });
-    console.log("searchDataByDate", eventsDataResult, {
-      startDateTime,
-      endDateTime,
     });
     setMyEvents(eventsDataResult);
     setLoader(false);

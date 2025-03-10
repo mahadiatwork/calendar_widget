@@ -26,7 +26,7 @@ const DrawerComponent = ({
   setActivityTypeFilter,
   users,
   userFilter,
-  setUserFilter
+  setUserFilter,
 }) => {
   const theme = useTheme();
   const MenuProps = {
@@ -37,7 +37,7 @@ const DrawerComponent = ({
       },
     },
   };
-  const priority = ["low", "medium", "high"];
+  const priority = ["Low", "Medium", "High"];
   const activityType = [
     { type: "Meeting", resource: 1 },
     { type: "To-Do", resource: 2 },
@@ -55,7 +55,7 @@ const DrawerComponent = ({
     { type: "Room 3", resource: 14 },
     { type: "To Do Billing", resource: 15 },
     { type: "Vacation", resource: 16 },
-  ]
+  ];
 
   const handleChange = (event) => {
     const {
@@ -89,7 +89,7 @@ const DrawerComponent = ({
       variant="persistent"
       anchor="right"
       open={open}
-      onClose={()=>setOpen(false)}
+      onClose={() => setOpen(false)}
     >
       <Box
         sx={{
@@ -112,9 +112,7 @@ const DrawerComponent = ({
       <Divider />
       <Box p={2}>
         <FormControl fullWidth size="small">
-          <InputLabel
-            id="demo-simple-select-standard-label"
-          >
+          <InputLabel id="demo-simple-select-standard-label">
             Priority
           </InputLabel>
           <Select
@@ -126,7 +124,6 @@ const DrawerComponent = ({
             MenuProps={MenuProps}
             input={<OutlinedInput label="Priority" />}
             renderValue={(selected) => selected.join(", ")}
-            
           >
             {priority.map((item, index) => (
               <MenuItem value={item} key={index}>
@@ -137,7 +134,7 @@ const DrawerComponent = ({
           </Select>
         </FormControl>
 
-        <FormControl fullWidth size="small" sx={{mt:3}}>
+        <FormControl fullWidth size="small" sx={{ mt: 3 }}>
           <InputLabel id="activity-type-select-label">Activity Type</InputLabel>
           <Select
             labelId="activity-type-select-label"
@@ -151,15 +148,17 @@ const DrawerComponent = ({
           >
             {activityType.map((activity, index) => (
               <MenuItem value={activity.type} key={index}>
-                <Checkbox checked={activityTypeFilter.includes(activity.type)} />
+                <Checkbox
+                  checked={activityTypeFilter.includes(activity.type)}
+                />
                 <ListItemText primary={activity.type} />
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-         {/* User Filter */}
-         <FormControl fullWidth size="small" sx={{ mt: 3 }}>
+        {/* User Filter */}
+        <FormControl fullWidth size="small" sx={{ mt: 3 }}>
           <InputLabel>Schedule For</InputLabel>
           <Select
             multiple
