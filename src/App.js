@@ -80,7 +80,6 @@ function App() {
       return {
         id: item.id,
         title: item.Event_Title,
-        resource: item.resource,
         startTime: "",
         endTime: "",
         duration: item.Duration_Min,
