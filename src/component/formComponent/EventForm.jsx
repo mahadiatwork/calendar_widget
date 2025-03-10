@@ -139,6 +139,9 @@ const EventForm = ({
       color: "#d1891f",
       Banner: false,
       Description: "",
+      send_notification: false,
+      Send_Reminders: false,
+      
     });
     onClose();
     setOpen(false);
@@ -187,6 +190,7 @@ const EventForm = ({
             Banner: false,
             Description: "",
             send_notification: false,
+            Send_Reminders: false
           });
           setClickedEvent(null);
           setOpen(false);
@@ -249,6 +253,9 @@ const EventForm = ({
         setOpen(false);
       } else {
         const transformedData = transformFormSubmission(formData);
+
+
+        return
         ZOHO.CRM.API.insertRecord({
           Entity: "Events",
           APIData: transformedData,
@@ -288,6 +295,7 @@ const EventForm = ({
                 Banner: false,
                 Description: "",
                 send_notification: false,
+                Send_Reminders: false
               });
               setClickedEvent(null);
               setOpen(false);

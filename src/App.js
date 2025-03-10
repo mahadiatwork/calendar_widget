@@ -92,6 +92,7 @@ function App() {
               Regarding: item?.Regarding,
               Reminder_Text: item?.Reminder_Text,
               send_notification: item?.$send_notification,
+              Send_Reminders: item?.Send_Reminders
             };
           });
           console.log({ x });
@@ -196,6 +197,7 @@ function App() {
         Regarding: item?.Regarding,
         Reminder_Text: item?.Reminder_Text,
         send_notification: item?.$send_notification,
+        Send_Reminders: item?.Send_Reminders
       };
     });
     setEvents(x);
