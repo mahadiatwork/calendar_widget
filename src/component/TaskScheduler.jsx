@@ -50,7 +50,7 @@ const today = now.toISOString().slice(0, 16);
 
 const TaskScheduler = ({
   myEvents,
-  setEvents,
+  setMyEvents,
   users,
   setStartDateTime,
   startDateTime,
@@ -61,13 +61,6 @@ const TaskScheduler = ({
   setRecentColor,
   loggedInUser,
 }) => {
-  const [clickedEvent, setClickedEvent] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(
-    dayjs().format("YYYY-MM-DD")
-  );
-  const [priorityFilter, setPriorityFilter] = useState([]);
-  const [activityTypeFilter, setActivityTypeFilter] = useState([]);
-  const [argumentLoader, setArgumentLoader] = useState(false);
   const [activityType, setActivityType] = useState([
     { type: "Meeting", resource: 1 },
     { type: "To-Do", resource: 2 },
@@ -86,22 +79,18 @@ const TaskScheduler = ({
     { type: "To Do Billing", resource: 15 },
     { type: "Vacation", resource: 16 },
   ]);
-
-  const usertype = loggedInUser?.User_Type;
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs().format("YYYY-MM-DD")
+  );
+  const [myView, setMyView] = useState({
+    calendar: { labels: true, type: "month" },
+  });
+  const [priorityFilter, setPriorityFilter] = useState([]);
+  const [activityTypeFilter, setActivityTypeFilter] = useState([]);
+  const [userFilter, setUserFilter] = useState([]);
+  const [clickedEvent, setClickedEvent] = useState(null);
+  const [argumentLoader, setArgumentLoader] = useState(false);
   const [types, setTypes] = useState();
-
-  useEffect(() => {
-    if (usertype !== undefined) {
-      if (usertype === SUPER_ADMIN) {
-        setTypes(SUPER_ADMIN);
-      } else if (usertype === ADMIN) {
-        setTypes(ADMIN);
-      } else {
-        setTypes(GENERIC);
-      }
-    }
-  }, [usertype]);
-
   const [myColors, setColors] = useState([]);
   const [open, setOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -109,18 +98,11 @@ const TaskScheduler = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [view, setView] = useState("month");
   const [filteredEvents, setFilteredEvents] = useState(myEvents);
-  const [userFilter, setUserFilter] = useState([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isTooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipAnchor, setTooltipAnchor] = useState(null);
   const [hoverInEvents, setHoverInEvents] = useState();
-  // const [loading, setLoading] = useState(false);
-  const [myView, setMyView] = useState({
-    calendar: { labels: true, type: "month" },
-  });
-  const timer = useRef(null);
   const newEvent = clickedEvent?.event;
-
   const [formData, setFormData] = useState({
     id: newEvent?.id || "",
     title: newEvent?.title || "New Meeting",
@@ -147,12 +129,52 @@ const TaskScheduler = ({
     Reminder_Text: newEvent?.Reminder_Text || "",
     send_notification: newEvent?.send_notification || false,
   });
+  const timer = useRef(null);
 
-  /*
-    Month
-    Type   All - Admin - Generic
+  const usertype = loggedInUser?.User_Type;
+  useEffect(() => {
+    if (usertype !== undefined) {
+      if (usertype === SUPER_ADMIN) {
+        setTypes(SUPER_ADMIN);
+      } else if (usertype === ADMIN) {
+        setTypes(ADMIN);
+      } else {
+        setTypes(GENERIC);
+      }
+    }
+  }, [usertype]);
 
-  */
+  useEffect(() => {
+    let filtered = myEvents;
+
+    if (priorityFilter.length > 0) {
+      filtered = filtered.filter((event) =>
+        priorityFilter.includes(event.priority)
+      );
+    }
+
+    if (activityTypeFilter.length > 0) {
+      filtered = filtered.filter((event) =>
+        activityTypeFilter.includes(event.Type_of_Activity)
+      );
+    }
+
+    if (userFilter.length > 0) {
+      filtered = filtered.filter((event) =>
+        userFilter.includes(event.scheduleFor.name)
+      );
+    }
+
+    setFilteredEvents(filtered);
+  }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
+
+  useEffect(() => {
+    for (const event of myEvents) {
+      event.start = event.start ? new Date(event.start) : event.start;
+      event.end = event.end ? new Date(event.end) : event.end;
+      event.editable = !!(event.start && today < event.start);
+    }
+  }, [myEvents]);
 
   const changeView = useCallback((event) => {
     let myView;
@@ -160,8 +182,18 @@ const TaskScheduler = ({
     switch (event.target.value) {
       case "month":
         myView = {
+          // schedule: {
+          //   type: "month",
+          // },
           calendar: { type: "month", labels: true },
+          // agenda: { type: "month" },
         };
+        setStartDateTime(
+          dayjs().startOf("month").format("YYYY-MM-DD") + "T00:00:00+10:30"
+        );
+        setEndDateTime(
+          dayjs().endOf("month").format("YYYY-MM-DD") + "T23:59:59+10:30"
+        );
         break;
       case "week":
         myView = {
@@ -173,8 +205,19 @@ const TaskScheduler = ({
             startDay: 1,
             endDay: 5,
           },
-          calendar: { type: "week" },
+          // calendar: { type: "week" },
+          // calendar: { type: "week", labels: true },
+          // calendar: { labels: true, type: "week", size: 1 },
+          // agenda: { type: "week" },
         };
+        setStartDateTime(
+          dayjs().day(1).startOf("week").format("YYYY-MM-DD") +
+            "T00:00:00+10:30"
+        );
+        setEndDateTime(
+          dayjs().day(1).startOf("week").endOf("week").format("YYYY-MM-DD") +
+            "T23:59:59+10:30"
+        );
         break;
       case "day":
         myView = {
@@ -185,6 +228,8 @@ const TaskScheduler = ({
             endTime: "24:00",
           },
         };
+        setStartDateTime(dayjs().format("YYYY-MM-DD") + "T00:00:00+10:30");
+        setEndDateTime(dayjs().format("YYYY-MM-DD") + "T23:59:59+10:30");
         break;
       default:
         myView = {
@@ -229,9 +274,9 @@ const TaskScheduler = ({
     (args) => {
       setToastMessage(args.event.title + " added");
       setToastOpen(true);
-      setEvents((prevEvents) => [...prevEvents, args.event]);
+      setMyEvents((prevEvents) => [...prevEvents, args.event]);
     },
-    [setEvents]
+    [setMyEvents]
   );
 
   const handleFailed = useCallback((event) => {
@@ -261,11 +306,11 @@ const TaskScheduler = ({
     (args) => {
       setToastMessage(args.event.title + " unscheduled");
       setToastOpen(true);
-      setEvents((prevEvents) =>
+      setMyEvents((prevEvents) =>
         prevEvents.filter((item) => item.id !== args.event.id)
       );
     },
-    [setEvents]
+    [setMyEvents]
   );
 
   const handleEventDragEnter = useCallback(() => {
@@ -347,32 +392,6 @@ const TaskScheduler = ({
     }
     setOpen(true);
   };
-
-  // Call handleFilterEvents when priorityFilter or myEvents change
-  useEffect(() => {
-    let filtered = myEvents;
-    // console.log({ filtered });
-
-    if (priorityFilter.length > 0) {
-      filtered = filtered.filter((event) =>
-        priorityFilter.includes(event.priority)
-      );
-    }
-
-    if (activityTypeFilter.length > 0) {
-      filtered = filtered.filter((event) =>
-        activityTypeFilter.includes(event.Type_of_Activity)
-      );
-    }
-
-    if (userFilter.length > 0) {
-      filtered = filtered.filter((event) =>
-        userFilter.includes(event.scheduleFor.name)
-      );
-    }
-
-    setFilteredEvents(filtered);
-  }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
   const meetings = [
     {
@@ -552,14 +571,6 @@ const TaskScheduler = ({
     );
   }, [view, changeView, selectedDate, setEndDateTime, setStartDateTime]);
 
-  useEffect(() => {
-    for (const event of myEvents) {
-      event.start = event.start ? new Date(event.start) : event.start;
-      event.end = event.end ? new Date(event.end) : event.end;
-      event.editable = !!(event.start && today < event.start);
-    }
-  }, [myEvents]);
-
   const onClose = () => {
     setOpen(false);
     setFormData({
@@ -626,12 +637,9 @@ const TaskScheduler = ({
   };
 
   const onDateChange = async (args) => {
-    console.log("hello darkness");
-
-    console.log(dayjs(args.date).format("YYYY-MM-DD"));
     let currentDate = dayjs(args.date).format("YYYY-MM-DD");
+    setSelectedDate(currentDate);
 
-    // setSelectedDate(null); // ✅ Automatically updates `Datepicker`
     if (view === "day") {
       const beginDate =
         dayjs(currentDate).startOf("day").format("YYYY-MM-DD") +
@@ -639,10 +647,11 @@ const TaskScheduler = ({
       const closeDate =
         dayjs(currentDate).endOf("day").format("YYYY-MM-DD") +
         "T23:59:59+10:30";
-      setSelectedDate(currentDate);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
-    } else if (view === "week") {
+    }
+
+    if (view === "week") {
       const beginDate =
         dayjs(currentDate).startOf("week").format("YYYY-MM-DD") +
         "T00:00:00+10:30";
@@ -651,29 +660,20 @@ const TaskScheduler = ({
         "T23:59:59+10:30";
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
-    } else {
+    }
+
+    if (view === "month") {
       const beginDate =
         dayjs(currentDate).startOf("month").format("YYYY-MM-DD") +
         "T00:00:00+10:30";
       const closeDate =
         dayjs(currentDate).endOf("month").format("YYYY-MM-DD") +
         "T23:59:59+10:30";
-      setSelectedDate(beginDate);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
     }
-
-    // return;
-    // let currentDate = dayjs(args.date).format("YYYY-MM-DDTHH:mm:ss") + "-10:30";
-    // const beginDate =
-    //   dayjs(currentDate).startOf("month").format("YYYY-MM-DD") +
-    //   "T00:00:00-10:30";
-    // const closeDate =
-    //   dayjs(currentDate).endOf("month").format("YYYY-MM-DD") +
-    //   "T23:59:59-10:30";
-    // console.log(beginDate);
-    // console.log(closeDate);
   };
+
   const openTooltip = useCallback((args) => {
     const event = args.event;
 
@@ -709,6 +709,7 @@ const TaskScheduler = ({
   const handleTooltipClose = useCallback(() => {
     setTooltipOpen(false);
   }, []);
+
   const handleEventHoverIn = useCallback(
     (args) => {
       // setHoverInEvents(args.event)
@@ -724,25 +725,20 @@ const TaskScheduler = ({
       }, 200);
     }
   }, []);
+
   const handleMouseEnter = useCallback(() => {
     if (timer.current) {
       clearTimeout(timer.current);
       timer.current = null;
     }
   }, []);
+
   const handleMouseLeave = useCallback(() => {
     timer.current = setTimeout(() => {
       setTooltipOpen(false);
     }, 200);
   }, []);
 
-  // const handlePageChange = (e) => {
-  //   console.log(e);
-  //   setSelectedDate(e.firstDay);
-  //   // console.log(e);
-  //   setStartDateTime(e.firstDay);
-  //   setEndDateTime(e.lastDay);
-  // };
   // if (loader) {
   //   return <Box> Fetching data ....</Box>;
   // }
@@ -773,7 +769,11 @@ const TaskScheduler = ({
               invalid={myInvalid}
               // startDay={(e)=>{console.log('faky',e)}}
               // refDate={calendarRef}
-              // onPageChange={(e) => handlePageChange(e)}
+              // onPageChange={(e) => {
+              //   setSelectedDate(e.firstDay);
+              //   setStartDateTime(e.firstDay);
+              //   setEndDateTime(e.lastDay);
+              // }}
               onSelectedDateChange={onDateChange}
               dragToMove={true}
               dragToCreate={true}
@@ -994,11 +994,11 @@ const TaskScheduler = ({
           <DrawerComponent
             open={drawerOpen}
             setOpen={setDrawerOpen}
+            users={users} // Pass users list here
             priorityFilter={priorityFilter}
             setPriorityFilter={setPriorityFilter}
             activityTypeFilter={activityTypeFilter}
             setActivityTypeFilter={setActivityTypeFilter}
-            users={users} // Pass users list here
             userFilter={userFilter} // Pass user filter state
             setUserFilter={setUserFilter} // Pass user filter setter
           />
@@ -1012,7 +1012,7 @@ const TaskScheduler = ({
             <DialogContent sx={{ padding: 0 }}>
               <EventForm
                 myEvents={myEvents}
-                setEvents={setEvents}
+                setEvents={setMyEvents}
                 setOpen={setOpen}
                 onClose={onClose}
                 activityType={activityType}

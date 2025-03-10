@@ -1,29 +1,28 @@
 import React, { useEffect } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
-import { Input, Select, Textarea } from "@mobiscroll/react";
 import {
-  Alert,
   Box,
   Button,
   IconButton,
-  Snackbar,
   Tab,
   Tabs,
   TextField,
   Typography,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
-import FirstComponent from "./FirstComponent";
-import SecondComponent from "./SecondComponent";
-import ThirdComponent from "./ThirdComponent";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import CloseIcon from "@mui/icons-material/Close";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { Input, Select, Textarea } from "@mobiscroll/react";
+import ReactQuill from "react-quill";
+
+import FirstComponent from "./FirstComponent";
+import SecondComponent from "./SecondComponent";
+import ThirdComponent from "./ThirdComponent";
 import { transformFormSubmission } from "../handleDataFormatting";
+
 const ZOHO = window.ZOHO;
 
 function TabPanel(props) {
@@ -93,14 +92,12 @@ const EventForm = ({
   setSnackbarOpen,
   loggedInUser,
 }) => {
-  const theme = useTheme();
   const [value, setValue] = useState(0);
   const [edited, setEdited] = useState(false);
   const todayDate = getLocalDateTime();
 
   dayjs.extend(utc);
   dayjs.extend(timezone);
-  console.log({ myEvents });
 
   console.log({ formData });
 
