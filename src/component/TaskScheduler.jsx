@@ -490,10 +490,13 @@ const TaskScheduler = ({
 
     if (types === GENERIC) {
       // Add specific logic for Generic view if needed
-      const filteredMeetings = meetings.filter((meeting) =>
-        genericMeetings.includes(meeting.name)
-      );
-      return filteredMeetings;
+
+      // const filteredMeetings = meetings.filter((meeting) =>
+      //   adminMeetings.includes(meeting.name)
+      // );
+
+      // Generic will see all meeting type without header.
+      return meetings?.map((el) => ({ id: el.id }));
     }
 
     return [
@@ -519,6 +522,15 @@ const TaskScheduler = ({
       setSelectedDate(e.value);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
+
+      setMyView({
+        schedule: {
+          type: "day",
+          allDay: false,
+          startTime: "06:00",
+          endTime: "24:00",
+        },
+      });
     };
 
     return (
