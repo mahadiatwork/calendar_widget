@@ -84,6 +84,7 @@ const TaskScheduler = ({
   const [myView, setMyView] = useState({
     calendar: { labels: true, type: "month" },
   });
+  const [view, setView] = useState("month");
   const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
   const [userFilter, setUserFilter] = useState([]);
@@ -95,7 +96,6 @@ const TaskScheduler = ({
   const [toastMessage, setToastMessage] = useState("");
   const [isToastOpen, setToastOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [view, setView] = useState("month");
   const [filteredEvents, setFilteredEvents] = useState(myEvents);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isTooltipOpen, setTooltipOpen] = useState(false);
