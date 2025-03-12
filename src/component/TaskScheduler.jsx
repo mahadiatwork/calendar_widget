@@ -473,6 +473,8 @@ const TaskScheduler = ({
     "Vacation",
   ];
 
+  const genericMeetings = ["Meeting"];
+
   // Filtered meetings based on the types state
   const filteredMeetings = (types) => {
     if (types === SUPER_ADMIN) {
@@ -488,10 +490,18 @@ const TaskScheduler = ({
 
     if (types === GENERIC) {
       // Add specific logic for Generic view if needed
-      return [{ id: 1 }];
+      const filteredMeetings = meetings.filter((meeting) =>
+        genericMeetings.includes(meeting.name)
+      );
+      return filteredMeetings;
     }
 
-    return [{ id: 1 }]; // Default fallback
+    return [
+      {
+        id: 1,
+        name: "Meeting",
+      },
+    ]; // Default fallback
   };
 
   const resources = filteredMeetings(types);
