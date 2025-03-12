@@ -495,17 +495,32 @@ const TaskScheduler = ({
       //   adminMeetings.includes(meeting.name)
       // );
 
+
       // Generic will see all meeting type without header.
-      return meetings?.map((el) => ({ id: el.id }));
+      // return meetings?.map((el) => ({ id: el.id }));
+
+      // return [filteredMeetings[0]];
     }
 
     return [
       {
         id: 1,
-        name: "Meeting",
+        name: "",
       },
     ]; // Default fallback
   };
+
+
+  useEffect(() => {
+    if (types === GENERIC) {
+      setFilteredEvents(prevEvents =>
+        prevEvents.map(event => ({
+          ...event,
+          resource: 1 // Change this to your desired value
+        }))
+      );
+    }
+  }, [types, meetings]); // Runs when `types` or `meetings` change
 
   const resources = filteredMeetings(types);
 
