@@ -522,7 +522,7 @@ const TaskScheduler = ({
       setSelectedDate(e.value);
       setStartDateTime(beginDate);
       setEndDateTime(closeDate);
-
+      setView("day");
       setMyView({
         schedule: {
           type: "day",
