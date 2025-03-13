@@ -68,9 +68,7 @@ const FirstComponent = ({
   const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
 
   function addMinutesToDateTime(formatType, durationInMinutes) {
-    console.log(durationInMinutes);
     // // Create a new Date object using the start time from formData
-    // console.log(formatType,durationInMinutes)
     if (formatType === "duration") {
       let date = new Date(formData.start);
 
@@ -95,7 +93,6 @@ const FirstComponent = ({
       );
 
       const modifiedDate = localDate.toISOString().slice(0, 16);
-      console.log({ modifiedDate });
 
       handleInputChange("Remind_At", modifiedDate);
       handleInputChange("Reminder_Text", durationInMinutes.name);

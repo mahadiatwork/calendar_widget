@@ -109,6 +109,7 @@ function App() {
         Regarding: item?.Regarding,
         Reminder_Text: item?.Reminder_Text,
         send_notification: item?.$send_notification,
+        Event_Status: item?.Event_Status
       };
     });
     setMyEvents(eventsDataResult);

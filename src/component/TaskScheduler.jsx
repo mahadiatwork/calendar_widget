@@ -128,6 +128,7 @@ const TaskScheduler = ({
     Reminder_Text: newEvent?.Reminder_Text || "",
     send_notification: newEvent?.send_notification || false,
     Send_Reminders: newEvent?.Send_Reminders || false,
+    Event_Status: newEvent?.Event_Status,
   });
   const timer = useRef(null);
 
@@ -379,7 +380,6 @@ const TaskScheduler = ({
     );
 
     const modifiedDate = localDate.toISOString().slice(0, 16);
-    console.log({ modifiedDate });
 
     handleInputChange("Remind_At", modifiedDate);
     handleInputChange("Reminder_Text", "");
@@ -490,15 +490,11 @@ const TaskScheduler = ({
 
     if (types === GENERIC) {
       // Add specific logic for Generic view if needed
-
       // const filteredMeetings = meetings.filter((meeting) =>
       //   adminMeetings.includes(meeting.name)
       // );
-
-
       // Generic will see all meeting type without header.
       // return meetings?.map((el) => ({ id: el.id }));
-
       // return [filteredMeetings[0]];
     }
 
@@ -510,13 +506,12 @@ const TaskScheduler = ({
     ]; // Default fallback
   };
 
-
   useEffect(() => {
     if (types === GENERIC) {
-      setFilteredEvents(prevEvents =>
-        prevEvents.map(event => ({
+      setFilteredEvents((prevEvents) =>
+        prevEvents.map((event) => ({
           ...event,
-          resource: 1 // Change this to your desired value
+          resource: 1, // Change this to your desired value
         }))
       );
     }
@@ -671,6 +666,7 @@ const TaskScheduler = ({
       send_notification: args?.event?.send_notification,
       Send_Invites: args?.event?.send_notification,
       Regarding: args?.event?.Regarding,
+      Event_Status: args?.event?.Event_Status,
     });
     setOpen(true);
     setArgumentLoader(false);
@@ -817,6 +813,50 @@ const TaskScheduler = ({
     }, 200);
   }, []);
 
+  const renderEvent = useCallback((data) => {
+    const ev = data.original;
+    const isClosed = data.original.Event_Status === "Closed"; // Check if the event is closed
+    const isAllDay = data.allDay;
+    const theme = "mbsc-ios"; // your theme name
+    return (
+      <>
+        <div
+          className={
+            "mbsc-schedule-event-background mbsc-timeline-event-background " +
+            (isAllDay ? " mbsc-schedule-event-all-day-background" : "") +
+            theme
+          }
+          style={{ background: data.style.background }}
+        />
+        <div
+          className={
+            "mbsc-schedule-event-inner " +
+            theme +
+            (isAllDay ? " mbsc-schedule-event-all-day-inner" : "") +
+            (data.cssClass || "")
+          }
+          style={{ color: data.color }}
+        >
+          <div
+            className={
+              "mbsc-schedule-event-title " +
+              (isAllDay ? " mbsc-schedule-event-all-day-title " : "") +
+              theme
+            }
+            style={{ textDecoration: isClosed ? "line-through" : "none" }}
+          >
+            {data.title}
+          </div>
+          {!isAllDay && (
+            <div className={"mbsc-schedule-event-range " + theme}>
+              {data.start} - {data.end}
+            </div>
+          )}
+        </div>
+      </>
+    );
+  }, []);
+
   // if (loader) {
   //   return <Box> Fetching data ....</Box>;
   // }
@@ -846,6 +886,7 @@ const TaskScheduler = ({
               resources={resources}
               renderHeader={customWithNavButtons}
               invalid={myInvalid}
+              renderScheduleEvent={renderEvent}
               // startDay={(e)=>{console.log('faky',e)}}
               // refDate={calendarRef}
               // onPageChange={(e) => {

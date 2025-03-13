@@ -7,13 +7,14 @@ import {
   Radio,
   RadioGroup,
   Typography,
+  Checkbox,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import CustomTextField from "../atom/CustomTextField";
+import React, { useState, useEffect } from "react";
 import { Datepicker } from "@mobiscroll/react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import CustomTextField from "../atom/CustomTextField";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -48,7 +49,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
       dateValue && dayjs(dateValue).isValid()
         ? dayjs(dateValue).format("DD/MM/YYYY hh:mm A")
         : "";
-  
+
     return (
       <CustomTextField
         fullWidth
@@ -64,16 +65,21 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
       />
     );
   };
-  
+
+useEffect(() => {
+  console.log({formData})
+},[])
 
   return (
     <Box>
       <FormControl>
-        <FormLabel id="demo-radio-buttons-group-label"  sx={{ fontSize: "9pt" }}>Gender</FormLabel>
+        <FormLabel id="demo-radio-buttons-group-label" sx={{ fontSize: "9pt" }}>
+          Gender
+        </FormLabel>
         <RadioGroup
           aria-labelledby="demo-radio-buttons-group-label"
           name="radio-buttons-group"
-          value={formData.occurrence}
+          value={formData.occurrence || "once"}
           onChange={(e) => handleInputChange("occurrence", e.target.value)}
         >
           <FormControlLabel
@@ -112,16 +118,28 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
       <Grid container spacing={2} sx={{ mt: 1, py: 1 }}>
         <Grid size={6}>
           <Box display="flex" alignItems="center">
-            <Typography variant="body1" sx={{ fontSize: "9pt", minWidth: "80px" }}>
-              Starts :
+            <Typography
+              variant="body1"
+              sx={{ fontSize: "9pt", minWidth: "80px" }}
+            >
+              Starts:
             </Typography>
             <Datepicker
-              controls={["calendar",'time']}
+              controls={["calendar", "time"]}
               calendarType="month"
               display="center"
               calendarScroll={"vertical"}
               inputComponent={() => (
-                <CustomInputComponent field="startTime" />
+                <CustomInputComponent
+                  field="startTime"
+                  sx={{
+                    "& .MuiInputBase-input": {
+                      fontSize: "9pt",
+                      padding: "4px",
+                    },
+                    "& .MuiOutlinedInput-root": { height: "30px" }, // Smaller height
+                  }}
+                />
               )}
               onClose={() => setOpenStartDatepicker(false)}
               onChange={(e) => handleInputChange("startTime", e.value)}
@@ -131,17 +149,29 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
         </Grid>
         <Grid size={6}>
           <Box display="flex" alignItems="center">
-            <Typography variant="body1" sx={{ fontSize: "9pt", minWidth: "80px" }}>
-              Ends :
+            <Typography
+              variant="body1"
+              sx={{ fontSize: "9pt", minWidth: "80px" }}
+            >
+              Ends:
             </Typography>
             <Datepicker
-              controls={["calendar",'time']}
+              controls={["calendar", "time"]}
               calendarType="month"
               display="center"
-              disabled
+              disabled={formData.noEndDate}
               calendarScroll={"vertical"}
               inputComponent={() => (
-                <CustomInputComponent field="endTime" />
+                <CustomInputComponent
+                  field="endTime"
+                  sx={{
+                    "& .MuiInputBase-input": {
+                      fontSize: "9pt",
+                      padding: "4px",
+                    },
+                    "& .MuiOutlinedInput-root": { height: "30px" }, // Smaller height
+                  }}
+                />
               )}
               onClose={() => setOpenEndDatepicker(false)}
               onChange={(e) => handleInputChange("endTime", e.value)}
@@ -150,12 +180,22 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
           </Box>
           <FormControlLabel
             control={
-              <Radio
+              <Checkbox
                 size="small"
                 checked={formData.noEndDate}
-                onChange={(e) =>
-                  handleInputChange("noEndDate", e.target.checked)
-                }
+                onChange={(e) => {
+                  const isChecked = e.target.checked;
+                  if (isChecked) {
+                    handleInputChange("endTime", ""); // Clear endTime if noEndDate is selected
+                    handleInputChange("noEndDate", true);
+                  } else if (formData.startTime) {
+                    const oneHourFromStart = dayjs(formData.startTime)
+                      .add(1, "hour")
+                      .toISOString();
+                    handleInputChange("endTime", oneHourFromStart); // Recalculate endTime
+                    handleInputChange("noEndDate", false);
+                  }
+                }}
               />
             }
             label="No end date"
