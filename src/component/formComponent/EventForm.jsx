@@ -99,7 +99,7 @@ const EventForm = ({
   dayjs.extend(utc);
   dayjs.extend(timezone);
 
-  console.log({ formData });
+
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -427,6 +427,9 @@ const EventForm = ({
               >
                 Next
               </Button>
+              {
+                formData.id && <Button>Clear Activity</Button>
+              }
               <Button
                 size="small"
                 disabled={
