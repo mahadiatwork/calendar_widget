@@ -579,7 +579,7 @@ const TaskScheduler = ({
           }}
         >
           <Datepicker
-            controls={["calendar"]}
+            // controls={["calendar"]}
             calendarType="month"
             dateFormat="DD/MM/YYYY"
             display="top"
