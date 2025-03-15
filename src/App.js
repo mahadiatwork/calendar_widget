@@ -41,11 +41,13 @@ function App() {
         per_page: 100,
         page: 1,
       }).then((usersResponse) => {
-        usersResponse?.users?.map((user, index) => {
-          if (user.status === "active") {
-            setUsers((prev) => [...prev, user]);
-          }
+        let temp = usersResponse?.users?.filter((user, index) => {
+          return user.status === "active";
+          // if (user.status === "active") {
+          //   setUsers((prev) => [...prev, user]);
+          // }
         });
+        setUsers(temp);
       });
 
       // Get organization variable
@@ -109,7 +111,7 @@ function App() {
         Regarding: item?.Regarding,
         Reminder_Text: item?.Reminder_Text,
         send_notification: item?.$send_notification,
-        Event_Status: item?.Event_Status
+        Event_Status: item?.Event_Status,
       };
     });
     setMyEvents(eventsDataResult);

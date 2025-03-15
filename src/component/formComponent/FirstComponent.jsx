@@ -50,7 +50,9 @@ const FirstComponent = ({
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [startValue, setStartValue] = useState(dayjs(formData.start));
   const [endValue, setEndValue] = useState(dayjs(formData.end));
-  const [sendNotification, setSendNotification] = useState(formData?.Send_Invites);
+  const [sendNotification, setSendNotification] = useState(
+    formData?.Send_Invites
+  );
   const [sendReminders, setSendReminders] = useState(false); // Initially, reminders are enabled
   const [reminderMinutes, setReminderMinutes] = useState(15);
 
@@ -703,7 +705,7 @@ const FirstComponent = ({
           <FormControl fullWidth size="small">
             <InputLabel
               id="demo-simple-select-standard-label"
-              sx={{  fontSize: "9pt" }} // ✅ Label text size
+              sx={{ fontSize: "9pt" }} // ✅ Label text size
             >
               Ring Alarm
             </InputLabel>
