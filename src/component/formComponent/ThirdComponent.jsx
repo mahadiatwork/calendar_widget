@@ -9,7 +9,7 @@ import {
   Typography,
   Checkbox,
 } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Datepicker } from "@mobiscroll/react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -43,13 +43,13 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
     handleInputChange,
   ]);
 
-  const CustomInputComponent = ({ field }) => {
+  const CustomInputComponent = useCallback(({ field }) => {
     const dateValue = formData?.[field];
     const formattedDate =
       dateValue && dayjs(dateValue).isValid()
         ? dayjs(dateValue).format("DD/MM/YYYY hh:mm A")
         : "";
-
+    console.log({ formattedDate });
     return (
       <CustomTextField
         fullWidth
@@ -57,18 +57,16 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
         label=""
         variant="outlined"
         value={formattedDate}
-        onClick={() =>
-          field === "startTime"
-            ? setOpenStartDatepicker(true)
-            : setOpenEndDatepicker(true)
-        }
+        onChange={() => {
+          if (field === "startTime") {
+            setOpenStartDatepicker(true);
+          } else {
+            setOpenEndDatepicker(true);
+          }
+        }}
       />
     );
-  };
-
-useEffect(() => {
-  console.log({formData})
-},[])
+  }, []);
 
   return (
     <Box>
@@ -124,25 +122,18 @@ useEffect(() => {
             >
               Starts:
             </Typography>
+
             <Datepicker
               controls={["calendar", "time"]}
               calendarType="month"
               display="center"
               calendarScroll={"vertical"}
-              inputComponent={() => (
-                <CustomInputComponent
-                  field="startTime"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      fontSize: "9pt",
-                      padding: "4px",
-                    },
-                    "& .MuiOutlinedInput-root": { height: "30px" }, // Smaller height
-                  }}
-                />
-              )}
+              inputComponent={() => <CustomInputComponent field="startTime" />}
               onClose={() => setOpenStartDatepicker(false)}
-              onChange={(e) => handleInputChange("startTime", e.value)}
+              onChange={(e) => {
+                console.log("Starts");
+                handleInputChange("startTime", e.value);
+              }}
               isOpen={openStartDatepicker}
             />
           </Box>
@@ -161,20 +152,12 @@ useEffect(() => {
               display="center"
               disabled={formData.noEndDate}
               calendarScroll={"vertical"}
-              inputComponent={() => (
-                <CustomInputComponent
-                  field="endTime"
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      fontSize: "9pt",
-                      padding: "4px",
-                    },
-                    "& .MuiOutlinedInput-root": { height: "30px" }, // Smaller height
-                  }}
-                />
-              )}
+              inputComponent={() => <CustomInputComponent field="endTime" />}
               onClose={() => setOpenEndDatepicker(false)}
-              onChange={(e) => handleInputChange("endTime", e.value)}
+              onChange={(e) => {
+                console.log("Ends");
+                handleInputChange("endTime", e.value);
+              }}
               isOpen={openEndDatepicker}
             />
           </Box>
