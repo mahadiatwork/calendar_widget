@@ -14,6 +14,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import "./test.css";
+// import EventForm from "./formComponent/EventForm";
 import EventForm from "./formComponent/EventForm";
 import {
   Alert,
@@ -515,7 +516,8 @@ const TaskScheduler = ({
         }))
       );
     }
-  }, [types, meetings]); // Runs when `types` or `meetings` change
+  }, [types]); // Runs when `types` or `meetings` change
+  // meetings removed from dependency due to rerender
 
   const resources = filteredMeetings(types);
 

@@ -49,7 +49,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
       dateValue && dayjs(dateValue).isValid()
         ? dayjs(dateValue).format("DD/MM/YYYY hh:mm A")
         : "";
-    console.log({ formattedDate });
+
     return (
       <CustomTextField
         fullWidth
@@ -57,7 +57,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
         label=""
         variant="outlined"
         value={formattedDate}
-        onChange={() => {
+        onClick={() => {
           if (field === "startTime") {
             setOpenStartDatepicker(true);
           } else {
