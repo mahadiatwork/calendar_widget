@@ -53,6 +53,7 @@ const FirstComponent = ({
   const [sendNotification, setSendNotification] = useState(
     formData?.Send_Invites
   );
+  const [clearActivity, setClearActivity] = useState(formData.Event_Status === "Open" || false);
   const [sendReminders, setSendReminders] = useState(false); // Initially, reminders are enabled
   const [reminderMinutes, setReminderMinutes] = useState(15);
 
@@ -202,6 +203,16 @@ const FirstComponent = ({
   //   return true
   // }
   const handleCheckboxChange = (field) => {
+
+    if (field === "clear_activity") {
+      const newClearActivity = !clearActivity;
+      setClearActivity(newClearActivity);
+      // Update the form data
+      handleInputChange("Event_Status", newClearActivity ? "Closed" : "Open");
+      handleInputChange("clear_activity", newClearActivity);
+    }
+
+
     if (field === "send_notification") {
       const newSendNotification = !sendNotification;
       setSendNotification(newSendNotification);
@@ -219,7 +230,8 @@ const FirstComponent = ({
           { period: "minutes", unit: reminderMinutes },
         ]);
         handleInputChange("Reminder_Text", `${reminderMinutes} minutes before`);
-      } else {
+      } 
+      else {
         // If reminders are disabled
         handleInputChange("Remind_Participants", []);
         handleInputChange("Reminder_Text", "None");
@@ -519,57 +531,71 @@ const FirstComponent = ({
           />
         </Grid>
         <Grid
-          container
-          spacing={2}
-          alignItems="center"
-          sx={{ margin: "-10px 0px" }}
-        >
-          <Grid item xs={4}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={sendNotification}
-                  onChange={() => handleCheckboxChange("send_notification")}
-                />
-              }
-              label="Send invites"
-              sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }} // Adjust font size
-            />
-          </Grid>
+  container
+  spacing={2}
+  alignItems="center"
+  sx={{ margin: "-10px 0px" }}
+>
+  <Grid item xs={3}>
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={sendNotification}
+          onChange={() => handleCheckboxChange("send_notification")}
+        />
+      }
+      label="Send invites"
+      sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }} // Adjust font size
+    />
+  </Grid>
 
-          <Grid item xs={4}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={sendReminders}
-                  onChange={() => handleCheckboxChange("Remind_Participants")}
-                />
-              }
-              label="Send reminders"
-              sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
-            />
-          </Grid>
+  <Grid item xs={3}>
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={sendReminders}
+          onChange={() => handleCheckboxChange("Remind_Participants")}
+        />
+      }
+      label="Send reminders"
+      sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
+    />
+  </Grid>
 
-          <Grid item xs={4}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.create_sperate_contact}
-                  disabled={formData.id !== "" ? true : false}
-                  onChange={(e) => {
-                    handleInputChange(
-                      "create_sperate_contact",
-                      e.target.checked
-                    );
-                    console.log(e.target.checked);
-                  }}
-                />
-              }
-              label="Create separate activity for each contact"
-              sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
-            />
-          </Grid>
-        </Grid>
+  <Grid item xs={3}>
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={formData.create_sperate_contact}
+          disabled={formData.id !== ""}
+          onChange={(e) => {
+            handleInputChange("create_sperate_contact", e.target.checked);
+            console.log(e.target.checked);
+          }}
+        />
+      }
+      label="Create separate activity for each contact"
+      sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
+    />
+  </Grid>
+
+  {/* Ensure the last column always exists, avoiding layout shifting */}
+  <Grid item xs={3} sx={{ display: "flex", alignItems: "center" }}>
+    {formData.id && (
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={clearActivity}
+            onChange={() => handleCheckboxChange("clear_activity")}
+          />
+        }
+        label="Clear Activity"
+        sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
+      />
+    )}
+  </Grid>
+</Grid>
+
 
         <Grid size={18}>
           <AccountField

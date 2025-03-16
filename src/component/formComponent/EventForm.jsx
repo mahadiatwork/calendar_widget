@@ -156,6 +156,7 @@ const EventForm = ({
         APIData: transformedData,
         Trigger: ["workflow"],
       };
+
       ZOHO.CRM.API.updateRecord(config).then(function (data) {
         console.log("tazwer", data);
         if (data.data[0].code === "SUCCESS") {
@@ -416,7 +417,6 @@ const EventForm = ({
             <Button size="small" disabled>
               Back
             </Button>{" "}
-            {/* Back is disabled on first tab */}
             <Box>
               <Button
                 size="small"
@@ -427,9 +427,6 @@ const EventForm = ({
               >
                 Next
               </Button>
-              {
-                formData.id && <Button>Clear Activity</Button>
-              }
               <Button
                 size="small"
                 disabled={
