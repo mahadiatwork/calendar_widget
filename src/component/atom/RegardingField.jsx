@@ -15,7 +15,7 @@ const RegardingField = ({ formData, handleInputChange }) => {
       if (predefinedOptions.includes(existingValue)) {
         setSelectedValue(existingValue);
         setManualInput("");
-        setShowManualInput(false);
+        // setShowManualInput(false);
       } else {
         setSelectedValue("Other");
         setManualInput(existingValue);
@@ -24,7 +24,7 @@ const RegardingField = ({ formData, handleInputChange }) => {
     } else {
       setSelectedValue("");
       setManualInput("");
-      setShowManualInput(false);
+      // setShowManualInput(false);
     }
   }, [formData.type, existingValue]);
 
