@@ -167,7 +167,17 @@ const TaskScheduler = ({
       });
     }
 
-    setFilteredEvents(filtered);
+    if (types === GENERIC) {
+      setFilteredEvents(
+        filtered.map((event) => ({
+          ...event,
+          resource: 1, // Ensure all events get resource = 1
+        }))
+      );
+    } else {
+      setFilteredEvents(filtered);
+    }
+    console.log({filteredEvents})
   }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
   useEffect(() => {
@@ -507,17 +517,6 @@ const TaskScheduler = ({
     ]; // Default fallback
   };
 
-  useEffect(() => {
-    if (types === GENERIC) {
-      setFilteredEvents((prevEvents) =>
-        prevEvents.map((event) => ({
-          ...event,
-          resource: 1, // Change this to your desired value
-        }))
-      );
-    }
-  }, [types]); // Runs when `types` or `meetings` change
-  // meetings removed from dependency due to rerender
 
   const resources = filteredMeetings(types);
 
