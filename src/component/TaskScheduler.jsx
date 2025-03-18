@@ -10,7 +10,10 @@ import {
   SegmentedGroup,
   setOptions,
   Toast,
+  momentTimezone,
 } from "@mobiscroll/react";
+import moment from "moment-timezone";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import "./test.css";
@@ -34,6 +37,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import DrawerComponent from "./DrawerComponent";
 
+momentTimezone.moment = moment;
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -888,6 +892,9 @@ const TaskScheduler = ({
           <div className="mbsc-col-sm-12 docs-appointment-calendar">
             {/* {console.log({ filteredEvents, myView, resources, myInvalid })} */}
             <Eventcalendar
+              timezonePlugin={momentTimezone}
+              dataTimezone="utc"
+              displayTimezone="Australia/Adelaide"
               data={filteredEvents}
               view={myView}
               resources={resources}
