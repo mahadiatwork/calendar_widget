@@ -83,14 +83,19 @@ const TaskScheduler = ({
     dayjs().format("YYYY-MM-DD")
   );
   const [myView, setMyView] = useState({
-    calendar: { labels: true, type: "month" },
+    schedule: {
+      type: "day",
+      allDay: false,
+      startTime: "06:00",
+      endTime: "24:00",
+    },
   });
-  const [view, setView] = useState("month");
+
+  const [view, setView] = useState("day");
   const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
-  const [userFilter, setUserFilter] = useState(
-    loggedInUser?.full_name ? [loggedInUser.full_name] : []
-  );
+  const [userFilter, setUserFilter] = useState([]);
+
   const [clickedEvent, setClickedEvent] = useState(null);
   const [argumentLoader, setArgumentLoader] = useState(false);
   const [types, setTypes] = useState();
@@ -179,7 +184,7 @@ const TaskScheduler = ({
     } else {
       setFilteredEvents(filtered);
     }
-    console.log({ filteredEvents });
+    setUserFilter(loggedInUser?.full_name ? [loggedInUser.full_name] : []);
   }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
   useEffect(() => {
