@@ -88,7 +88,9 @@ const TaskScheduler = ({
   const [view, setView] = useState("month");
   const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
-  const [userFilter, setUserFilter] = useState([]);
+  const [userFilter, setUserFilter] = useState(
+    loggedInUser?.full_name ? [loggedInUser.full_name] : []
+  );
   const [clickedEvent, setClickedEvent] = useState(null);
   const [argumentLoader, setArgumentLoader] = useState(false);
   const [types, setTypes] = useState();
@@ -177,7 +179,7 @@ const TaskScheduler = ({
     } else {
       setFilteredEvents(filtered);
     }
-    console.log({filteredEvents})
+    console.log({ filteredEvents });
   }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
 
   useEffect(() => {
@@ -516,7 +518,6 @@ const TaskScheduler = ({
       },
     ]; // Default fallback
   };
-
 
   const resources = filteredMeetings(types);
 
