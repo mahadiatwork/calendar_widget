@@ -79,7 +79,23 @@ function App() {
     );
 
     const eventsData = searchResp?.details?.statusMessage?.data || [];
-    const eventsDataResult = eventsData.map((item, index) => {
+
+    let combinedEvents = [];
+
+    const allMeetings = await ZOHO.CRM.API.getAllRecords({
+      Entity: "Events",
+      sort_order: "asc",
+      per_page: 100,
+      page: 1,
+    });
+
+    const allMeetingsData = allMeetings?.data || [];
+
+    combinedEvents = [...eventsData, ...allMeetingsData];
+
+
+
+    const eventsDataResult = combinedEvents.map((item, index) => {
       return {
         id: item.id,
         title: item.Event_Title,
