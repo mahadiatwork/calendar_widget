@@ -1,119 +1,94 @@
 import React, { useState, useEffect } from "react";
-import { FormControl, InputLabel, Select, MenuItem, TextField, Box } from "@mui/material";
-import { getRegardingOptions } from "./helperFunc";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Box,
+} from "@mui/material";
+import { getRegardingOptions } from "./helperFunc"; // Import the function
 
 const RegardingField = ({ formData, handleInputChange }) => {
   const existingValue = formData.Regarding;
-  const predefinedOptions = getRegardingOptions(formData.Type_of_Activity, existingValue);
+  const predefinedOptions = getRegardingOptions(
+    formData.Type_of_Activity,
+    existingValue
+  ); // Get dynamic options based on type
 
-  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedValue, setSelectedValue] = useState(existingValue);
   const [manualInput, setManualInput] = useState("");
-  const [showManualInput, setShowManualInput] = useState(false);
 
   useEffect(() => {
-    if (existingValue) {
-      if (predefinedOptions.includes(existingValue)) {
-        setSelectedValue(existingValue);
-        setManualInput("");
-        // setShowManualInput(false);
-      } else {
-        setSelectedValue("Other");
-        setManualInput(existingValue);
-        setShowManualInput(true);
-      }
+    console.log({ mahadiData: formData });
+    // If existingValue is not in the predefined options, set it to "Other" and show manual input
+    if (existingValue && !predefinedOptions.includes(existingValue)) {
+      setSelectedValue("Other");
+      setManualInput(existingValue);
     } else {
-      setSelectedValue("");
+      setSelectedValue(existingValue);
       setManualInput("");
-      // setShowManualInput(false);
     }
-  }, [formData.type, existingValue]);
+  }, [formData.Type_of_Activity, existingValue]);
 
   const handleSelectChange = (event) => {
     const value = event.target.value;
     setSelectedValue(value);
-    
-    if (value === "Other") {
-      setShowManualInput(true);
-      setManualInput("");
-      handleInputChange("Regarding", "Other");
-    } else {
-      setShowManualInput(false);
-      setManualInput("");
+
+    if (value !== "Other") {
+      setManualInput(""); // Clear manual input when a predefined option is selected
       handleInputChange("Regarding", value);
+    } else {
+      setManualInput(""); // Reset manual input when "Other" is selected
     }
   };
 
   const handleManualInputChange = (event) => {
     const value = event.target.value;
     setManualInput(value);
-    handleInputChange("Regarding", value);
+    
   };
 
+  const handleBlur = () => {
+    handleInputChange("Regarding", manualInput);
+  }
+
   return (
-    <Box sx={{ width: "100%", mb: "3px" }}>
-      <FormControl fullWidth size="small">
-        <InputLabel id="regarding-label" shrink sx={{ fontSize: "9pt" }}> {/* ✅ Label text size */}
+    <Box sx={{ width: "100%" }}>
+      <FormControl fullWidth size="small" variant="outlined">
+        <InputLabel id="regarding-label" sx={{ fontSize: "9pt" }}>
           Regarding
         </InputLabel>
         <Select
           labelId="regarding-label"
           id="regarding-select"
-          label="Regarding"
-          fullWidth
-          size="small"
-          displayEmpty
           value={selectedValue}
           onChange={handleSelectChange}
-          MenuProps={{
-            PaperProps: {
-              sx: {
-                fontSize: "9pt", // ✅ Dropdown menu text size
-              },
-            },
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              padding: 0,
-            },
-            "& .MuiInputBase-input": {
-              display: "flex",
-              alignItems: "center",
-              fontSize: "9pt", // ✅ Input text size
-            },
-            "& .MuiSelect-select": {
-              padding: "4px 10px",
-              fontSize: "9pt", // ✅ Selected value text size
-            },
-          }}
+          label="Regarding"
+          sx={{ fontSize: "9pt" }}
         >
           {predefinedOptions.map((option) => (
-            <MenuItem key={option} value={option} sx={{ fontSize: "9pt" }}> {/* ✅ Menu item text size */}
+            <MenuItem key={option} value={option} sx={{ fontSize: "9pt" }}>
               {option}
             </MenuItem>
           ))}
-          <MenuItem value="Other" sx={{ fontSize: "9pt" }}>Other (Manually enter)</MenuItem>
+          <MenuItem value="Other" sx={{ fontSize: "9pt" }}>
+            Other (Manually enter)
+          </MenuItem>
         </Select>
       </FormControl>
 
-      {showManualInput && (
+      {selectedValue === "Other" && (
         <TextField
           label="Enter your custom regarding"
           fullWidth
           size="small"
           value={manualInput}
           onChange={handleManualInputChange}
-          InputLabelProps={{ shrink: true }}
+          onBlur={handleBlur}
           sx={{
             mt: 2,
-            mb: "3px",
-            "& .MuiInputLabel-root": { fontSize: "9pt" }, // ✅ Label text size
-            "& .MuiOutlinedInput-root": {
-              padding: "2px",
-            },
-            "& .MuiInputBase-input": {
-              padding: "0px 10px",
-              fontSize: "9pt", // ✅ Input text size
-            },
+            fontSize: "9pt",
           }}
         />
       )}

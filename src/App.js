@@ -9,6 +9,7 @@ const ZOHO = window.ZOHO;
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+
 function App() {
   const [startDateTime, setStartDateTime] = useState(
     dayjs().startOf("month").format("YYYY-MM-DD") + "T00:00:00+10:30"
@@ -94,6 +95,9 @@ function App() {
     combinedEvents = [...eventsData, ...allMeetingsData];
 
 
+    console.log({eventsData})
+
+
 
     const eventsDataResult = combinedEvents.map((item, index) => {
       return {
@@ -130,6 +134,8 @@ function App() {
         Event_Status: item?.Event_Status,
       };
     });
+
+    console.log({eventsDataResult})
     setMyEvents(eventsDataResult);
     setLoader(false);
   }, [startDateTime, endDateTime]);
@@ -150,6 +156,7 @@ function App() {
       searchDataByDate();
     }
   }, [zohoLoaded, searchDataByDate]);
+
 
   return (
     <div>
