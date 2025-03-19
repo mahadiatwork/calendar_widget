@@ -188,8 +188,11 @@ const TaskScheduler = ({
     } else {
       setFilteredEvents(filtered);
     }
+  }, [priorityFilter, activityTypeFilter, myEvents,userFilter]);
+
+  useEffect(() => {
     setUserFilter(loggedInUser?.full_name ? [loggedInUser.full_name] : []);
-  }, [priorityFilter, activityTypeFilter, userFilter, myEvents]);
+  }, []);
 
   useEffect(() => {
     for (const event of myEvents) {

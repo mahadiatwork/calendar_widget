@@ -7,12 +7,31 @@ export default function AccountField({
   value,
   handleInputChange,
   clickedEvent,
+  formData,
 }) {
   const [accounts, setAccounts] = useState([]); // Accounts list
   const [selectedAccount, setSelectedAccount] = useState(null); // Selected account
   const [inputValue, setInputValue] = useState(""); // Input field value
   const [notFoundMessage, setNotFoundMessage] = useState(""); // Not found message
   const [loading, setLoading] = useState(false); // Loading state
+
+  // Sync selectedAccount with formData.What_Id for the default value
+  useEffect(() => {
+    // console.log({associateWith: formData.associateWith})
+    if (formData.associateWith?.id) {
+      const selected = {
+        Account_Name: formData.associateWith.Account_Name,
+        id: formData.associateWith.id,
+      };
+      setSelectedAccount(selected);
+      setInputValue(formData.associateWith.Account_Name || "");
+      setAccounts((prevAccounts) =>
+        [selected, ...prevAccounts].filter(
+          (v, i, a) => a.findIndex((t) => t.id === v.id) === i // Ensure no duplicates
+        )
+      );
+    }
+  }, [formData.associateWith]); // Rerun effect only when formData.What_Id changes
 
   // Utility to debounce the search function
   const debounceSearch = useCallback(
