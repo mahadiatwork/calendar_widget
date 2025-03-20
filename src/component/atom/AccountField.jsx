@@ -10,7 +10,7 @@ export default function AccountField({
   formData,
 }) {
   const [accounts, setAccounts] = useState([]); // Accounts list
-  const [selectedAccount, setSelectedAccount] = useState(null); // Selected account
+  const [selectedAccount, setSelectedAccount] = useState(value || null); // Selected account
   const [inputValue, setInputValue] = useState(""); // Input field value
   const [notFoundMessage, setNotFoundMessage] = useState(""); // Not found message
   const [loading, setLoading] = useState(false); // Loading state
