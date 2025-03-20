@@ -188,7 +188,7 @@ const TaskScheduler = ({
     } else {
       setFilteredEvents(filtered);
     }
-  }, [priorityFilter, activityTypeFilter, myEvents,userFilter]);
+  }, [priorityFilter, activityTypeFilter, myEvents, userFilter]);
 
   useEffect(() => {
     setUserFilter(loggedInUser?.full_name ? [loggedInUser.full_name] : []);
@@ -370,10 +370,12 @@ const TaskScheduler = ({
     }
 
     if (field === "scheduleWith") {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: Array.isArray(value) ? [...value] : value, // Spread array values for multiple selections
-      }));
+      setFormData((prev) => {
+        return {
+          ...prev,
+          [field]: Array.isArray(value) ? [...value] : value, // Spread array values for multiple selections
+        };
+      });
     }
     setFormData((prevState) => ({
       ...prevState,
