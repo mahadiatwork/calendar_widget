@@ -143,7 +143,10 @@ const TaskScheduler = ({
     Event_Status: newEvent?.Event_Status,
   });
   const timer = useRef(null);
-
+  console.log({
+    myEventsTaskSchedule: myEvents,
+    filteredEvents,
+  });
   const usertype = loggedInUser?.User_Type;
   useEffect(() => {
     if (usertype !== undefined) {
@@ -191,6 +194,7 @@ const TaskScheduler = ({
   }, [priorityFilter, activityTypeFilter, myEvents, userFilter]);
 
   useEffect(() => {
+    console.log({ admin: loggedInUser });
     setUserFilter(loggedInUser?.full_name ? [loggedInUser.full_name] : []);
   }, []);
 
@@ -683,6 +687,7 @@ const TaskScheduler = ({
       Send_Invites: args?.event?.send_notification,
       Regarding: args?.event?.Regarding,
       Event_Status: args?.event?.Event_Status,
+      Send_Reminders: args?.event?.Send_Reminders,
     });
     setOpen(true);
     setArgumentLoader(false);
@@ -851,7 +856,7 @@ const TaskScheduler = ({
             (isAllDay ? " mbsc-schedule-event-all-day-inner" : "") +
             (data.cssClass || "")
           }
-          style={{ color: data.color }}
+          style={{ color: "black" }}
         >
           <div
             className={

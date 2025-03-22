@@ -56,7 +56,7 @@ const FirstComponent = ({
   const [clearActivity, setClearActivity] = useState(
     formData.Event_Status === "Open" || false
   );
-  const [sendReminders, setSendReminders] = useState(false); // Initially, reminders are enabled
+  const [sendReminders, setSendReminders] = useState(formData?.Send_Reminders); // Initially, reminders are enabled
   const [reminderMinutes, setReminderMinutes] = useState(15);
 
   const ringAlarm = [
@@ -73,33 +73,25 @@ const FirstComponent = ({
   const durations = Array.from({ length: 24 }, (_, i) => (i + 1) * 10);
 
   function addMinutesToDateTime(formatType, durationInMinutes) {
-    // // Create a new Date object using the start time from formData
+    const startTime = dayjs(formData.start);
+
     if (formatType === "duration") {
-      let date = new Date(formData.start);
+      const endTime = startTime.add(durationInMinutes, 'minute');
 
-      date.setMinutes(date.getMinutes() + parseInt(durationInMinutes, 10));
-      const localDate = new Date(
-        date.getTime() - date.getTimezoneOffset() * 60000
-      );
+      const modifiedEndDate = endTime.format('YYYY-MM-DDTHH:mm');
+      const modifiedStartDate = startTime.format('YYYY-MM-DDTHH:mm');
 
-      const modifiedDate = localDate.toISOString().slice(0, 16);
-
-      handleInputChange("end", modifiedDate);
-      setEndValue(dayjs(modifiedDate));
+      handleInputChange("end", modifiedEndDate);
+      handleInputChange("start", modifiedStartDate);
+      setEndValue(dayjs(endTime));
     } else {
-      let date = new Date(formData.start);
 
-      date.setMinutes(
-        date.getMinutes() - parseInt(durationInMinutes.value, 10)
-      );
+      const reminderTime = startTime.subtract(durationInMinutes.value, 'minute');
 
-      const localDate = new Date(
-        date.getTime() - date.getTimezoneOffset() * 60000
-      );
+      console.log("startTime", reminderTime,durationInMinutes)
+      const modifiedReminderDate = reminderTime.format('YYYY-MM-DDTHH:mm');
 
-      const modifiedDate = localDate.toISOString().slice(0, 16);
-
-      handleInputChange("Remind_At", modifiedDate);
+      handleInputChange("Remind_At", modifiedReminderDate);
       handleInputChange("Reminder_Text", durationInMinutes.name);
     }
   }
@@ -251,6 +243,8 @@ const FirstComponent = ({
       handleInputChange("Reminder_Text", `${value} minutes before`);
     }
   };
+
+
 
   return (
     <Box>

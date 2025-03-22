@@ -99,8 +99,6 @@ const EventForm = ({
   dayjs.extend(utc);
   dayjs.extend(timezone);
 
-
-
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -138,7 +136,6 @@ const EventForm = ({
       Description: "",
       send_notification: false,
       Send_Reminders: false,
-      
     });
     onClose();
     setOpen(false);
@@ -157,8 +154,10 @@ const EventForm = ({
         Trigger: ["workflow"],
       };
 
+      formData.start = new Date(formData.start);
+      formData.end = new Date(formData.end);
+
       ZOHO.CRM.API.updateRecord(config).then(function (data) {
-        console.log("tazwer", data);
         if (data.data[0].code === "SUCCESS") {
           setSnackbarOpen(true);
           setEvents((prevEvents) =>
@@ -188,7 +187,7 @@ const EventForm = ({
             Banner: false,
             Description: "",
             send_notification: false,
-            Send_Reminders: false
+            Send_Reminders: false,
           });
           setClickedEvent(null);
           setOpen(false);
@@ -206,11 +205,7 @@ const EventForm = ({
             Trigger: ["workflow"],
           })
             .then((data) => {
-              if (
-                data.data &&
-                data.data.length > 0 &&
-                data.data[0].code === "SUCCESS"
-              ) {
+              if (data.data[0].code === "SUCCESS") {
                 console.log(data?.data);
                 setSnackbarOpen(true);
                 handleInputChange("id", data?.data[0]?.details?.id);
@@ -251,23 +246,41 @@ const EventForm = ({
         setOpen(false);
       } else {
         const transformedData = transformFormSubmission(formData);
+        formData.start = new Date(formData.start);
+        formData.end = new Date(formData.end);
         ZOHO.CRM.API.insertRecord({
           Entity: "Events",
           APIData: transformedData,
           Trigger: ["workflow"],
         })
           .then((data) => {
-            if (
-              data.data &&
-              data.data.length > 0 &&
-              data.data[0].code === "SUCCESS"
-            ) {
+            if (data.data[0].code === "SUCCESS") {
               handleInputChange("id", data?.data[0]?.details?.id);
-
+              console.log({
+                key: {
+                  ...formData,
+                  id: data?.data[0].details?.id,
+                  scheduleFor: {
+                    name: formData.scheduleFor.full_name,
+                    id: formData.scheduleFor.id,
+                    email: formData.scheduleFor.email,
+                  },
+                },
+              });
               setEvents((prev) => [
                 ...prev,
-                { ...formData, id: data?.data[0].details?.id },
+                {
+                  ...formData,
+                  id: data?.data[0].details?.id,
+                  scheduleFor: {
+                    name: formData.scheduleFor.full_name,
+                    id: formData.scheduleFor.id,
+                    email: formData.scheduleFor.email,
+                  },
+                },
               ]);
+
+              // console.log({myEvents})
               setFormData({
                 id: "",
                 title: "",
@@ -290,7 +303,7 @@ const EventForm = ({
                 Banner: false,
                 Description: "",
                 send_notification: false,
-                Send_Reminders: false
+                Send_Reminders: false,
               });
               setClickedEvent(null);
               setOpen(false);
@@ -303,7 +316,7 @@ const EventForm = ({
       }
     }
   };
-
+  console.log({ myEvents });
   useEffect(() => {
     if (formData.id !== "") {
       setEdited(true);
@@ -349,7 +362,6 @@ const EventForm = ({
       </Box>
     );
   }
-
 
   return (
     <Box

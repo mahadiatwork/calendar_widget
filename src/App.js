@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { Box, CircularProgress } from "@mui/material";
 const ZOHO = window.ZOHO;
 
 dayjs.extend(utc);
@@ -57,7 +58,7 @@ function App() {
         const colorsArray = JSON.parse(data?.Success?.Content || "[]");
         setRecentColor(colorsArray);
       });
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const searchDataByDate = useCallback(async () => {
@@ -95,7 +96,6 @@ function App() {
     combinedEvents = [...eventsData, ...allMeetingsData];
 
 
-    console.log({eventsData})
 
 
 
@@ -131,11 +131,11 @@ function App() {
         Regarding: item?.Regarding,
         Reminder_Text: item?.Reminder_Text,
         send_notification: item?.$send_notification,
+        Send_Reminders: item?.Send_Reminders,
         Event_Status: item?.Event_Status,
       };
     });
 
-    console.log({eventsDataResult})
     setMyEvents(eventsDataResult);
     setLoader(false);
   }, [startDateTime, endDateTime]);
@@ -156,6 +156,21 @@ function App() {
       searchDataByDate();
     }
   }, [zohoLoaded, searchDataByDate]);
+
+  if (loggedInUser === null) {
+    return (
+      <Box
+        sx={{
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center", 
+          minHeight: "100vh"
+        }}
+      >
+        <CircularProgress size={40} />
+      </Box>
+    );
+  }
 
 
   return (
