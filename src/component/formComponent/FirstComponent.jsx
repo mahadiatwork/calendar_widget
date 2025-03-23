@@ -327,6 +327,7 @@ const FirstComponent = ({
                 handleInputChange("start", e.$d);
                 handleInputChange("end", addedHour);
                 setEndValue(dayjs(addedHour));
+                handleInputChange("duration", 60);
                 console.log(e.$d);
                 console.log(addedHour);
               }}
