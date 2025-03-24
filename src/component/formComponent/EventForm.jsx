@@ -148,6 +148,10 @@ const EventForm = ({
 
     if (formData.id !== "") {
       const transformedData = transformFormSubmission(formData);
+
+      console.log({transformedData})
+
+      return
       var config = {
         Entity: "Events",
         APIData: transformedData,

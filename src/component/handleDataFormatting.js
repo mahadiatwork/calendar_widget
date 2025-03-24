@@ -4,6 +4,31 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+
+const activityType = [
+  { type: "Meeting", resource: 1 },
+  { type: "To-Do", resource: 2 },
+  { type: "Appointment", resource: 3 },
+  { type: "Boardroom", resource: 4 },
+  { type: "Call Billing", resource: 5 },
+  { type: "Email Billing", resource: 6 },
+  { type: "Initial Consultation", resource: 7 },
+  { type: "Call", resource: 8 },
+  { type: "Mail", resource: 9 },
+  { type: "Meeting Billing", resource: 10 },
+  { type: "Personal Activity", resource: 11 },
+  { type: "Room 1", resource: 12 },
+  { type: "Room 2", resource: 13 },
+  { type: "Room 3", resource: 14 },
+  { type: "To Do Billing", resource: 15 },
+  { type: "Vacation", resource: 16 },
+];
+
+function getResourceByType(type) {
+  const match = activityType.find(item => item.type === type);
+  return match ? match.resource : null;
+}
+
 export function transformFormSubmission(data, individualParticipant = null) {
   const transformScheduleWithToParticipants = (scheduleWith) => {
     return scheduleWith.map((contact) => ({
@@ -38,7 +63,6 @@ export function transformFormSubmission(data, individualParticipant = null) {
     ]
     : transformScheduleWithToParticipants(data?.scheduledWith || []);
 
-  console.log("data?.occurrence", data?.start);
 
   // Initialize transformedData
   let transformedData = {
@@ -83,17 +107,22 @@ export function transformFormSubmission(data, individualParticipant = null) {
     };
   }
 
+  const resourceValue = getResourceByType(data.Type_of_Activity);
+
+  transformedData.resource = resourceValue;
+
+
   if (data.Send_Reminders) {
     const startTime = dayjs(data.start);
 
     let modifiedReminderDate = null;
 
-    if(data.Reminder_Text === "At time of meeting"){
+    if (data.Reminder_Text === "At time of meeting") {
       modifiedReminderDate = startTime.tz("Australia/Adelaide")
-      .format("YYYY-MM-DDTHH:mm:ssZ");
-    }else{
+        .format("YYYY-MM-DDTHH:mm:ssZ");
+    } else {
       const reminderTime = startTime.subtract(parseInt(data?.Reminder_Text.split(" ")[0]), 'minute');
-       modifiedReminderDate = reminderTime.tz("Australia/Adelaide")
+      modifiedReminderDate = reminderTime.tz("Australia/Adelaide")
         .format("YYYY-MM-DDTHH:mm:ssZ");
       transformedData.Remind_At = modifiedReminderDate;
       transformedData.Participant_Reminder = modifiedReminderDate;
@@ -109,12 +138,12 @@ export function transformFormSubmission(data, individualParticipant = null) {
   ) {
     transformedData.Recurring_Activity = {
       RRULE: `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${data.occurrence === "weekly"
-          ? `;BYDAY=${dayName.toUpperCase()}`
-          : data.occurrence === "monthly"
-            ? `;BYMONTHDAY=${dayOfMonth}`
-            : data.occurrence === "yearly"
-              ? `;BYMONTH=${monthNumber};BYMONTHDAY=${dayOfMonth}`
-              : ""
+        ? `;BYDAY=${dayName.toUpperCase()}`
+        : data.occurrence === "monthly"
+          ? `;BYMONTHDAY=${dayOfMonth}`
+          : data.occurrence === "yearly"
+            ? `;BYMONTH=${monthNumber};BYMONTHDAY=${dayOfMonth}`
+            : ""
         };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}`,
     };
   }

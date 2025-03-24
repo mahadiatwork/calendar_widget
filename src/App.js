@@ -87,7 +87,7 @@ function App() {
     const allMeetings = await ZOHO.CRM.API.getAllRecords({
       Entity: "Events",
       sort_order: "asc",
-      per_page: 100,
+      per_page: 200,
       page: 1,
     });
 

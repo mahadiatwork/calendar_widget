@@ -577,7 +577,7 @@ const FirstComponent = ({
           </Grid>
 
           {/* Ensure the last column always exists, avoiding layout shifting */}
-          <Grid item xs={3} sx={{ display: "flex", alignItems: "center" }}>
+          <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
             {formData.id && (
               <FormControlLabel
                 control={
@@ -586,7 +586,21 @@ const FirstComponent = ({
                     onChange={() => handleCheckboxChange("clear_activity")}
                   />
                 }
-                label="Clear Activity"
+                label="Clear"
+                sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
+              />
+            )}
+          </Grid>
+          <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
+            {formData.id && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={clearActivity}
+                    onChange={() => handleCheckboxChange("clear_activity")}
+                  />
+                }
+                label="Erase"
                 sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
               />
             )}
