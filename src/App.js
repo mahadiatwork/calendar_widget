@@ -151,14 +151,89 @@ function App() {
       param_type: 1,
     };
 
+
+    var conn_name = "zoho_crm_conn";
+
+
+    const req_data_meetings2 = {
+      parameters: {
+        select_query: `
+          SELECT 
+            id, 
+            Event_Title, 
+            Start_DateTime, 
+            End_DateTime, 
+            Duration_Min, 
+            What_Id, 
+            Type_of_Activity, 
+            resource, 
+            Owner,
+            Venue, 
+            Event_Priority, 
+            Remind_At, 
+            Recurring_Activity, 
+            Colour, 
+            Banner, 
+            Description, 
+            Regarding, 
+            Reminder_Text, 
+            Send_Reminders, 
+            Event_Status 
+          FROM Events 
+          WHERE 
+            (Start_DateTime >= '${startDateTime}') 
+            AND (End_DateTime <= '${endDateTime}')
+        `,
+      },
+      method: "POST",
+      url: "https://www.zohoapis.com.au/crm/v3/coql",
+      param_type: 2,
+    };
+    
+
     // Fetching data with custom search criteria
     const data1 = await ZOHO.CRM.CONNECTION.invoke(
       "zoho_crm_conn",
       req_data_meetings1
     );
+<<<<<<< Updated upstream
     console.log({ data1 });
     const eventsData = data1?.details?.statusMessage?.data || [];
     const x = eventsData.map((item, index) => {
+=======
+
+    let combinedEvents = [];
+
+    await ZOHO.CRM.CONNECTION.invoke(conn_name, req_data_meetings2).then(function (data) {
+    
+      // Extract the array of events safely
+      const events = data?.details?.statusMessage?.data || [];
+    
+      console.log("Extracted Events Array:", events);
+      combinedEvents = [...events];
+    });
+
+    const eventsData = searchResp?.details?.statusMessage?.data || [];
+
+
+
+    const allMeetings = await ZOHO.CRM.API.getAllRecords({
+      Entity: "Events",
+      sort_order: "asc",
+      per_page: 200,
+      page: 1,
+    });
+
+    const allMeetingsData = allMeetings?.data || [];
+
+    // combinedEvents = [...eventsData, ...allMeetingsData];
+
+
+
+
+
+    const eventsDataResult = combinedEvents.map((item, index) => {
+>>>>>>> Stashed changes
       return {
         id: item.id,
         title: item.Event_Title,
@@ -173,7 +248,7 @@ function App() {
         Type_of_Activity: item.Type_of_Activity,
         resource: item.resource,
         scheduleFor: item.Owner,
-        scheduledWith: item?.Participants.map((participant) => ({
+        scheduledWith: item?.Participants?.length > 0 && item?.Participants.map((participant) => ({
           Full_Name: participant.name,
           participant: participant.participant,
           type: participant.type,

@@ -176,6 +176,72 @@ const TaskScheduler = ({
     Reminder_Text: newEvent?.Reminder_Text || "",
     send_notification: newEvent?.send_notification || true,
   });
+<<<<<<< Updated upstream
+=======
+  const timer = useRef(null);
+  console.log({
+    myEventsTaskSchedule: myEvents,
+    filteredEvents,
+  });
+  const usertype = loggedInUser?.User_Type;
+  useEffect(() => {
+    if (usertype !== undefined) {
+      if (usertype === SUPER_ADMIN) {
+        setTypes(SUPER_ADMIN);
+      } else if (usertype === ADMIN) {
+        setTypes(ADMIN);
+      } else {
+        setTypes(GENERIC);
+      }
+    }
+  }, [usertype]);
+
+  useEffect(() => {
+    let filtered = myEvents;
+
+    if (priorityFilter.length > 0) {
+      filtered = filtered.filter((obj) => {
+        return priorityFilter.includes(obj.priority);
+      });
+    }
+
+    if (activityTypeFilter.length > 0) {
+      filtered = filtered.filter((obj) => {
+        return activityTypeFilter.includes(obj.Type_of_Activity);
+      });
+    }
+
+    if (userFilter.length > 0) {
+      filtered = filtered.filter((obj) => {
+        return userFilter.includes(obj.scheduleFor.name);
+      });
+    }
+
+    // if (types === GENERIC) {
+    //   setFilteredEvents(
+    //     filtered.map((event) => ({
+    //       ...event,
+    //       resource: 1, // Ensure all events get resource = 1
+    //     }))
+    //   );
+    // } else {
+    //   setFilteredEvents(filtered);
+    // }
+  }, [priorityFilter, activityTypeFilter, myEvents, userFilter]);
+
+  useEffect(() => {
+    console.log({ admin: loggedInUser });
+    setUserFilter(loggedInUser?.full_name ? [loggedInUser.full_name] : []);
+  }, []);
+
+  useEffect(() => {
+    for (const event of myEvents) {
+      event.start = event.start ? new Date(event.start) : event.start;
+      event.end = event.end ? new Date(event.end) : event.end;
+      event.editable = !!(event.start && today < event.start);
+    }
+  }, [myEvents]);
+>>>>>>> Stashed changes
 
   const changeView = useCallback((event) => {
     let myView;
@@ -725,6 +791,7 @@ const TaskScheduler = ({
   //   return <Box> Fetching data ....</Box>;
   // }
 
+<<<<<<< Updated upstream
   console.log({ mahadi: filteredEvents });
   console.log(filteredEvents.length);
   return (
@@ -760,6 +827,274 @@ const TaskScheduler = ({
             onEventHoverIn={handleEventHoverIn}
             onEventHoverOut={handleEventHoverOut}
             className="mbsc-schedule-date-header-text mbsc-schedule-resource-title"
+=======
+  if (!usertype) {
+    return <>...</>;
+  }
+
+  console.log({filteredEvents})
+
+  return (
+    <div style={{ padding: "1em" }}>
+      <div
+        // className="mbsc-grid mbsc-no-padding"
+        style={{
+          borderTop: "1px solid #ccc",
+          borderLeft: "1px solid #ccc",
+          borderRight: "1px solid #ccc",
+          borderRadius: "6px",
+          overflow: "hidden",
+        }}
+      >
+        <div className="mbsc-row">
+          <div className="mbsc-col-sm-12 docs-appointment-calendar">
+            {/* {console.log({ filteredEvents, myView, resources, myInvalid })} */}
+            <Eventcalendar
+              timezonePlugin={momentTimezone}
+              dataTimezone="utc"
+              displayTimezone="Australia/Adelaide"
+              data={myEvents}
+              view={myView}
+              resources={resources}
+              renderHeader={customWithNavButtons}
+              invalid={myInvalid}
+              renderScheduleEvent={renderEvent}
+              // startDay={(e)=>{console.log('faky',e)}}
+              // refDate={calendarRef}
+              // onPageChange={(e) => {
+              //   setSelectedDate(e.firstDay);
+              //   setStartDateTime(e.firstDay);
+              //   setEndDateTime(e.lastDay);
+              // }}
+              // onSelectedDateChange={onDateChange}
+              onPageChange={onPageChange}
+              dragToMove={true}
+              dragToCreate={true}
+              eventOverlap={false}
+              externalDrop={true}
+              externalDrag={true}
+              selectedDate={selectedDate}
+              colors={myColors}
+              onCellDoubleClick={handleCellDoubleClick}
+              onEventClick={handleEventClick}
+              onEventCreate={handleEventCreate}
+              onEventCreated={handleEventCreated}
+              onEventCreateFailed={handleEventCreateFailed}
+              onEventUpdateFailed={handleEventUpdateFailed}
+              onEventDelete={handleEventDelete}
+              onEventDragEnter={handleEventDragEnter}
+              onEventDragLeave={handleEventDragLeave}
+              onEventHoverIn={handleEventHoverIn}
+              onEventHoverOut={handleEventHoverOut}
+              className="mbsc-schedule-date-header-text mbsc-schedule-resource-title"
+            />
+            <Popup
+              anchor={tooltipAnchor}
+              contentPadding={false}
+              display="anchored"
+              isOpen={isTooltipOpen}
+              scrollLock={false}
+              showOverlay={false}
+              touchUi={false}
+              width={350}
+              onClose={handleTooltipClose}
+            >
+              <div
+                className="mds-tooltip"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                  mt={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    minWidth={"120px"}
+                  >
+                    Title
+                  </Typography>
+                  <Typography variant="p">{hoverInEvents?.title}</Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    Priority
+                  </Typography>
+                  <Typography variant="p">{hoverInEvents?.priority}</Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    Start time
+                  </Typography>
+                  <Typography variant="p">
+                    {dayjs(hoverInEvents?.start).format("DD/MM/YYYY hh:mm A")}
+                  </Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    End time
+                  </Typography>
+                  <Typography variant="p">
+                    {dayjs(hoverInEvents?.end).format("DD/MM/YYYY hh:mm A")}
+                  </Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    Description
+                  </Typography>
+                  <Typography
+                    variant="p"
+                    sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: "8",
+                      WebkitBoxOrient: "vertical",
+                      ml: 2,
+                      textAlign: "right",
+                    }}
+                  >
+                    {hoverInEvents?.Description}
+                  </Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    minWidth={"120px"}
+                  >
+                    Regarding
+                  </Typography>
+                  <Typography variant="p">
+                    {hoverInEvents?.Regarding}
+                  </Typography>
+                </Box>
+                <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    minWidth={"120px"}
+                  >
+                    Scheduled With
+                  </Typography>
+                  <ul style={{ width: "100%" }}>
+                    {hoverInEvents?.scheduledWith.length > 0 &&
+                      hoverInEvents?.scheduledWith.map((item, index) => (
+                        <li>{item?.Full_Name}</li>
+                      ))}
+                  </ul>
+                </Box>
+              </div>
+            </Popup>
+            <Toast
+              isOpen={isToastOpen}
+              message={toastMessage}
+              onClose={handleCloseToast}
+            />
+          </div>
+          <DrawerComponent
+            open={drawerOpen}
+            setOpen={setDrawerOpen}
+            users={users} // Pass users list here
+            priorityFilter={priorityFilter}
+            setPriorityFilter={setPriorityFilter}
+            activityTypeFilter={activityTypeFilter}
+            setActivityTypeFilter={setActivityTypeFilter}
+            userFilter={userFilter} // Pass user filter state
+            setUserFilter={setUserFilter} // Pass user filter setter
+>>>>>>> Stashed changes
           />
           <Popup
             anchor={tooltipAnchor}
