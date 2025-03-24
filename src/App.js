@@ -196,11 +196,7 @@ function App() {
       "zoho_crm_conn",
       req_data_meetings1
     );
-<<<<<<< Updated upstream
-    console.log({ data1 });
-    const eventsData = data1?.details?.statusMessage?.data || [];
-    const x = eventsData.map((item, index) => {
-=======
+
 
     let combinedEvents = [];
 
@@ -213,7 +209,7 @@ function App() {
       combinedEvents = [...events];
     });
 
-    const eventsData = searchResp?.details?.statusMessage?.data || [];
+    // const eventsData = searchResp?.details?.statusMessage?.data || [];
 
 
 
@@ -233,7 +229,6 @@ function App() {
 
 
     const eventsDataResult = combinedEvents.map((item, index) => {
->>>>>>> Stashed changes
       return {
         id: item.id,
         title: item.Event_Title,
