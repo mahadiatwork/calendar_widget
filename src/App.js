@@ -61,6 +61,7 @@ function App() {
     } catch (error) { }
   };
 
+
   const searchDataByDate = useCallback(async () => {
     setLoader(true);
     setMyEvents([]);
@@ -82,19 +83,85 @@ function App() {
 
     const eventsData = searchResp?.details?.statusMessage?.data || [];
 
-    let combinedEvents = [];
-
     const allMeetings = await ZOHO.CRM.API.getAllRecords({
       Entity: "Events",
-      sort_order: "asc",
+      sort_order: "desc",
+      sort_by: "Modified_Time",
       per_page: 200,
       page: 1,
     });
 
+
+
     const allMeetingsData = allMeetings?.data || [];
 
-    combinedEvents = [...eventsData, ...allMeetingsData];
 
+    // Filter meetings within date range
+    const meetingsWithinRange = allMeetingsData.filter(meeting => {
+      const meetingStart = meeting.Start_DateTime;
+      return meetingStart >= startDateTime && meetingStart <= endDateTime;
+    });
+
+    console.log({meetingsWithinRange})
+
+    // Create a Set of existing IDs for quick lookup
+    const existingIds = new Set(eventsData.map(event => event.id));
+
+    // Combine unique meetings that don't already exist
+    const uniqueNewMeetings = meetingsWithinRange.filter(meeting => !existingIds.has(meeting.id));
+
+    console.log({uniqueNewMeetings})
+
+    // Combine into a final array
+    const combinedEvents = [...eventsData, ...uniqueNewMeetings];
+
+
+    // const req_data_meetings2 = {
+    //   parameters: {
+    //     select_query: `
+    //       SELECT 
+    //         id, 
+    //         Event_Title, 
+    //         Start_DateTime, 
+    //         End_DateTime, 
+    //         Duration_Min, 
+    //         What_Id, 
+    //         Type_of_Activity, 
+    //         resource, 
+    //         Owner,
+    //         Venue, 
+    //         Event_Priority, 
+    //         Remind_At, 
+    //         Recurring_Activity, 
+    //         Colour, 
+    //         Banner, 
+    //         Description, 
+    //         Regarding, 
+    //         Reminder_Text, 
+    //         Send_Reminders,
+    //         Participants,
+
+    //         Event_Status 
+    //       FROM Events 
+    //       WHERE 
+    //         (Start_DateTime >= '${startDateTime}') 
+    //         AND (End_DateTime <= '${endDateTime}')
+    //     `,
+    //   },
+    //   method: "POST",
+    //   url: "https://www.zohoapis.com.au/crm/v3/coql",
+    //   param_type: 2,
+    // };
+
+
+    // await ZOHO.CRM.CONNECTION.invoke(conn_name, req_data_meetings2).then(function (data) {
+
+    //   // Extract the array of events safely
+    //   const events = data?.details?.statusMessage?.data || [];
+
+    //   console.log("data using coql:", events);
+    //   // combinedEvents = [...events];
+    // });
 
 
 
@@ -161,9 +228,9 @@ function App() {
     return (
       <Box
         sx={{
-          display: "flex", 
-          justifyContent: "center", 
-          alignItems: "center", 
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           minHeight: "100vh"
         }}
       >
