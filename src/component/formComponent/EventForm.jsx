@@ -3,6 +3,11 @@ import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   Tab,
   Tabs,
@@ -323,28 +328,38 @@ const EventForm = ({
     }
   }, [formData]);
 
-  const handleDelete = async (eventID) => {
-    const confirmed = window.confirm("Are you sure you want to delete this event?");
-    
-    if (!confirmed) return;
-  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
+
+  const handleDelete = (eventID) => {
+    setEventToDelete(eventID);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
       const deleteResponse = await ZOHO.CRM.API.deleteRecord({
         Entity: "Events",
-        RecordID: eventID,
+        RecordID: eventToDelete,
       });
-  
+
       console.log("Event deleted successfully:", deleteResponse);
-  
-      // Update the events state to reflect the deletion
-      setEvents((prevEvents) => prevEvents.filter(event => event.id !== eventID));
-      handleClose()
+
+      setEvents((prevEvents) =>
+        prevEvents.filter((event) => event.id !== eventToDelete)
+      );
+      setDeleteDialogOpen(false);
+      setEventToDelete(null);
+      handleClose(); // If you're closing a parent modal too
     } catch (error) {
       console.error("Error deleting event:", error);
     }
   };
-  
-  
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setEventToDelete(null);
+  };
 
   if (argumentLoader) {
     return (
@@ -450,16 +465,20 @@ const EventForm = ({
             clickedEvent={clickedEvent}
           />
           <Box display="flex" justifyContent="space-between" mt={2}>
-           <Box>
-           <Button size="small" disabled>
-              Back
-            </Button>{" "}
-            {clickedEvent?.id && (
-              <Button size="small" color="error" onClick={() => handleDelete(clickedEvent?.id)}>
-                Delete
-              </Button>
-            )}
-           </Box>
+            <Box>
+              <Button size="small" disabled>
+                Back
+              </Button>{" "}
+              {clickedEvent?.id && (
+                <Button
+                  size="small"
+                  color="error"
+                  onClick={() => handleDelete(clickedEvent?.id)}
+                >
+                  Delete
+                </Button>
+              )}
+            </Box>
             <Box>
               <Button
                 size="small"
@@ -572,6 +591,27 @@ const EventForm = ({
           </Box>
         </Box>
       )}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCancelDelete}
+        aria-labelledby="delete-dialog-title"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Event</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this event? This action cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
