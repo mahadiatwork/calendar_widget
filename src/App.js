@@ -102,15 +102,12 @@ function App() {
       return meetingStart >= startDateTime && meetingStart <= endDateTime;
     });
 
-    console.log({meetingsWithinRange})
-
     // Create a Set of existing IDs for quick lookup
     const existingIds = new Set(eventsData.map(event => event.id));
 
     // Combine unique meetings that don't already exist
     const uniqueNewMeetings = meetingsWithinRange.filter(meeting => !existingIds.has(meeting.id));
 
-    console.log({uniqueNewMeetings})
 
     // Combine into a final array
     const combinedEvents = [...eventsData, ...uniqueNewMeetings];

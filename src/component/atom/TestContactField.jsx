@@ -35,6 +35,7 @@ export default function TestContactField({
   // Prepopulate and fetch missing data for selectedParticipants
   useEffect(() => {
     const fetchParticipantsDetails = async () => {
+      console.log("clickedEvent?.scheduledWith", clickedEvent?.scheduledWith)
       if (clickedEvent?.scheduledWith && ZOHO) {
         const participants = await Promise.all(
           clickedEvent?.scheduledWith.map(async (participant) => {
@@ -78,9 +79,9 @@ export default function TestContactField({
           })
         );
         setSelectedParticipants(participants);
+        handleInputChange("scheduledWith", participants)
       }
     };
-
     fetchParticipantsDetails();
   }, [clickedEvent, ZOHO]);
 
@@ -174,10 +175,14 @@ export default function TestContactField({
     }));
 
     handleInputChange("scheduledWith", updatedParticipants);
+    clickedEvent.scheduledWith = updatedParticipants;
 
     // Close the modal
     setIsModalOpen(false);
   };
+
+
+  console.log({scheduledWith: clickedEvent})
 
   return (
     <Box>

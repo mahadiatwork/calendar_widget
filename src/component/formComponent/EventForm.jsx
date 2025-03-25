@@ -316,12 +316,35 @@ const EventForm = ({
       }
     }
   };
-  console.log({ myEvents });
+
   useEffect(() => {
     if (formData.id !== "") {
       setEdited(true);
     }
   }, [formData]);
+
+  const handleDelete = async (eventID) => {
+    const confirmed = window.confirm("Are you sure you want to delete this event?");
+    
+    if (!confirmed) return;
+  
+    try {
+      const deleteResponse = await ZOHO.CRM.API.deleteRecord({
+        Entity: "Events",
+        RecordID: eventID,
+      });
+  
+      console.log("Event deleted successfully:", deleteResponse);
+  
+      // Update the events state to reflect the deletion
+      setEvents((prevEvents) => prevEvents.filter(event => event.id !== eventID));
+      handleClose()
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+  
+  
 
   if (argumentLoader) {
     return (
@@ -427,9 +450,16 @@ const EventForm = ({
             clickedEvent={clickedEvent}
           />
           <Box display="flex" justifyContent="space-between" mt={2}>
-            <Button size="small" disabled>
+           <Box>
+           <Button size="small" disabled>
               Back
             </Button>{" "}
+            {clickedEvent?.id && (
+              <Button size="small" color="error" onClick={() => handleDelete(clickedEvent?.id)}>
+                Delete
+              </Button>
+            )}
+           </Box>
             <Box>
               <Button
                 size="small"

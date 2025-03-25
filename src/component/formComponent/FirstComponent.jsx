@@ -577,7 +577,7 @@ const FirstComponent = ({
           </Grid>
 
           {/* Ensure the last column always exists, avoiding layout shifting */}
-          <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
+          {/* <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
             {formData.id && (
               <FormControlLabel
                 control={
@@ -590,8 +590,8 @@ const FirstComponent = ({
                 sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
               />
             )}
-          </Grid>
-          <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
+          </Grid> */}
+          {/* <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
             {formData.id && (
               <FormControlLabel
                 control={
@@ -604,7 +604,7 @@ const FirstComponent = ({
                 sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
               />
             )}
-          </Grid>
+          </Grid> */}
         </Grid>
 
         <Grid size={18}>

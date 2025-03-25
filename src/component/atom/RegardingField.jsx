@@ -20,7 +20,6 @@ const RegardingField = ({ formData, handleInputChange }) => {
   const [manualInput, setManualInput] = useState("");
 
   useEffect(() => {
-    console.log({ mahadiData: formData });
     // If existingValue is not in the predefined options, set it to "Other" and show manual input
     if (existingValue && !predefinedOptions.includes(existingValue)) {
       setSelectedValue("Other");

@@ -143,10 +143,6 @@ const TaskScheduler = ({
     Event_Status: newEvent?.Event_Status,
   });
   const timer = useRef(null);
-  console.log({
-    myEventsTaskSchedule: myEvents,
-    filteredEvents,
-  });
   const usertype = loggedInUser?.User_Type;
   useEffect(() => {
     if (usertype !== undefined) {
@@ -194,7 +190,6 @@ const TaskScheduler = ({
   }, [priorityFilter, activityTypeFilter, myEvents, userFilter]);
 
   useEffect(() => {
-    console.log({ admin: loggedInUser });
     setUserFilter(loggedInUser?.full_name ? [loggedInUser.full_name] : []);
   }, []);
 

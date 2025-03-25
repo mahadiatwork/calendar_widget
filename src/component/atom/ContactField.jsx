@@ -29,6 +29,7 @@ export default function ContactField({
   // Sync selectedParticipants with value and selectedRowData
   useEffect(() => {
     // Sync selectedParticipants with formData's scheduledWith prop
+
     if (formData.scheduledWith && formData.scheduledWith.length > 0) {
       const defaultParticipants = formData.scheduledWith.map((participant) => ({
         Full_Name: participant.Full_Name,
@@ -120,7 +121,7 @@ export default function ContactField({
     );
   };
 
-  console.log({ data: clickedEvent?.scheduledWith });
+  console.log("formData.scheduledWith", formData.scheduledWith)
 
   return (
     <Box>

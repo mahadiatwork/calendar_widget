@@ -30,11 +30,13 @@ function getResourceByType(type) {
 }
 
 export function transformFormSubmission(data, individualParticipant = null) {
+
+
   const transformScheduleWithToParticipants = (scheduleWith) => {
     return scheduleWith.map((contact) => ({
       Full_Name: contact?.Full_Name || null,
       type: "contact",
-      participant: contact?.participant || null,
+      participant: contact?.participant ?? contact?.id ?? null,
     }));
   };
 
