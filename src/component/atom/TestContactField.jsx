@@ -45,6 +45,7 @@ export default function TestContactField({
                 RecordID: participant.participant, // Use participant ID
               });
 
+              console.log({contactDetails})
               if (contactDetails.data && contactDetails.data.length > 0) {
                 const contact = contactDetails.data[0];
                 return {
@@ -175,7 +176,10 @@ export default function TestContactField({
     }));
 
     handleInputChange("scheduledWith", updatedParticipants);
-    clickedEvent.scheduledWith = updatedParticipants;
+    // console.log({ clickedEvent: clickedEvent})
+    if(clickedEvent !== null){
+      clickedEvent.scheduledWith = updatedParticipants;
+    }
 
     // Close the modal
     setIsModalOpen(false);
