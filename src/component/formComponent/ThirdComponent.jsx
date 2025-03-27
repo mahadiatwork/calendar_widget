@@ -22,7 +22,7 @@ dayjs.extend(timezone);
 const ThirdComponent = ({ formData, handleInputChange }) => {
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
-
+  // console.log({ startTime: formData?.startTime });
   useEffect(() => {
     if (!formData.startTime) {
       const currentTime = dayjs().toISOString();
@@ -43,13 +43,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
     handleInputChange,
   ]);
 
-  const CustomInputComponent = useCallback(({ field }) => {
-    const dateValue = formData?.[field];
-    const formattedDate =
-      dateValue && dayjs(dateValue).isValid()
-        ? dayjs(dateValue).format("DD/MM/YYYY hh:mm A")
-        : "";
-
+  const CustomInputComponent = useCallback(({ field, formattedDate }) => {
     return (
       <CustomTextField
         fullWidth
@@ -72,7 +66,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
     <Box>
       <FormControl>
         <FormLabel id="demo-radio-buttons-group-label" sx={{ fontSize: "9pt" }}>
-          Gender
+          Frequency
         </FormLabel>
         <RadioGroup
           aria-labelledby="demo-radio-buttons-group-label"
@@ -128,10 +122,21 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
               calendarType="month"
               display="center"
               calendarScroll={"vertical"}
-              inputComponent={() => <CustomInputComponent field="startTime" />}
+              inputComponent={() => {
+                const dateValue = formData?.startTime;
+                const formattedDate =
+                  dateValue && dayjs(dateValue).isValid()
+                    ? dayjs(dateValue).format("DD/MM/YYYY hh:mm A")
+                    : "";
+                return (
+                  <CustomInputComponent
+                    field="startTime"
+                    formattedDate={formattedDate}
+                  />
+                );
+              }}
               onClose={() => setOpenStartDatepicker(false)}
               onChange={(e) => {
-                console.log("Starts");
                 handleInputChange("startTime", e.value);
               }}
               isOpen={openStartDatepicker}
@@ -152,10 +157,21 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
               display="center"
               disabled={formData.noEndDate}
               calendarScroll={"vertical"}
-              inputComponent={() => <CustomInputComponent field="endTime" />}
+              inputComponent={() => {
+                const dateValue = formData?.endTime;
+                const formattedDate =
+                  dateValue && dayjs(dateValue).isValid()
+                    ? dayjs(dateValue).format("DD/MM/YYYY hh:mm A")
+                    : "";
+                return (
+                  <CustomInputComponent
+                    field="endTime"
+                    formattedDate={formattedDate}
+                  />
+                );
+              }}
               onClose={() => setOpenEndDatepicker(false)}
               onChange={(e) => {
-                console.log("Ends");
                 handleInputChange("endTime", e.value);
               }}
               isOpen={openEndDatepicker}
@@ -169,7 +185,12 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
                 onChange={(e) => {
                   const isChecked = e.target.checked;
                   if (isChecked) {
-                    handleInputChange("endTime", ""); // Clear endTime if noEndDate is selected
+                    const oneYearFromStart = dayjs(formData.startTime)
+                      .add(1, "year")
+                      .toISOString();
+                    handleInputChange("endTime", oneYearFromStart);
+                    // handleInputChange("endTime", "");
+                    //-------------
                     handleInputChange("noEndDate", true);
                   } else if (formData.startTime) {
                     const oneHourFromStart = dayjs(formData.startTime)

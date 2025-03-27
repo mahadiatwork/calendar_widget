@@ -10,7 +10,6 @@ const ZOHO = window.ZOHO;
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-
 function App() {
   const [startDateTime, setStartDateTime] = useState(
     dayjs().startOf("month").format("YYYY-MM-DD") + "T00:00:00+10:30"
@@ -58,9 +57,8 @@ function App() {
         const colorsArray = JSON.parse(data?.Success?.Content || "[]");
         setRecentColor(colorsArray);
       });
-    } catch (error) { }
+    } catch (error) {}
   };
-
 
   const searchDataByDate = useCallback(async () => {
     setLoader(true);
@@ -91,57 +89,54 @@ function App() {
       page: 1,
     });
 
-
-
     const allMeetingsData = allMeetings?.data || [];
 
-
     // Filter meetings within date range
-    const meetingsWithinRange = allMeetingsData.filter(meeting => {
+    const meetingsWithinRange = allMeetingsData.filter((meeting) => {
       const meetingStart = meeting.Start_DateTime;
       return meetingStart >= startDateTime && meetingStart <= endDateTime;
     });
 
     // Create a Set of existing IDs for quick lookup
-    const existingIds = new Set(eventsData.map(event => event.id));
+    const existingIds = new Set(eventsData.map((event) => event.id));
 
     // Combine unique meetings that don't already exist
-    const uniqueNewMeetings = meetingsWithinRange.filter(meeting => !existingIds.has(meeting.id));
-
+    const uniqueNewMeetings = meetingsWithinRange.filter(
+      (meeting) => !existingIds.has(meeting.id)
+    );
 
     // Combine into a final array
     const combinedEvents = [...eventsData, ...uniqueNewMeetings];
 
-
     // const req_data_meetings2 = {
     //   parameters: {
     //     select_query: `
-    //       SELECT 
-    //         id, 
-    //         Event_Title, 
-    //         Start_DateTime, 
-    //         End_DateTime, 
-    //         Duration_Min, 
-    //         What_Id, 
-    //         Type_of_Activity, 
-    //         resource, 
+    //       SELECT
+    //         id,
+    //         Event_Title,
+    //         Start_DateTime,
+    //         End_DateTime,
+    //         Duration_Min,
+    //         What_Id,
+    //         Type_of_Activity,
+    //         resource,
     //         Owner,
-    //         Venue, 
-    //         Event_Priority, 
-    //         Remind_At, 
-    //         Recurring_Activity, 
-    //         Colour, 
-    //         Banner, 
-    //         Description, 
-    //         Regarding, 
-    //         Reminder_Text, 
+    //         Venue,
+    //         Event_Priority,
+    //         Remind_At,
+    //         Recurring_Activity,
+    //         Colour,
+    //         Banner,
+    //         Description,
+    //         Regarding,
+    //         Reminder_Text,
     //         Send_Reminders,
     //         Participants,
 
-    //         Event_Status 
-    //       FROM Events 
-    //       WHERE 
-    //         (Start_DateTime >= '${startDateTime}') 
+    //         Event_Status
+    //       FROM Events
+    //       WHERE
+    //         (Start_DateTime >= '${startDateTime}')
     //         AND (End_DateTime <= '${endDateTime}')
     //     `,
     //   },
@@ -149,7 +144,6 @@ function App() {
     //   url: "https://www.zohoapis.com.au/crm/v3/coql",
     //   param_type: 2,
     // };
-
 
     // await ZOHO.CRM.CONNECTION.invoke(conn_name, req_data_meetings2).then(function (data) {
 
@@ -159,9 +153,6 @@ function App() {
     //   console.log("data using coql:", events);
     //   // combinedEvents = [...events];
     // });
-
-
-
 
     const eventsDataResult = combinedEvents.map((item, index) => {
       return {
@@ -228,7 +219,7 @@ function App() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "100vh"
+          minHeight: "100vh",
         }}
       >
         <CircularProgress size={40} />
@@ -236,15 +227,15 @@ function App() {
     );
   }
 
-
   return (
     <div>
       <TaskScheduler
         myEvents={myEvents}
         setMyEvents={setMyEvents}
         users={users}
-        setStartDateTime={setStartDateTime}
         startDateTime={startDateTime}
+        setStartDateTime={setStartDateTime}
+        endDateTime={endDateTime}
         setEndDateTime={setEndDateTime}
         loader={loader}
         setLoader={setLoader}
