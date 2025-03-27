@@ -89,16 +89,6 @@ export function transformFormSubmission(data, individualParticipant = null) {
     Duration_Min: data.duration.toString(),
     Venue: data.location,
     Colour: data.color,
-    Participant_Reminder: data.Send_Reminders
-      ? dayjs(data?.Remind_At)
-        .tz("Australia/Adelaide")
-        .format("YYYY-MM-DDTHH:mm:ssZ")
-      : null,
-    Remind_At: data.Send_Reminders
-      ? dayjs(data?.Remind_At)
-        .tz("Australia/Adelaide")
-        .format("YYYY-MM-DDTHH:mm:ssZ")
-      : null,
     Send_Reminders: data.Send_Reminders
   };
 
@@ -130,6 +120,24 @@ export function transformFormSubmission(data, individualParticipant = null) {
       transformedData.Participant_Reminder = modifiedReminderDate;
     }
     transformedData.Send_Reminders = true;
+  }
+
+  if(data.Send_Invites){
+    const startTime = dayjs(data.start);
+
+    let modifiedReminderDate = null;
+
+    if (data.Reminder_Text === "At time of meeting") {
+      modifiedReminderDate = startTime.tz("Australia/Adelaide")
+        .format("YYYY-MM-DDTHH:mm:ssZ");
+    } else {
+      const reminderTime = startTime.subtract(parseInt(data?.Reminder_Text.split(" ")[0]), 'minute');
+      modifiedReminderDate = reminderTime.tz("Australia/Adelaide")
+        .format("YYYY-MM-DDTHH:mm:ssZ");
+      transformedData.Remind_At = modifiedReminderDate;
+      transformedData.User_Reminder = modifiedReminderDate;
+    }
+    transformedData.send_notification = true;
   }
 
   // Validate and Add Recurring_Activity

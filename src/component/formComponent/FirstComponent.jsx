@@ -76,20 +76,22 @@ const FirstComponent = ({
     const startTime = dayjs(formData.start);
 
     if (formatType === "duration") {
-      const endTime = startTime.add(durationInMinutes, 'minute');
+      const endTime = startTime.add(durationInMinutes, "minute");
 
-      const modifiedEndDate = endTime.format('YYYY-MM-DDTHH:mm');
-      const modifiedStartDate = startTime.format('YYYY-MM-DDTHH:mm');
+      const modifiedEndDate = endTime.format("YYYY-MM-DDTHH:mm");
+      const modifiedStartDate = startTime.format("YYYY-MM-DDTHH:mm");
 
       handleInputChange("end", modifiedEndDate);
       handleInputChange("start", modifiedStartDate);
       setEndValue(dayjs(endTime));
     } else {
+      const reminderTime = startTime.subtract(
+        durationInMinutes.value,
+        "minute"
+      );
 
-      const reminderTime = startTime.subtract(durationInMinutes.value, 'minute');
-
-      console.log("startTime", reminderTime,durationInMinutes)
-      const modifiedReminderDate = reminderTime.format('YYYY-MM-DDTHH:mm');
+      console.log("startTime", reminderTime, durationInMinutes);
+      const modifiedReminderDate = reminderTime.format("YYYY-MM-DDTHH:mm");
 
       handleInputChange("Remind_At", modifiedReminderDate);
       handleInputChange("Reminder_Text", durationInMinutes.name);
@@ -200,7 +202,6 @@ const FirstComponent = ({
     if (field === "clear_activity") {
       const newClearActivity = !clearActivity;
       setClearActivity(newClearActivity);
-      // Update the form data
       handleInputChange("Event_Status", newClearActivity ? "Closed" : "Open");
       handleInputChange("clear_activity", newClearActivity);
     }
@@ -210,20 +211,33 @@ const FirstComponent = ({
       setSendNotification(newSendNotification);
       handleInputChange("send_notification", newSendNotification);
       handleInputChange("Send_Invites", newSendNotification);
+
+      if (newSendNotification) {
+        // Uncheck and reset reminders if invites are checked
+        setSendReminders(false);
+        handleInputChange("Send_Reminders", false);
+        handleInputChange("Remind_Participants", [
+          { period: "minutes", unit: reminderMinutes },
+        ]);
+        handleInputChange("Reminder_Text", `${reminderMinutes} minutes before`);
+        handleInputChange("Remind_At", []);
+      }
     } else if (field === "Remind_Participants") {
       const newSendReminders = !sendReminders;
       setSendReminders(newSendReminders);
       handleInputChange("Send_Reminders", newSendReminders);
-      console.log({ newSendReminders });
 
       if (newSendReminders) {
-        // If reminders are enabled
+        // Uncheck and reset invites if reminders are checked
+        setSendNotification(false);
+        handleInputChange("send_notification", false);
+        handleInputChange("Send_Invites", false);
+
         handleInputChange("Remind_Participants", [
           { period: "minutes", unit: reminderMinutes },
         ]);
         handleInputChange("Reminder_Text", `${reminderMinutes} minutes before`);
       } else {
-        // If reminders are disabled
         handleInputChange("Remind_Participants", []);
         handleInputChange("Reminder_Text", "None");
         handleInputChange("Remind_At", []);
@@ -243,8 +257,6 @@ const FirstComponent = ({
       handleInputChange("Reminder_Text", `${value} minutes before`);
     }
   };
-
-
 
   return (
     <Box>
@@ -536,10 +548,11 @@ const FirstComponent = ({
                 <Checkbox
                   checked={sendNotification}
                   onChange={() => handleCheckboxChange("send_notification")}
+                  disabled={sendReminders} // Disable if "Send reminders" is checked
                 />
               }
               label="Send invites"
-              sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }} // Adjust font size
+              sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
             />
           </Grid>
 
@@ -549,6 +562,7 @@ const FirstComponent = ({
                 <Checkbox
                   checked={sendReminders}
                   onChange={() => handleCheckboxChange("Remind_Participants")}
+                  disabled={sendNotification} // Disable if "Send invites" is checked
                 />
               }
               label="Send reminders"
