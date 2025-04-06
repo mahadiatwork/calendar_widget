@@ -33,58 +33,58 @@ export default function TestContactField({
   const debounceTimer = useRef(null); // Debounce timer for search
 
   // Prepopulate and fetch missing data for selectedParticipants
-  useEffect(() => {
-    const fetchParticipantsDetails = async () => {
-      console.log("clickedEvent?.scheduledWith", clickedEvent?.scheduledWith)
-      if (clickedEvent?.scheduledWith && ZOHO) {
-        const participants = await Promise.all(
-          clickedEvent?.scheduledWith.map(async (participant) => {
-            try {
-              const contactDetails = await ZOHO.CRM.API.getRecord({
-                Entity: "Contacts",
-                RecordID: participant.participant, // Use participant ID
-              });
+  // useEffect(() => {
+  //   const fetchParticipantsDetails = async () => {
+  //     console.log("clickedEvent?.scheduledWith", clickedEvent?.scheduledWith)
+  //     if (clickedEvent?.scheduledWith && ZOHO) {
+  //       const participants = await Promise.all(
+  //         clickedEvent?.scheduledWith.map(async (participant) => {
+  //           try {
+  //             const contactDetails = await ZOHO.CRM.API.getRecord({
+  //               Entity: "Contacts",
+  //               RecordID: participant.participant, // Use participant ID
+  //             });
 
-              console.log({contactDetails})
-              if (contactDetails.data && contactDetails.data.length > 0) {
-                const contact = contactDetails.data[0];
-                return {
-                  id: contact.id,
-                  First_Name: contact.First_Name || "N/A",
-                  Last_Name: contact.Last_Name || "N/A",
-                  Email: contact.Email || "No Email",
-                  Mobile: contact.Mobile || "N/A",
-                  Full_Name: `${contact.First_Name || "N/A"} ${
-                    contact.Last_Name || "N/A"
-                  }`,
-                  ID_Number: contact.ID_Number || "N/A",
-                };
-              } else {
-                return {
-                  id: participant.participant,
-                  Full_Name: participant.name || "Unknown",
-                  Email: participant.Email || "No Email",
-                };
-              }
-            } catch (error) {
-              console.error(
-                `Error fetching contact details for ID ${participant.participant}:`,
-                error
-              );
-              return {
-                id: participant.participant,
-                Full_Name: participant.name || "Unknown",
-                Email: participant.Email || "No Email",
-              };
-            }
-          })
-        );
-        setSelectedParticipants(participants);
-        handleInputChange("scheduledWith", participants)
-      }
-    };
-    fetchParticipantsDetails();
-  }, [clickedEvent, ZOHO]);
+  //             console.log({contactDetails})
+  //             if (contactDetails.data && contactDetails.data.length > 0) {
+  //               const contact = contactDetails.data[0];
+  //               return {
+  //                 id: contact.id,
+  //                 First_Name: contact.First_Name || "N/A",
+  //                 Last_Name: contact.Last_Name || "N/A",
+  //                 Email: contact.Email || "No Email",
+  //                 Mobile: contact.Mobile || "N/A",
+  //                 Full_Name: `${contact.First_Name || "N/A"} ${
+  //                   contact.Last_Name || "N/A"
+  //                 }`,
+  //                 ID_Number: contact.ID_Number || "N/A",
+  //               };
+  //             } else {
+  //               return {
+  //                 id: participant.participant,
+  //                 Full_Name: participant.name || "Unknown",
+  //                 Email: participant.Email || "No Email",
+  //               };
+  //             }
+  //           } catch (error) {
+  //             console.error(
+  //               `Error fetching contact details for ID ${participant.participant}:`,
+  //               error
+  //             );
+  //             return {
+  //               id: participant.participant,
+  //               Full_Name: participant.name || "Unknown",
+  //               Email: participant.Email || "No Email",
+  //             };
+  //           }
+  //         })
+  //       );
+  //       setSelectedParticipants(participants);
+  //       handleInputChange("scheduledWith", participants)
+  //     }
+  //   };
+  //   fetchParticipantsDetails();
+  // }, [clickedEvent, ZOHO]);
 
   // Open modal and sync selected participants
   const handleOpen = () => {
@@ -185,8 +185,6 @@ export default function TestContactField({
     setIsModalOpen(false);
   };
 
-
-  console.log({scheduledWith: clickedEvent})
 
   return (
     <Box>

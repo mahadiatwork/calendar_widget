@@ -161,9 +161,11 @@ export function transformFormSubmission(data, individualParticipant = null) {
   if (
     transformedData.Remind_At == null ||
     transformedData.Remind_At == "Invalid Date" ||
-    transformedData.Remind_At == ""
+    transformedData.Remind_At == "" ||
+    transformedData.Reminder_Text == ""
   ) {
     delete transformedData.Remind_At;
+    delete transformedData.Reminder_Text;
   }
 
   // Remove null or undefined keys

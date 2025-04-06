@@ -251,7 +251,6 @@ const EventForm = ({
         setOpen(false);
       } else {
         const transformedData = transformFormSubmission(formData);
-
         formData.start = new Date(formData.start);
         formData.end = new Date(formData.end);
         ZOHO.CRM.API.insertRecord({
