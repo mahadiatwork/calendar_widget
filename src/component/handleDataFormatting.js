@@ -117,7 +117,8 @@ export function transformFormSubmission(data, individualParticipant = null) {
       modifiedReminderDate = reminderTime.tz("Australia/Adelaide")
         .format("YYYY-MM-DDTHH:mm:ssZ");
       transformedData.Remind_At = modifiedReminderDate;
-      transformedData.Participant_Reminder = modifiedReminderDate;
+      // transformedData.Participant_Reminder = modifiedReminderDate;
+      transformedData.User_Reminder = modifiedReminderDate;
     }
     transformedData.Send_Reminders = true;
   }
