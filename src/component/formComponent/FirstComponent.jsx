@@ -7,6 +7,7 @@ import {
   FormControlLabel,
   Grid2 as Grid,
   InputLabel,
+  Link,
   MenuItem,
   Select,
   TextField,
@@ -588,7 +589,17 @@ const FirstComponent = ({
               sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
             />
           </Grid>
-
+          <Grid item xs={2} sx={{display: "flex", alignItems: "center"}}>
+            {formData.id && (
+              <Link
+                href={`https://crm.zoho.com.au/crm/org7004396182/tab/Events/${formData.id}`}
+                target="_blank"
+                sx={{ fontSize: "9pt" }}
+              >
+                Meeting Link
+              </Link>
+            )}
+          </Grid>
           {/* Ensure the last column always exists, avoiding layout shifting */}
           {/* <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
             {formData.id && (
