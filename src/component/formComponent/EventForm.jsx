@@ -146,14 +146,38 @@ const EventForm = ({
     setOpen(false);
   };
 
-  const handleSubmit = () => {
-    // const transformedData = transformFormSubmission(formData);
-    // Add your submit logic here (e.g., send data to the backend)
-    // setEvents((prev) => [...prev, formData]);
+  const logResponse = async ({
+    name,
+    payload,
+    response,
+    result,
+    trigger,
+    meetingType,
+    Widget_Source,
+  }) => {
+    const timeOccurred = dayjs()
+      .tz("Australia/Adelaide")
+      .format("YYYY-MM-DDTHH:mm:ssZ");
 
+    await ZOHO.CRM.API.insertRecord({
+      Entity: "Log_Module",
+      APIData: {
+        Name: name,
+        Payload_2: JSON.stringify(payload),
+        Response: JSON.stringify(response),
+        Result: result,
+        Trigger: trigger,
+        Time_Occured: timeOccurred,
+        Meeting_Type: meetingType,
+        Widget_Source: Widget_Source,
+      },
+    });
+  };
+
+  const handleSubmit = () => {
     if (formData.id !== "") {
       const transformedData = transformFormSubmission(formData);
-      var config = {
+      const config = {
         Entity: "Events",
         APIData: transformedData,
         Trigger: ["workflow"],
@@ -162,116 +186,102 @@ const EventForm = ({
       formData.start = new Date(formData.start);
       formData.end = new Date(formData.end);
 
-      ZOHO.CRM.API.updateRecord(config).then(function (data) {
-        if (data.data[0].code === "SUCCESS") {
+      ZOHO.CRM.API.updateRecord(config).then(async (data) => {
+        const wasSuccessful = data.data[0].code === "SUCCESS";
+
+        await logResponse({
+          name: `Update Event: ${formData.title || formData.id}`,
+          Payload_2: transformedData,
+          response: data,
+          result: wasSuccessful ? "Success" : "Error",
+          trigger: "Record Update",
+          meetingType: formData.Type_of_Activity || "",
+          Widget_Source: "Calendar Widget",
+        });
+
+        if (wasSuccessful) {
           setSnackbarOpen(true);
           setEvents((prevEvents) =>
             prevEvents.map((event) =>
               event.id === formData.id ? formData : event
             )
           );
-          setFormData({
-            id: "",
-            title: "",
-            startTime: "",
-            endTime: "",
-            duration: 0,
-            associateWith: null,
-            Type_of_Activity: "",
-            resource: 0,
-            scheduleFor: "",
-            scheduleWith: [],
-            location: "",
-            priority: "",
-            Remind_At: "",
-            occurrence: "once",
-            start: "",
-            end: "",
-            noEndDate: false,
-            color: "#d1891f",
-            Banner: false,
-            Description: "",
-            send_notification: false,
-            Send_Reminders: false,
-          });
-          setClickedEvent(null);
-          setOpen(false);
+          resetFormState();
         }
       });
     }
+
     if (formData.id === "") {
       if (formData.create_sperate_contact) {
-        formData?.scheduledWith.forEach((item, index) => {
+        formData?.scheduledWith.forEach(async (item) => {
           const transformedData = transformFormSubmission(formData, item);
-          console.log({ transformedData });
-          ZOHO.CRM.API.insertRecord({
-            Entity: "Events",
-            APIData: transformedData,
-            Trigger: ["workflow"],
-          })
-            .then((data) => {
-              if (data.data[0].code === "SUCCESS") {
-                console.log(data?.data);
-                setSnackbarOpen(true);
-                handleInputChange("id", data?.data[0]?.details?.id);
-                setEvents((prev) => [
-                  ...prev,
-                  { ...formData, id: data?.data[0].details?.id },
-                ]);
-              }
-            })
-            .catch((error) => {
-              console.error("Error submitting the form:", error);
+          try {
+            const data = await ZOHO.CRM.API.insertRecord({
+              Entity: "Events",
+              APIData: transformedData,
+              Trigger: ["workflow"],
             });
+
+            const wasSuccessful = data.data[0].code === "SUCCESS";
+
+            await logResponse({
+              name: `Create Event for ${item.name}`,
+              Payload_2: transformedData,
+              response: data,
+              result: wasSuccessful ? "Success" : "Error",
+              trigger: "Record Create",
+              meetingType: formData.Type_of_Activity || "",
+              Widget_Source: "Calendar Widget",
+            });
+
+            if (wasSuccessful) {
+              setSnackbarOpen(true);
+              handleInputChange("id", data?.data[0]?.details?.id);
+              setEvents((prev) => [
+                ...prev,
+                { ...formData, id: data?.data[0].details?.id },
+              ]);
+            }
+          } catch (error) {
+            await logResponse({
+              name: `Create Event for ${item.name}`,
+              Payload_2: transformedData,
+              response: { error: error.message },
+              result: "Error",
+              trigger: "Record Create",
+              meetingType: formData.Type_of_Activity || "",
+              Widget_Source: "Calendar Widget",
+            });
+            console.error("Error submitting the form:", error);
+          }
         });
-        setFormData({
-          id: "",
-          title: "",
-          startTime: "",
-          endTime: "",
-          duration: 0,
-          associateWith: null,
-          Type_of_Activity: "",
-          resource: 0,
-          scheduleFor: "",
-          scheduleWith: [],
-          location: "",
-          priority: "",
-          Remind_At: "",
-          occurrence: "once",
-          start: "",
-          end: "",
-          noEndDate: false,
-          color: "#d1891f",
-          Banner: false,
-          Description: "",
-          send_notification: false,
-        });
-        setClickedEvent(null);
-        setOpen(false);
+
+        resetFormState();
       } else {
         const transformedData = transformFormSubmission(formData);
         formData.start = new Date(formData.start);
         formData.end = new Date(formData.end);
+
         ZOHO.CRM.API.insertRecord({
           Entity: "Events",
           APIData: transformedData,
           Trigger: ["workflow"],
         })
-          .then((data) => {
-            if (data.data[0].code === "SUCCESS") {
+          .then(async (data) => {
+            const wasSuccessful = data.data[0].code === "SUCCESS";
+
+            await logResponse({
+              name: `Create Event: ${formData.title || "Unnamed"}`,
+              Payload_2: transformedData,
+              response: data,
+              result: wasSuccessful ? "Success" : "Error",
+              trigger: "Record Create",
+              meetingType: formData.Type_of_Activity || "",
+              Widget_Source: "Calendar Widget",
+            });
+
+            if (wasSuccessful) {
               handleInputChange("id", data?.data[0]?.details?.id);
-              console.log({
-                key: {
-                  ...formData,
-                  id: data?.data[0].details?.id,
-                  scheduleFor: {
-                    name: formData.scheduleFor.full_name,
-                    id: formData.scheduleFor.id,
-                    email: formData.scheduleFor.email,
-                  },
-                },
-              });
               setEvents((prev) => [
                 ...prev,
                 {
@@ -284,42 +294,54 @@ const EventForm = ({
                   },
                 },
               ]);
-
-              // console.log({myEvents})
-              setFormData({
-                id: "",
-                title: "",
-                startTime: "",
-                endTime: "",
-                duration: 0,
-                associateWith: null,
-                Type_of_Activity: "",
-                resource: 0,
-                scheduleFor: "",
-                scheduleWith: [],
-                location: "",
-                priority: "",
-                Remind_At: "",
-                occurrence: "once",
-                start: "",
-                end: "",
-                noEndDate: false,
-                color: "#d1891f",
-                Banner: false,
-                Description: "",
-                send_notification: false,
-                Send_Reminders: false,
-              });
-              setClickedEvent(null);
-              setOpen(false);
+              resetFormState();
               setSnackbarOpen(true);
             }
           })
-          .catch((error) => {
+          .catch(async (error) => {
+            await logResponse({
+              name: `Create Event: ${formData.title || "Unnamed"}`,
+              Payload_2: transformedData,
+              response: { error: error.message },
+              result: "Error",
+              trigger: "Record Create",
+              meetingType: formData.Type_of_Activity || "",
+              Widget_Source: "Calendar Widget",
+            });
             console.error("Error submitting the form:", error);
           });
       }
     }
+  };
+
+  // Optional helper
+  const resetFormState = () => {
+    setFormData({
+      id: "",
+      title: "",
+      startTime: "",
+      endTime: "",
+      duration: 0,
+      associateWith: null,
+      Type_of_Activity: "",
+      resource: 0,
+      scheduleFor: "",
+      scheduleWith: [],
+      location: "",
+      priority: "",
+      Remind_At: "",
+      occurrence: "once",
+      start: "",
+      end: "",
+      noEndDate: false,
+      color: "#d1891f",
+      Banner: false,
+      Description: "",
+      send_notification: false,
+      Send_Reminders: false,
+    });
+    setClickedEvent(null);
+    setOpen(false);
   };
 
   useEffect(() => {
