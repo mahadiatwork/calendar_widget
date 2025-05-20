@@ -457,8 +457,26 @@ export default function TestContactField({
                           onChange={() => toggleContactSelection(contact)}
                         />
                       </TableCell>
-                      <TableCell>{contact.First_Name}</TableCell>
-                      <TableCell>{contact.Last_Name}</TableCell>
+                         <TableCell>
+                        <a
+                          href={`https://crm.zoho.com.au/crm/org7004396182/tab/Contacts/${contact.id}/canvas/76775000000287551`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          // style={{  color: "inherit" }}
+                        >
+                          {contact.First_Name}
+                        </a>
+                      </TableCell>
+                      <TableCell>
+                        <a
+                          href={`https://crm.zoho.com.au/crm/org7004396182/tab/Contacts/${contact.id}/canvas/76775000000287551`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          // style={{  color: "inherit" }}
+                        >
+                          {contact.Last_Name}
+                        </a>
+                      </TableCell>
                       <TableCell>{contact.Email}</TableCell>
                       <TableCell>{contact.Mobile}</TableCell>
                       <TableCell>{contact.ID_Number}</TableCell>
