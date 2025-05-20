@@ -154,7 +154,9 @@ function App() {
     //   // combinedEvents = [...events];
     // });
 
+
     const eventsDataResult = combinedEvents.map((item, index) => {
+
       return {
         id: item.id,
         title: item.Event_Title,
@@ -172,6 +174,7 @@ function App() {
           Full_Name: participant.name,
           participant: participant.participant,
           type: participant.type,
+          status: participant.status,
         })),
         location: item.Venue,
         priority: item.Event_Priority,

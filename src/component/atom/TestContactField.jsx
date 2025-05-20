@@ -35,7 +35,7 @@ export default function TestContactField({
   // Prepopulate and fetch missing data for selectedParticipants
   useEffect(() => {
     const fetchParticipantsDetails = async () => {
-      console.log("clickedEvent?.scheduledWith", clickedEvent?.scheduledWith)
+      console.log("clickedEvent?.scheduledWith", clickedEvent?.scheduledWith);
       if (clickedEvent?.scheduledWith && ZOHO) {
         const participants = await Promise.all(
           clickedEvent?.scheduledWith.map(async (participant) => {
@@ -45,7 +45,7 @@ export default function TestContactField({
                 RecordID: participant.participant, // Use participant ID
               });
 
-              console.log({contactDetails})
+              console.log({ contactDetails });
               if (contactDetails.data && contactDetails.data.length > 0) {
                 const contact = contactDetails.data[0];
                 return {
@@ -58,6 +58,7 @@ export default function TestContactField({
                     contact.Last_Name || "N/A"
                   }`,
                   ID_Number: contact.ID_Number || "N/A",
+                  status: participant.status,
                 };
               } else {
                 return {
@@ -80,7 +81,7 @@ export default function TestContactField({
           })
         );
         setSelectedParticipants(participants);
-        handleInputChange("scheduledWith", participants)
+        handleInputChange("scheduledWith", participants);
       }
     };
     fetchParticipantsDetails();
@@ -185,7 +186,7 @@ export default function TestContactField({
     setIsModalOpen(false);
   };
 
-  console.log("filteredContacts", selectedParticipants);
+  console.log("clickedEvent", clickedEvent);
 
   return (
     <Box>
@@ -438,6 +439,9 @@ export default function TestContactField({
                     <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>
                       MS File Number
                     </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>
+                      Invite Status
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -457,7 +461,7 @@ export default function TestContactField({
                           onChange={() => toggleContactSelection(contact)}
                         />
                       </TableCell>
-                         <TableCell>
+                      <TableCell>
                         <a
                           href={`https://crm.zoho.com.au/crm/org7004396182/tab/Contacts/${contact.id}/canvas/76775000000287551`}
                           target="_blank"
@@ -480,6 +484,7 @@ export default function TestContactField({
                       <TableCell>{contact.Email}</TableCell>
                       <TableCell>{contact.Mobile}</TableCell>
                       <TableCell>{contact.ID_Number}</TableCell>
+                      <TableCell>{contact.status}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

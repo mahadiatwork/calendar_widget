@@ -37,6 +37,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
       Full_Name: contact?.Full_Name || null,
       type: "contact",
       participant: contact?.participant ?? contact?.id ?? null,
+       status: contact.status,
     }));
   };
 
@@ -61,6 +62,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
         Full_Name: individualParticipant?.Full_Name || null,
         type: "contact",
         participant: individualParticipant?.participant || null,
+          status: individualParticipant.status,
       },
     ]
     : transformScheduleWithToParticipants(data?.scheduledWith || []);

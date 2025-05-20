@@ -653,7 +653,6 @@ const TaskScheduler = ({
 
   const handleEventClick = (args) => {
     setArgumentLoader(true);
-    console.log({ args });
     setClickedEvent(args?.event);
     setFormData({
       id: args?.event?.id,
