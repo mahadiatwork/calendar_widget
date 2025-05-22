@@ -1118,18 +1118,21 @@ const TaskScheduler = ({
                     Scheduled With
                   </Typography>
                   <ul style={{ width: "100%" }}>
-                    {hoverInEvents?.scheduledWith.length > 0 &&
-                      hoverInEvents?.scheduledWith.map((item, index) => (
-                        <li key={index}>
-                          <a
-                            href={`https://crm.zoho.com.au/crm/org7004396182/tab/Contacts/${item?.participant}/canvas/76775000000287551`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {item?.Full_Name}
-                          </a>
-                        </li>
-                      ))}
+                    {hoverInEvents?.scheduledWith?.length > 0 &&
+                      hoverInEvents.scheduledWith.map((item, index) => {
+                        const contactId = item?.id || item?.participant; // fallback logic
+                        return (
+                          <li key={index}>
+                            <a
+                              href={`https://crm.zoho.com.au/crm/org7004396182/tab/Contacts/${contactId}/canvas/76775000000287551`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {item?.Full_Name}
+                            </a>
+                          </li>
+                        );
+                      })}
                   </ul>
                 </Box>
               </div>

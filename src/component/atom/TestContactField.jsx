@@ -186,8 +186,6 @@ export default function TestContactField({
     setIsModalOpen(false);
   };
 
-  console.log("clickedEvent", clickedEvent);
-
   return (
     <Box>
       {/* Single-line display for selected contacts */}

@@ -12,6 +12,7 @@ import {
   Select,
   TextField,
   Typography,
+  Tooltip
 } from "@mui/material";
 import React from "react";
 import CustomTextField from "../atom/CustomTextField";
@@ -53,6 +54,9 @@ const FirstComponent = ({
   const [sendNotification, setSendNotification] = useState(
     formData?.Send_Invites
   );
+
+
+
   const [clearActivity, setClearActivity] = useState(
     formData.Event_Status === "Open" || false
   );
@@ -257,6 +261,7 @@ const FirstComponent = ({
       handleInputChange("Reminder_Text", `${value} minutes before`);
     }
   };
+
 
   return (
     <Box>
@@ -516,7 +521,6 @@ const FirstComponent = ({
                 size="small"
                 value={formData.send_notification}
                 checked={formData.send_notification}
-                onChange={handleNotificationChange}
               />
             }
             label="Send notification"
@@ -589,7 +593,7 @@ const FirstComponent = ({
               sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
             />
           </Grid>
-          <Grid item xs={2} sx={{display: "flex", alignItems: "center"}}>
+          <Grid item xs={2} sx={{ display: "flex", alignItems: "center" }}>
             {formData.id && (
               <Link
                 href={`https://crm.zoho.com.au/crm/org7004396182/tab/Events/${formData.id}`}

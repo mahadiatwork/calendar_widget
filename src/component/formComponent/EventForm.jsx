@@ -3,15 +3,23 @@ import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
   IconButton,
+  InputLabel,
+  Link,
+  MenuItem,
   Tab,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
@@ -27,6 +35,10 @@ import FirstComponent from "./FirstComponent";
 import SecondComponent from "./SecondComponent";
 import ThirdComponent from "./ThirdComponent";
 import { transformFormSubmission } from "../handleDataFormatting";
+import {
+  getResultBasedOnActivityType,
+  getResultBasedOnActivityType2,
+} from "../helperFunction";
 
 const ZOHO = window.ZOHO;
 
@@ -314,6 +326,47 @@ const EventForm = ({
     }
   };
 
+  // Delete existing history
+  const handleDeleteHistory = async () => {
+    const historyRecordId = existingHistory[0]?.id;
+
+    const getAllHistoryXcontacts = await ZOHO.CRM.API.getRelatedRecords({
+      Entity: "History1",
+      RecordID: historyRecordId,
+      RelatedList: "Contacts3",
+      page: 1,
+      per_page: 200,
+    });
+
+    const deleteResponse = await ZOHO.CRM.API.deleteRecord({
+      Entity: "History1",
+      RecordID: historyRecordId,
+    });
+
+    if (deleteResponse.data[0].code === "SUCCESS") {
+      setActivityDetails("");
+      if (getAllHistoryXcontacts.data.length > 0) {
+        for (const participant of getAllHistoryXcontacts.data) {
+          const relatedRecordsDelete = await ZOHO.CRM.API.deleteRecord({
+            Entity: "History1",
+            RecordID: participant?.id,
+          });
+        }
+      }
+      // setSnackbarMessage("History deleted successfully!");
+      // setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      setExistingHistory([]);
+      setTimeout(() => {
+        handleClose();
+      }, 1000);
+    } else {
+      // setSnackbarMessage("Failed to delete history.");
+      // setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
   // Optional helper
   const resetFormState = () => {
     setFormData({
@@ -382,6 +435,19 @@ const EventForm = ({
     setDeleteDialogOpen(false);
     setEventToDelete(null);
   };
+
+  const [clearChecked, setClearChecked] = useState(
+    formData?.Event_Status === "Closed"
+  );
+  const [eraseChecked, setEraseChecked] = useState(false);
+  const [addActivityToHistory, setAddActivityToHistory] = useState(false);
+  const [activityDetails, setActivityDetails] = useState(
+    formData.Description || ""
+  );
+  const [result, setResult] = useState(formData.result || "");
+  const [isActivityDetailsUpdated, setIsActivityDetailsUpdated] =
+    useState(false);
+  const [existingHistory, setExistingHistory] = useState([]);
 
   if (argumentLoader) {
     return (
@@ -470,7 +536,8 @@ const EventForm = ({
         >
           <Tab label="General" sx={{ fontSize: "9pt" }} />
           <Tab label="Details" sx={{ fontSize: "9pt" }} />
-          <Tab label="Reccurence" sx={{ fontSize: "9pt" }} F />
+          <Tab label="Reccurence" sx={{ fontSize: "9pt" }} />
+          {/* <Tab label="Clear" sx={{ fontSize: "9pt" }} /> New tab */}
         </Tabs>
       </Box>
       {value === 0 && (
@@ -613,6 +680,157 @@ const EventForm = ({
           </Box>
         </Box>
       )}
+      {value === 3 && (
+        <Box sx={{ p: 2 }}>
+          <Typography variant="subtitle2" gutterBottom>
+            Clear or Erase this event, and optionally log to history.
+          </Typography>
+
+          <FormGroup row>
+            <Tooltip
+              title="Mark this event as cleared and update its status"
+              arrow
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={clearChecked}
+                    onChange={(e) => {
+                      setClearChecked(e.target.checked);
+                      setEraseChecked(false);
+                      setResult(
+                        getResultBasedOnActivityType(formData.Type_of_Activity)
+                      );
+                    }}
+                  />
+                }
+                label="Clear"
+              />
+            </Tooltip>
+            <Tooltip title="Delete this event permanently" arrow>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={eraseChecked}
+                    onChange={(e) => {
+                      setEraseChecked(e.target.checked);
+                      setClearChecked(false);
+                      setResult(
+                        getResultBasedOnActivityType(formData.Type_of_Activity)
+                      );
+                    }}
+                  />
+                }
+                label="Erase"
+              />
+            </Tooltip>
+          </FormGroup>
+
+          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <Select
+              labelId="demo-select-small-label"
+              id="demo-select-small"
+              value={result}
+              label="Age"
+              onChange={handleChange}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value={10}>Ten</MenuItem>
+              <MenuItem value={20}>Twenty</MenuItem>
+              <MenuItem value={30}>Thirty</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* <FormControl fullWidth>
+            <Select
+              value={result}
+              onChange={(e) => setResult(e.target.value)}
+              size="small"
+              sx={{ marginLeft: 2, minWidth: 150, fontSize: "9pt" }}
+            >
+              {getResultBasedOnActivityType2(formData.Type_of_Activity).map(
+                (option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                )
+              )}
+            </Select>
+          </FormControl> */}
+
+          {existingHistory.length > 0 ? (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                Existing History:
+                <Link
+                  href={`https://crm.zoho.com.au/crm/org7004396182/tab/CustomModule4/${existingHistory[0].id}`}
+                  target="_blank"
+                  rel="noopener"
+                  sx={{ ml: 1 }}
+                >
+                  View
+                </Link>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ ml: 2 }}
+                  onClick={handleDeleteHistory}
+                >
+                  Delete History
+                </Button>
+              </Typography>
+            </Box>
+          ) : (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={addActivityToHistory}
+                  onChange={(e) => {
+                    setAddActivityToHistory(e.target.checked);
+                    if (!e.target.checked) setActivityDetails("");
+                    else setActivityDetails(formData.Description || "");
+                  }}
+                />
+              }
+              label="Add Activity Details to History"
+            />
+          )}
+
+          <TextField
+            fullWidth
+            label="Activity Details"
+            value={activityDetails}
+            onChange={(e) => {
+              setActivityDetails(e.target.value);
+              setIsActivityDetailsUpdated(true);
+            }}
+            margin="dense"
+            multiline
+            minRows={4}
+            size="small"
+            disabled={!addActivityToHistory}
+            sx={{ mt: 2 }}
+          />
+
+          <Box display="flex" justifyContent="space-between" mt={3}>
+            <Button size="small" variant="contained" onClick={handleBack}>
+              Back
+            </Button>
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={handleSubmit}
+            >
+              Ok
+            </Button>
+          </Box>
+        </Box>
+      )}
+
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCancelDelete}
