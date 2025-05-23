@@ -21,6 +21,10 @@ import {
   TextField,
   Tooltip,
   Typography,
+  Select as MuiSelect,
+  Snackbar,
+  Alert,
+  Divider,
 } from "@mui/material";
 import { useState } from "react";
 import "react-quill/dist/quill.snow.css";
@@ -112,6 +116,8 @@ const EventForm = ({
   const [value, setValue] = useState(0);
   const [edited, setEdited] = useState(false);
   const todayDate = getLocalDateTime();
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   dayjs.extend(utc);
   dayjs.extend(timezone);
@@ -166,39 +172,73 @@ const EventForm = ({
     trigger,
     meetingType,
     Widget_Source,
+    errorDetails = null,
   }) => {
     const timeOccurred = dayjs()
       .tz("Australia/Adelaide")
       .format("YYYY-MM-DDTHH:mm:ssZ");
 
-    await ZOHO.CRM.API.insertRecord({
-      Entity: "Log_Module",
-      APIData: {
-        Name: name,
-        Payload_2: JSON.stringify(payload),
-        Response: JSON.stringify(response),
-        Result: result,
-        Trigger: trigger,
-        Time_Occured: timeOccurred,
-        Meeting_Type: meetingType,
-        Widget_Source: Widget_Source,
-      },
-    });
+    try {
+      await ZOHO.CRM.API.insertRecord({
+        Entity: "Log_Module",
+        APIData: {
+          Name: name,
+          Payload_2: JSON.stringify(payload),
+          Response: JSON.stringify(response),
+          Result: result,
+          Trigger: trigger,
+          Time_Occured: timeOccurred,
+          Meeting_Type: meetingType,
+          Widget_Source: Widget_Source,
+          Error_Details: errorDetails ? JSON.stringify(errorDetails) : null,
+        },
+      });
+    } catch (logError) {
+      // Even log the logging errors
+      console.error("Failed to log response:", logError);
+    }
   };
 
-  const handleSubmit = () => {
-    if (formData.id !== "") {
-      const transformedData = transformFormSubmission(formData);
-      const config = {
-        Entity: "Events",
-        APIData: transformedData,
-        Trigger: ["workflow"],
-      };
+  const handleApiError = async (error, operation, transformedData, formData) => {
+    const errorDetails = {
+      message: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+      operation: operation,
+    };
 
-      formData.start = new Date(formData.start);
-      formData.end = new Date(formData.end);
+    await logResponse({
+      name: `${operation}: ${formData.title || formData.id || "Unnamed"}`,
+      Payload_2: transformedData,
+      response: { error: error.message },
+      result: "Error",
+      trigger: operation.includes("Update") ? "Record Update" : "Record Create",
+      meetingType: formData.Type_of_Activity || "",
+      Widget_Source: "Calendar Widget",
+      errorDetails: errorDetails,
+    });
 
-      ZOHO.CRM.API.updateRecord(config).then(async (data) => {
+    console.error(`Error in ${operation}:`, error);
+  };
+
+  // ========================================
+  // HANDLE SUBMIT FOR FIRST THREE TABS (General, Details, Recurrence)
+  // ========================================
+  const handleSubmit = async () => {
+    try {
+      // UPDATE EXISTING EVENT
+      if (formData.id !== "") {
+        const transformedData = transformFormSubmission(formData);
+        const config = {
+          Entity: "Events",
+          APIData: transformedData,
+          Trigger: ["workflow"],
+        };
+
+        formData.start = new Date(formData.start);
+        formData.end = new Date(formData.end);
+
+        const data = await ZOHO.CRM.API.updateRecord(config);
         const wasSuccessful = data.data[0].code === "SUCCESS";
 
         await logResponse({
@@ -212,6 +252,8 @@ const EventForm = ({
         });
 
         if (wasSuccessful) {
+          setSnackbarMessage("Event updated successfully!");
+          setSnackbarSeverity("success");
           setSnackbarOpen(true);
           setEvents((prevEvents) =>
             prevEvents.map((event) =>
@@ -219,110 +261,445 @@ const EventForm = ({
             )
           );
           resetFormState();
+        } else {
+          setSnackbarMessage("Failed to update event.");
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
         }
-      });
-    }
+      }
 
-    if (formData.id === "") {
-      if (formData.create_sperate_contact) {
-        formData?.scheduledWith.forEach(async (item) => {
-          const transformedData = transformFormSubmission(formData, item);
-          try {
-            const data = await ZOHO.CRM.API.insertRecord({
-              Entity: "Events",
-              APIData: transformedData,
-              Trigger: ["workflow"],
-            });
+      // CREATE NEW EVENT
+      if (formData.id === "") {
+        // CREATE SEPARATE CONTACTS
+        if (formData.create_sperate_contact) {
+          const promises = formData?.scheduledWith.map(async (item) => {
+            const transformedData = transformFormSubmission(formData, item);
+            try {
+              const data = await ZOHO.CRM.API.insertRecord({
+                Entity: "Events",
+                APIData: transformedData,
+                Trigger: ["workflow"],
+              });
 
-            const wasSuccessful = data.data[0].code === "SUCCESS";
+              const wasSuccessful = data.data[0].code === "SUCCESS";
 
-            await logResponse({
-              name: `Create Event for ${item.name}`,
-              Payload_2: transformedData,
-              response: data,
-              result: wasSuccessful ? "Success" : "Error",
-              trigger: "Record Create",
-              meetingType: formData.Type_of_Activity || "",
-              Widget_Source: "Calendar Widget",
-            });
+              await logResponse({
+                name: `Create Event for ${item.name}`,
+                Payload_2: transformedData,
+                response: data,
+                result: wasSuccessful ? "Success" : "Error",
+                trigger: "Record Create",
+                meetingType: formData.Type_of_Activity || "",
+                Widget_Source: "Calendar Widget",
+              });
 
-            if (wasSuccessful) {
-              setSnackbarOpen(true);
-              handleInputChange("id", data?.data[0]?.details?.id);
-              setEvents((prev) => [
-                ...prev,
-                { ...formData, id: data?.data[0].details?.id },
-              ]);
+              if (wasSuccessful) {
+                handleInputChange("id", data?.data[0]?.details?.id);
+                setEvents((prev) => [
+                  ...prev,
+                  { ...formData, id: data?.data[0].details?.id },
+                ]);
+                return { success: true, data };
+              }
+              return { success: false, data };
+            } catch (error) {
+              await handleApiError(
+                error,
+                `Create Event for ${item.name}`,
+                transformedData,
+                formData
+              );
+              return { success: false, error };
             }
-          } catch (error) {
-            await logResponse({
-              name: `Create Event for ${item.name}`,
-              Payload_2: transformedData,
-              response: { error: error.message },
-              result: "Error",
-              trigger: "Record Create",
-              meetingType: formData.Type_of_Activity || "",
-              Widget_Source: "Calendar Widget",
-            });
-            console.error("Error submitting the form:", error);
+          });
+
+          const results = await Promise.all(promises);
+          const successCount = results.filter(r => r.success).length;
+          
+          if (successCount > 0) {
+            setSnackbarMessage(`${successCount} event(s) created successfully!`);
+            setSnackbarSeverity("success");
+            setSnackbarOpen(true);
+          } else {
+            setSnackbarMessage("Failed to create events.");
+            setSnackbarSeverity("error");
+            setSnackbarOpen(true);
           }
+
+          resetFormState();
+        } else {
+          // CREATE SINGLE EVENT
+          const transformedData = transformFormSubmission(formData);
+          formData.start = new Date(formData.start);
+          formData.end = new Date(formData.end);
+
+          const data = await ZOHO.CRM.API.insertRecord({
+            Entity: "Events",
+            APIData: transformedData,
+            Trigger: ["workflow"],
+          });
+
+          const wasSuccessful = data.data[0].code === "SUCCESS";
+
+          await logResponse({
+            name: `Create Event: ${formData.title || "Unnamed"}`,
+            Payload_2: transformedData,
+            response: data,
+            result: wasSuccessful ? "Success" : "Error",
+            trigger: "Record Create",
+            meetingType: formData.Type_of_Activity || "",
+            Widget_Source: "Calendar Widget",
+          });
+
+          if (wasSuccessful) {
+            setSnackbarMessage("Event created successfully!");
+            setSnackbarSeverity("success");
+            setSnackbarOpen(true);
+            handleInputChange("id", data?.data[0]?.details?.id);
+            setEvents((prev) => [
+              ...prev,
+              {
+                ...formData,
+                id: data?.data[0].details?.id,
+                scheduleFor: {
+                  name: formData.scheduleFor.full_name,
+                  id: formData.scheduleFor.id,
+                  email: formData.scheduleFor.email,
+                },
+              },
+            ]);
+            resetFormState();
+          } else {
+            setSnackbarMessage("Failed to create event.");
+            setSnackbarSeverity("error");
+            setSnackbarOpen(true);
+          }
+        }
+      }
+    } catch (error) {
+      await handleApiError(
+        error,
+        formData.id ? "Update Event" : "Create Event",
+        formData.id ? transformFormSubmission(formData) : formData,
+        formData
+      );
+      setSnackbarMessage("An unexpected error occurred!");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
+  // ========================================
+  // HANDLE CLEAR UPDATE FOR CLEAR TAB ONLY
+  // ========================================
+  const handleClearUpdate = async (e) => {
+    if (e) e.preventDefault();
+    
+    try {
+      // Helper to update only the history record
+      const updateHistoryOnly = async () => {
+        const historyRecordId = existingHistory[0]?.id;
+        const updatedHistoryData = {
+          History_Details_Plain: activityDetails,
+          History_Result: result,
+          id: historyRecordId
+        };
+
+        const updateResponse = await ZOHO.CRM.API.updateRecord({
+          Entity: "History1",
+          RecordID: historyRecordId,
+          APIData: updatedHistoryData,
         });
 
-        resetFormState();
-      } else {
-        const transformedData = transformFormSubmission(formData);
-        formData.start = new Date(formData.start);
-        formData.end = new Date(formData.end);
+        await logResponse({
+          name: `Update History: ${historyRecordId}`,
+          Payload_2: updatedHistoryData,
+          response: updateResponse,
+          result: updateResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+          trigger: "History Update",
+          meetingType: formData.Type_of_Activity || "",
+          Widget_Source: "Calendar Widget",
+        });
 
-        ZOHO.CRM.API.insertRecord({
-          Entity: "Events",
-          APIData: transformedData,
-          Trigger: ["workflow"],
-        })
-          .then(async (data) => {
-            const wasSuccessful = data.data[0].code === "SUCCESS";
+        if (updateResponse.data[0].code === "SUCCESS") {
+          setSnackbarMessage("History updated successfully!");
+          setSnackbarSeverity("success");
+          setSnackbarOpen(true);
+        } else {
+          setSnackbarMessage("Failed to update history.");
+          setSnackbarSeverity("warning");
+          setSnackbarOpen(true);
+          return false;
+        }
+        return true;
+      };
 
-            await logResponse({
-              name: `Create Event: ${formData.title || "Unnamed"}`,
-              Payload_2: transformedData,
-              response: data,
-              result: wasSuccessful ? "Success" : "Error",
-              trigger: "Record Create",
-              meetingType: formData.Type_of_Activity || "",
-              Widget_Source: "Calendar Widget",
-            });
+      // Helper to create or update history
+      const createOrUpdateHistory = async () => {
+        // Prepare record data for history
+        const recordData = {
+          Name: formData.title || "Unnamed Event",
+          Duration: formData.duration,
+          History_Type: formData.Type_of_Activity,
+          Stakeholder: formData.associateWith ? { 
+            id: formData.associateWith.id 
+          } : null,
+          Regarding: formData.Regarding,
+          Date: formData.start,
+          Owner: formData.Owner,
+          History_Details_Plain: activityDetails,
+          History_Result: result,
+          Event_ID: formData.id,
+        };
 
-            if (wasSuccessful) {
-              handleInputChange("id", data?.data[0]?.details?.id);
-              setEvents((prev) => [
-                ...prev,
-                {
-                  ...formData,
-                  id: data?.data[0].details?.id,
-                  scheduleFor: {
-                    name: formData.scheduleFor.full_name,
-                    id: formData.scheduleFor.id,
-                    email: formData.scheduleFor.email,
-                  },
-                },
-              ]);
-              resetFormState();
-              setSnackbarOpen(true);
-            }
-          })
-          .catch(async (error) => {
-            await logResponse({
-              name: `Create Event: ${formData.title || "Unnamed"}`,
-              Payload_2: transformedData,
-              response: { error: error.message },
-              result: "Error",
-              trigger: "Record Create",
-              meetingType: formData.Type_of_Activity || "",
-              Widget_Source: "Calendar Widget",
-            });
-            console.error("Error submitting the form:", error);
+        if (existingHistory.length > 0) {
+          return await updateHistoryOnly();
+        } else {
+          const historyResponse = await ZOHO.CRM.API.insertRecord({
+            Entity: "History1",
+            APIData: recordData,
+            Trigger: ["workflow"],
           });
+
+          await logResponse({
+            name: `Create History: ${formData.title || formData.id}`,
+            Payload_2: recordData,
+            response: historyResponse,
+            result: historyResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+            trigger: "History Create",
+            meetingType: formData.Type_of_Activity || "",
+            Widget_Source: "Calendar Widget",
+          });
+
+          if (historyResponse.data[0].code === "SUCCESS") {
+            // Handle participants if available
+            if (formData.scheduleWith && formData.scheduleWith.length > 0) {
+              for (const participant of formData.scheduleWith) {
+                const historyXContactRecordData = {
+                  Contact_Details: { id: participant.id },
+                  Contact_History_Info: {
+                    id: historyResponse?.data[0]?.details?.id,
+                  },
+                  Duration: formData.duration,
+                  History_Type: formData.Type_of_Activity,
+                  Stakeholder: formData.associateWith ? { 
+                    id: formData.associateWith.id 
+                  } : null,
+                  Regarding: formData.Regarding,
+                  History_Date_Time: formData.start,
+                  Owner: formData.Owner,
+                  History_Details: activityDetails,
+                  History_Result: result,
+                  Event_ID: formData.id,
+                };
+
+                try {
+                  const contactHistoryResponse = await ZOHO.CRM.API.insertRecord({
+                    Entity: "History_X_Contacts",
+                    APIData: historyXContactRecordData,
+                    Trigger: ["workflow"],
+                  });
+                  
+                  await logResponse({
+                    name: `Create Contact History: ${participant.name || participant.id}`,
+                    Payload_2: historyXContactRecordData,
+                    response: contactHistoryResponse,
+                    result: contactHistoryResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+                    trigger: "Contact History Create",
+                    meetingType: formData.Type_of_Activity || "",
+                    Widget_Source: "Calendar Widget",
+                  });
+                  
+                  console.log(`Record inserted for participant ${participant.name || participant.id}`);
+                } catch (error) {
+                  console.error(`Error inserting record for ${participant.name || participant.id}:`, error);
+                  await handleApiError(
+                    error,
+                    `Create Contact History for ${participant.name || participant.id}`,
+                    historyXContactRecordData,
+                    formData
+                  );
+                }
+              }
+            }
+
+            setSnackbarMessage("New history created successfully!");
+            setSnackbarSeverity("success");
+            setSnackbarOpen(true);
+          } else {
+            setSnackbarMessage("Failed to create new history.");
+            setSnackbarSeverity("warning");
+            setSnackbarOpen(true);
+            return false;
+          }
+          return true;
+        }
+      };
+
+      // CASE 1: "Clear" checked and "Erase" unchecked → Close the event
+      if (clearChecked && !eraseChecked) {
+        const updateResponse = await ZOHO.CRM.API.updateRecord({
+          Entity: "Events",
+          RecordID: formData.id,
+          APIData: {
+            id: formData.id,
+            Event_Status: "Closed",
+            result: result,
+          },
+        });
+
+        await logResponse({
+          name: `Clear Event: ${formData.title || formData.id}`,
+          Payload_2: { id: formData.id, Event_Status: "Closed", result },
+          response: updateResponse,
+          result: updateResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+          trigger: "Event Clear",
+          meetingType: formData.Type_of_Activity || "",
+          Widget_Source: "Calendar Widget",
+        });
+
+        if (updateResponse.data[0].code === "SUCCESS") {
+          setSnackbarMessage("Event marked as cleared successfully!");
+          setSnackbarSeverity("success");
+          setSnackbarOpen(true);
+
+          setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+              event.id === formData.id
+                ? { ...event, Event_Status: "Closed", result: result }
+                : event
+            )
+          );
+          
+          if (addActivityToHistory) {
+            await createOrUpdateHistory();
+          }
+        } else {
+          throw new Error("Failed to update the event.");
+        }
       }
+
+      // CASE 2: Both "Clear" and "Erase" unchecked → Open the event
+      if (!clearChecked && !eraseChecked) {
+        const eventResponse = await ZOHO.CRM.API.getRecord({
+          Entity: "Events",
+          approved: "both",
+          RecordID: formData.id,
+        });
+
+        await logResponse({
+          name: `Get Event: ${formData.title || formData.id}`,
+          Payload_2: { id: formData.id },
+          response: eventResponse,
+          result: eventResponse.data.length > 0 ? "Success" : "Error",
+          trigger: "Event Get",
+          meetingType: formData.Type_of_Activity || "",
+          Widget_Source: "Calendar Widget",
+        });
+
+        if (eventResponse.data.length > 0) {
+          const updateResponse = await ZOHO.CRM.API.updateRecord({
+            Entity: "Events",
+            RecordID: formData.id,
+            APIData: {
+              id: formData.id,
+              Event_Status: "Open",
+            },
+          });
+
+          await logResponse({
+            name: `Reopen Event: ${formData.title || formData.id}`,
+            Payload_2: { id: formData.id, Event_Status: "Open" },
+            response: updateResponse,
+            result: updateResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+            trigger: "Event Reopen",
+            meetingType: formData.Type_of_Activity || "",
+            Widget_Source: "Calendar Widget",
+          });
+
+          if (updateResponse.data[0].code === "SUCCESS") {
+            setSnackbarMessage("Event status updated to Open.");
+            setSnackbarSeverity("success");
+            setSnackbarOpen(true);
+
+            setEvents((prevEvents) =>
+              prevEvents.map((event) =>
+                event.id === formData.id
+                  ? {
+                      ...event,
+                      Event_Status: "Open",
+                    }
+                  : event
+              )
+            );
+            
+            if (addActivityToHistory) {
+              await createOrUpdateHistory();
+            }
+          } else {
+            throw new Error("Failed to update the event status.");
+          }
+        } else {
+          setSnackbarMessage("No event found to update.");
+          setSnackbarSeverity("info");
+          setSnackbarOpen(true);
+        }
+      }
+
+      // CASE 3: "Erase" checked → Delete the event
+      if (!clearChecked && eraseChecked) {
+        // If adding to history, do that first before deleting the event
+        if (addActivityToHistory) {
+          await createOrUpdateHistory();
+        }
+        
+        const deleteResponse = await ZOHO.CRM.API.deleteRecord({
+          Entity: "Events",
+          RecordID: formData.id,
+        });
+
+        await logResponse({
+          name: `Delete Event: ${formData.title || formData.id}`,
+          Payload_2: { id: formData.id },
+          response: deleteResponse,
+          result: deleteResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+          trigger: "Event Delete",
+          meetingType: formData.Type_of_Activity || "",
+          Widget_Source: "Calendar Widget",
+        });
+
+        if (deleteResponse.data[0].code === "SUCCESS") {
+          setSnackbarMessage("Event erased successfully!");
+          setSnackbarSeverity("success");
+          setSnackbarOpen(true);
+
+          setEvents((prevEvents) =>
+            prevEvents.filter((event) => event.id !== formData.id)
+          );
+        } else {
+          throw new Error("Failed to delete the event.");
+        }
+      }
+
+      // Handle only history update when event data is unchanged
+      if (!clearChecked && !eraseChecked && isActivityDetailsUpdated && existingHistory.length > 0) {
+        await updateHistoryOnly();
+      }
+
+      setTimeout(() => {
+        handleClose();
+      }, 1000);
+    } catch (error) {
+      console.error("Error during clear operation:", error);
+      await handleApiError(
+        error,
+        "Clear/Update Event",
+        { id: formData.id },
+        formData
+      );
+      setSnackbarMessage("An unexpected error occurred, try again!");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
 
@@ -330,39 +707,82 @@ const EventForm = ({
   const handleDeleteHistory = async () => {
     const historyRecordId = existingHistory[0]?.id;
 
-    const getAllHistoryXcontacts = await ZOHO.CRM.API.getRelatedRecords({
-      Entity: "History1",
-      RecordID: historyRecordId,
-      RelatedList: "Contacts3",
-      page: 1,
-      per_page: 200,
-    });
+    try {
+      const getAllHistoryXcontacts = await ZOHO.CRM.API.getRelatedRecords({
+        Entity: "History1",
+        RecordID: historyRecordId,
+        RelatedList: "Contacts3",
+        page: 1,
+        per_page: 200,
+      });
 
-    const deleteResponse = await ZOHO.CRM.API.deleteRecord({
-      Entity: "History1",
-      RecordID: historyRecordId,
-    });
+      await logResponse({
+        name: `Get Related History: ${historyRecordId}`,
+        Payload_2: { id: historyRecordId },
+        response: getAllHistoryXcontacts,
+        result: "Success",
+        trigger: "Get Related History",
+        meetingType: formData.Type_of_Activity || "",
+        Widget_Source: "Calendar Widget",
+      });
 
-    if (deleteResponse.data[0].code === "SUCCESS") {
-      setActivityDetails("");
-      if (getAllHistoryXcontacts.data.length > 0) {
-        for (const participant of getAllHistoryXcontacts.data) {
-          const relatedRecordsDelete = await ZOHO.CRM.API.deleteRecord({
-            Entity: "History1",
-            RecordID: participant?.id,
-          });
+      const deleteResponse = await ZOHO.CRM.API.deleteRecord({
+        Entity: "History1",
+        RecordID: historyRecordId,
+      });
+
+      await logResponse({
+        name: `Delete History: ${historyRecordId}`,
+        Payload_2: { id: historyRecordId },
+        response: deleteResponse,
+        result: deleteResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+        trigger: "History Delete",
+        meetingType: formData.Type_of_Activity || "",
+        Widget_Source: "Calendar Widget",
+      });
+
+      if (deleteResponse.data[0].code === "SUCCESS") {
+        setActivityDetails("");
+        if (getAllHistoryXcontacts.data && getAllHistoryXcontacts.data.length > 0) {
+          for (const participant of getAllHistoryXcontacts.data) {
+            const relatedRecordsDelete = await ZOHO.CRM.API.deleteRecord({
+              Entity: "History1",
+              RecordID: participant?.id,
+            });
+            
+            await logResponse({
+              name: `Delete Related History: ${participant?.id}`,
+              Payload_2: { id: participant?.id },
+              response: relatedRecordsDelete,
+              result: relatedRecordsDelete.data[0].code === "SUCCESS" ? "Success" : "Error",
+              trigger: "Related History Delete",
+              meetingType: formData.Type_of_Activity || "",
+              Widget_Source: "Calendar Widget",
+            });
+          }
         }
+        setSnackbarMessage("History deleted successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+        setExistingHistory([]);
+        setTimeout(() => {
+          handleClose();
+        }, 1000);
+      } else {
+        setSnackbarMessage("Failed to delete history.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
-      // setSnackbarMessage("History deleted successfully!");
-      // setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-      setExistingHistory([]);
-      setTimeout(() => {
-        handleClose();
-      }, 1000);
-    } else {
-      // setSnackbarMessage("Failed to delete history.");
-      // setSnackbarSeverity("error");
+    } catch (error) {
+      await handleApiError(
+        error,
+        "Delete History",
+        { id: historyRecordId },
+        formData
+      );
+      console.error("Error deleting history:", error);
+      setSnackbarMessage("Failed to delete history.");
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
   };
@@ -418,6 +838,16 @@ const EventForm = ({
         RecordID: eventToDelete,
       });
 
+      await logResponse({
+        name: `Delete Event: ${eventToDelete}`,
+        Payload_2: { id: eventToDelete },
+        response: deleteResponse,
+        result: deleteResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+        trigger: "Event Delete",
+        meetingType: formData.Type_of_Activity || "",
+        Widget_Source: "Calendar Widget",
+      });
+
       console.log("Event deleted successfully:", deleteResponse);
 
       setEvents((prevEvents) =>
@@ -427,6 +857,12 @@ const EventForm = ({
       setEventToDelete(null);
       handleClose(); // If you're closing a parent modal too
     } catch (error) {
+      await handleApiError(
+        error,
+        "Delete Event",
+        { id: eventToDelete },
+        formData
+      );
       console.error("Error deleting event:", error);
     }
   };
@@ -445,9 +881,93 @@ const EventForm = ({
     formData.Description || ""
   );
   const [result, setResult] = useState(formData.result || "");
-  const [isActivityDetailsUpdated, setIsActivityDetailsUpdated] =
-    useState(false);
+  const [isActivityDetailsUpdated, setIsActivityDetailsUpdated] = useState(false);
   const [existingHistory, setExistingHistory] = useState([]);
+  const [filteredActivities, setFilteredActivities] = useState([]);
+  
+  // Check for existing history on component mount or when editing an event
+  useEffect(() => {
+    if (formData.id) {
+      // Fetch existing history for this event
+      const fetchHistory = async () => {
+        try {
+          const historyResponse = await ZOHO.CRM.API.searchRecords({
+            Entity: "History1",
+            Type: "criteria",
+            Query: `(Event_ID:equals:${formData.id})`,
+          });
+          
+          if (historyResponse && historyResponse.data && historyResponse.data.length > 0) {
+            setExistingHistory(historyResponse.data);
+            // If there's existing history, pre-populate the activity details
+            if (historyResponse.data[0].History_Details_Plain) {
+              setActivityDetails(historyResponse.data[0].History_Details_Plain);
+              setAddActivityToHistory(true);
+            }
+            if (historyResponse.data[0].History_Result) {
+              setResult(historyResponse.data[0].History_Result);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching history:", error);
+        }
+      };
+      
+      fetchHistory();
+    }
+  }, [formData.id]);
+
+  // Update filtered activities when activity type changes
+  useEffect(() => {
+    if (formData?.Type_of_Activity) {
+      const filteredOptions = getResultBasedOnActivityType2(formData.Type_of_Activity);
+      setFilteredActivities(filteredOptions);
+  
+      // Set the first option as the default if no result is already set
+      if (filteredOptions.length > 0 && !result) {
+        setResult(filteredOptions[0]);
+      }
+    }
+  }, [formData?.Type_of_Activity]);
+
+  // Handle result selection change
+  const handleResultChange = (e) => {
+    setResult(e.target.value);
+  };
+
+  // Handle clear checkbox change
+  const handleClearChange = (event) => {
+    setClearChecked(event.target.checked);
+    if (event.target.checked) {
+      setEraseChecked(false);
+      setResult(getResultBasedOnActivityType(formData.Type_of_Activity) || "");
+    }
+  };
+
+  // Handle erase checkbox change
+  const handleEraseChange = (event) => {
+    setEraseChecked(event.target.checked);
+    if (event.target.checked) {
+      setClearChecked(false);
+      setResult(getResultBasedOnActivityType(formData.Type_of_Activity) || "");
+    }
+  };
+
+  // Handle activity to history checkbox change
+  const handleActivityToHistory = (e) => {
+    setAddActivityToHistory(e.target.checked);
+    if (!e.target.checked) {
+      setActivityDetails("");
+    } else {
+      setActivityDetails(formData.Description || "");
+    }
+  };
+
+  // Handle activity details change
+  const handleActivityDetailsChange = (e) => {
+    setActivityDetails(e.target.value);
+    setIsActivityDetailsUpdated(true);
+  };
 
   if (argumentLoader) {
     return (
@@ -489,6 +1009,9 @@ const EventForm = ({
     );
   }
 
+  // Determine if we should show the Clear tab (only for editing, not for creation)
+  const showClearTab = formData.id !== "";
+
   return (
     <Box
       sx={{
@@ -504,17 +1027,10 @@ const EventForm = ({
         overflowY: "auto",
         maxHeight: "90vh", // Ensure the modal is scrollable if content exceeds the viewport
         zIndex: 100,
-        p: "15px 30px  20px 30px",
+        p: "15px 30px 20px 30px",
       }}
     >
       <Box display="flex" justifyContent="space-between" sx={{ padding: 0 }}>
-        {/* <Typography
-          variant="subtitle1"
-          sx={{ fontWeight: "bold" }}
-          align="center"
-        >
-          Create Activity
-        </Typography> */}
         <Box></Box>
         <Button
           variant="outlined"
@@ -537,9 +1053,11 @@ const EventForm = ({
           <Tab label="General" sx={{ fontSize: "9pt" }} />
           <Tab label="Details" sx={{ fontSize: "9pt" }} />
           <Tab label="Reccurence" sx={{ fontSize: "9pt" }} />
-          {/* <Tab label="Clear" sx={{ fontSize: "9pt" }} /> New tab */}
+          {showClearTab && <Tab label="Clear" sx={{ fontSize: "9pt" }} />}
         </Tabs>
       </Box>
+      
+      {/* GENERAL TAB */}
       {value === 0 && (
         <Box sx={{ p: 0, borderRadius: 1 }}>
           <FirstComponent
@@ -587,29 +1105,21 @@ const EventForm = ({
                 color="secondary"
                 onClick={handleSubmit}
               >
-                {/* {formData.id !== "" ? "Update" : "Submit"} */}
                 Ok
-                {/* Submit */}
               </Button>
             </Box>
           </Box>
         </Box>
       )}
+      
+      {/* DETAILS TAB */}
       {value === 1 && (
         <Box sx={{ p: 1, borderRadius: 1 }}>
-          {/* <SecondComponent /> */}
-          {/* <ReactQuill
-          theme="snow"
-          style={{ height: 250, marginBottom: 80 }}
-          value={formData.quillContent}
-          onChange={(content) => handleInputChange("quillContent", content)}
-        /> */}
           <TextField
             multiline
             rows={10}
             fullWidth
             defaultValue={formData.Description}
-            // value={formData.Description}
             onChange={(e) => handleInputChange("Description", e.target.value)}
           />
           <Box display="flex" justifyContent="space-between" mt={2}>
@@ -640,14 +1150,14 @@ const EventForm = ({
                 color="secondary"
                 onClick={handleSubmit}
               >
-                {/* {formData.id !== "" ? "Update" : "Submit"} */}
                 Ok
-                {/* Submit */}
               </Button>
             </Box>
           </Box>
         </Box>
       )}
+      
+      {/* RECURRENCE TAB */}
       {value === 2 && (
         <Box sx={{ p: 2, borderRadius: 1 }}>
           <ThirdComponent
@@ -672,93 +1182,55 @@ const EventForm = ({
               color="secondary"
               onClick={handleSubmit}
             >
-              {/* {formData.id !== "" ? "Update" : "Ok"} */}
               Ok
-              {/* Submit */}
-            </Button>{" "}
-            {/* Next is disabled on the last tab */}
+            </Button>
           </Box>
         </Box>
       )}
-      {value === 3 && (
+      
+      {/* CLEAR TAB */}
+      {value === 3 && showClearTab && (
         <Box sx={{ p: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            Clear or Erase this event, and optionally log to history.
+          <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: "9pt" }}>
+            Results:
           </Typography>
 
           <FormGroup row>
-            <Tooltip
-              title="Mark this event as cleared and update its status"
-              arrow
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={clearChecked}
-                    onChange={(e) => {
-                      setClearChecked(e.target.checked);
-                      setEraseChecked(false);
-                      setResult(
-                        getResultBasedOnActivityType(formData.Type_of_Activity)
-                      );
-                    }}
-                  />
-                }
-                label="Clear"
-              />
-            </Tooltip>
-            <Tooltip title="Delete this event permanently" arrow>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={eraseChecked}
-                    onChange={(e) => {
-                      setEraseChecked(e.target.checked);
-                      setClearChecked(false);
-                      setResult(
-                        getResultBasedOnActivityType(formData.Type_of_Activity)
-                      );
-                    }}
-                  />
-                }
-                label="Erase"
-              />
-            </Tooltip>
-          </FormGroup>
-
-          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-            <Select
-              labelId="demo-select-small-label"
-              id="demo-select-small"
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={clearChecked}
+                  onChange={handleClearChange}
+                />
+              }
+              label="Clear"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={eraseChecked}
+                  onChange={handleEraseChange}
+                />
+              }
+              label="Erase"
+            />
+            <MuiSelect
               value={result}
-              label="Age"
-              onChange={handleChange}
-            >
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
-
-          {/* <FormControl fullWidth>
-            <Select
-              value={result}
-              onChange={(e) => setResult(e.target.value)}
+              onChange={handleResultChange}
               size="small"
               sx={{ marginLeft: 2, minWidth: 150, fontSize: "9pt" }}
+              displayEmpty
             >
-              {getResultBasedOnActivityType2(formData.Type_of_Activity).map(
-                (option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                )
-              )}
-            </Select>
-          </FormControl> */}
+              <MenuItem value="" disabled>
+                <em>Select a result</em>
+              </MenuItem>
+              {filteredActivities.map((option) => (
+                <MenuItem key={option} value={option} sx={{ fontSize: "9pt" }}>
+                  {option}
+                </MenuItem>
+              ))}
+            </MuiSelect>
+          </FormGroup>
 
           {existingHistory.length > 0 ? (
             <Box sx={{ mt: 2 }}>
@@ -788,44 +1260,45 @@ const EventForm = ({
               control={
                 <Checkbox
                   checked={addActivityToHistory}
-                  onChange={(e) => {
-                    setAddActivityToHistory(e.target.checked);
-                    if (!e.target.checked) setActivityDetails("");
-                    else setActivityDetails(formData.Description || "");
-                  }}
+                  onChange={handleActivityToHistory}
                 />
               }
               label="Add Activity Details to History"
             />
           )}
 
-          <TextField
-            fullWidth
-            label="Activity Details"
-            value={activityDetails}
-            onChange={(e) => {
-              setActivityDetails(e.target.value);
-              setIsActivityDetailsUpdated(true);
-            }}
-            margin="dense"
-            multiline
-            minRows={4}
-            size="small"
-            disabled={!addActivityToHistory}
-            sx={{ mt: 2 }}
-          />
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" gutterBottom>
+              Activity Details
+            </Typography>
+            <TextField
+              fullWidth
+              value={activityDetails}
+              onChange={handleActivityDetailsChange}
+              multiline
+              rows={4}
+              size="small"
+              disabled={!addActivityToHistory && existingHistory.length === 0}
+            />
+          </Box>
 
-          <Box display="flex" justifyContent="space-between" mt={3}>
-            <Button size="small" variant="contained" onClick={handleBack}>
-              Back
+          <Box display="flex" justifyContent="flex-end" mt={3}>
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={handleClose}
+              sx={{ mr: 2 }}
+            >
+              CANCEL
             </Button>
             <Button
               size="small"
               variant="contained"
               color="primary"
-              onClick={handleSubmit}
+              onClick={handleClearUpdate}
             >
-              Ok
+              UPDATE
             </Button>
           </Box>
         </Box>
@@ -852,6 +1325,20 @@ const EventForm = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%", fontSize: "9pt" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
