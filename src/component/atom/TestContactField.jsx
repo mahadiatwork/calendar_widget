@@ -37,6 +37,12 @@ export default function TestContactField({
   const getInviteStatusDisplay = (status, sendInvites) => {
     if (status === "yes") return "Accepted"
     if (status === "no") return "Declined"
+    if (status === undefined) {
+      return "Not Sent"
+    }
+    if (status === "" || status === null) {
+      return sendInvites ? "Invite Sent" : "Not Sent"
+    }
     if (status === "not_known") {
       return sendInvites ? "No Reply" : "Not Sent"
     }
