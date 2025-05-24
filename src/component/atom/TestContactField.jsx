@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react"
 import {
   Box,
   Button,
@@ -15,27 +15,38 @@ import {
   TableRow,
   Checkbox,
   Typography,
-} from "@mui/material";
-const ZOHO = window.ZOHO;
+} from "@mui/material"
+const ZOHO = window.ZOHO
 
 export default function TestContactField({
   value,
   handleInputChange,
   // ZOHO,
   clickedEvent = {}, // Default to an empty object
+  formData,
 }) {
-  const [contacts, setContacts] = useState([]); // Fetched contacts
-  const [selectedParticipants, setSelectedParticipants] = useState(value || []); // Selected participants
-  const [searchType, setSearchType] = useState("First_Name"); // Search criteria
-  const [searchText, setSearchText] = useState(""); // Search input
-  const [filteredContacts, setFilteredContacts] = useState([]); // Filtered contacts for display
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-  const debounceTimer = useRef(null); // Debounce timer for search
+  const [contacts, setContacts] = useState([]) // Fetched contacts
+  const [selectedParticipants, setSelectedParticipants] = useState(value || []) // Selected participants
+  const [searchType, setSearchType] = useState("First_Name") // Search criteria
+  const [searchText, setSearchText] = useState("") // Search input
+  const [filteredContacts, setFilteredContacts] = useState([]) // Filtered contacts for display
+  const [isModalOpen, setIsModalOpen] = useState(false) // Modal state
+  const debounceTimer = useRef(null) // Debounce timer for search
+
+  // Helper function to determine invite status display
+  const getInviteStatusDisplay = (status, sendInvites) => {
+    if (status === "yes") return "Accepted"
+    if (status === "no") return "Declined"
+    if (status === "not_known") {
+      return sendInvites ? "No Reply" : "Not Sent"
+    }
+    return status // fallback for any other status values
+  }
 
   // Prepopulate and fetch missing data for selectedParticipants
   useEffect(() => {
     const fetchParticipantsDetails = async () => {
-      console.log("clickedEvent?.scheduledWith", clickedEvent?.scheduledWith);
+      console.log("clickedEvent?.scheduledWith", clickedEvent?.scheduledWith)
       if (clickedEvent?.scheduledWith && ZOHO) {
         const participants = await Promise.all(
           clickedEvent?.scheduledWith.map(async (participant) => {
@@ -43,98 +54,93 @@ export default function TestContactField({
               const contactDetails = await ZOHO.CRM.API.getRecord({
                 Entity: "Contacts",
                 RecordID: participant.participant, // Use participant ID
-              });
+              })
 
-              console.log({ contactDetails });
+              console.log({ contactDetails })
               if (contactDetails.data && contactDetails.data.length > 0) {
-                const contact = contactDetails.data[0];
+                const contact = contactDetails.data[0]
                 return {
                   id: contact.id,
                   First_Name: contact.First_Name || "N/A",
                   Last_Name: contact.Last_Name || "N/A",
                   Email: contact.Email || "No Email",
                   Mobile: contact.Mobile || "N/A",
-                  Full_Name: `${contact.First_Name || "N/A"} ${
-                    contact.Last_Name || "N/A"
-                  }`,
+                  Full_Name: `${contact.First_Name || "N/A"} ${contact.Last_Name || "N/A"}`,
                   ID_Number: contact.ID_Number || "N/A",
                   status: participant.status,
-                };
+                }
               } else {
                 return {
                   id: participant.participant,
                   Full_Name: participant.name || "Unknown",
                   Email: participant.Email || "No Email",
-                };
+                }
               }
             } catch (error) {
-              console.error(
-                `Error fetching contact details for ID ${participant.participant}:`,
-                error
-              );
+              console.error(`Error fetching contact details for ID ${participant.participant}:`, error)
               return {
                 id: participant.participant,
                 Full_Name: participant.name || "Unknown",
                 Email: participant.Email || "No Email",
-              };
+              }
             }
-          })
-        );
-        setSelectedParticipants(participants);
-        handleInputChange("scheduledWith", participants);
+          }),
+        )
+        setSelectedParticipants(participants)
+        handleInputChange("scheduledWith", participants)
       }
-    };
-    fetchParticipantsDetails();
-  }, [clickedEvent, ZOHO]);
+    }
+    fetchParticipantsDetails()
+  }, [clickedEvent, ZOHO])
 
   // Open modal and sync selected participants
   const handleOpen = () => {
-    setFilteredContacts([]);
-    setIsModalOpen(true);
-  };
+    setFilteredContacts([])
+    setIsModalOpen(true)
+  }
 
   // Close modal without saving changes
   const handleCancel = () => {
-    setIsModalOpen(false);
-  };
+    setIsModalOpen(false)
+  }
 
   // Fetch and filter contacts from the server based on search criteria
   const handleSearch = async () => {
-    if (!ZOHO || !searchText.trim()) return;
+    if (!ZOHO || !searchText.trim()) return
 
     try {
-      let searchResults;
+      let searchResults
 
       if (searchType === "Email") {
         searchResults = await ZOHO.CRM.API.searchRecord({
           Entity: "Contacts",
           Type: "email",
           Query: searchText.trim(),
-        });
+        })
       } else if (searchType === "Mobile") {
         searchResults = await ZOHO.CRM.API.searchRecord({
           Entity: "Contacts",
           Type: "criteria",
           Query: `(Mobile:equals:${searchText.trim()})`,
-        });
+        })
       } else if (searchType === "ID_Number") {
         searchResults = await ZOHO.CRM.API.searchRecord({
           Entity: "Contacts",
           Type: "criteria",
           Query: `(ID_Number:equals:${searchText.trim()})`,
-        });
+        })
       } else if (searchType === "Full_Name") {
         searchResults = await ZOHO.CRM.API.searchRecord({
           Entity: "Contacts",
           Type: "word",
           Query: searchText.trim(),
-        });
+        })
       } else {
         searchResults = await ZOHO.CRM.API.searchRecord({
           Entity: "Contacts",
           Type: "criteria",
           Query: `(${searchType}:equals:${searchText.trim()})`,
-        });
+        })
       }
 
       if (searchResults.data && searchResults.data.length > 0) {
@@ -145,56 +151,51 @@ export default function TestContactField({
           Mobile: contact.Mobile || "N/A",
           ID_Number: contact.ID_Number || "N/A", // Assuming ID_Number is available
           id: contact.id,
-        }));
-        setFilteredContacts(formattedContacts);
+        }))
+        setFilteredContacts(formattedContacts)
       } else {
-        setFilteredContacts([]);
+        setFilteredContacts([])
       }
     } catch (error) {
-      console.error("Error during search:", error);
-      setFilteredContacts([]);
+      console.error("Error during search:", error)
+      setFilteredContacts([])
     }
-  };
+  }
 
   // Toggle selection of a contact
   const toggleContactSelection = (contact) => {
     setSelectedParticipants((prev) =>
-      prev.some((c) => c.id === contact.id)
-        ? prev.filter((c) => c.id !== contact.id)
-        : [...prev, contact]
-    );
-  };
+      prev.some((c) => c.id === contact.id) ? prev.filter((c) => c.id !== contact.id) : [...prev, contact],
+    )
+  }
 
   // Save changes and close the modal
   const handleOk = () => {
     const updatedParticipants = selectedParticipants.map((participant) => ({
-      Full_Name:
-        participant.Full_Name ||
-        `${participant.First_Name} ${participant.Last_Name}`,
+      Full_Name: participant.Full_Name || `${participant.First_Name} ${participant.Last_Name}`,
       Email: participant.Email,
       participant: participant.id,
       type: "contact",
-    }));
+    }))
 
-    handleInputChange("scheduledWith", updatedParticipants);
+    handleInputChange("scheduledWith", updatedParticipants)
     // console.log({ clickedEvent: clickedEvent})
     if (clickedEvent !== null) {
-      clickedEvent.scheduledWith = updatedParticipants;
+      clickedEvent.scheduledWith = updatedParticipants
     }
 
     // Close the modal
-    setIsModalOpen(false);
-  };
+    setIsModalOpen(false)
+  }
 
+  console.log({ formData })
   return (
     <Box>
       {/* Single-line display for selected contacts */}
       <Box display="flex" alignItems="center" gap={2}>
         <TextField
           fullWidth
-          value={selectedParticipants
-            .map((c) => c.Full_Name || `${c.First_Name} ${c.Last_Name}`)
-            .join(", ")}
+          value={selectedParticipants.map((c) => c.Full_Name || `${c.First_Name} ${c.Last_Name}`).join(", ")}
           variant="outlined"
           placeholder="Selected contacts"
           InputProps={{
@@ -370,9 +371,7 @@ export default function TestContactField({
                     >
                       <TableCell>
                         <Checkbox
-                          checked={selectedParticipants.some(
-                            (c) => c.id === contact.id
-                          )}
+                          checked={selectedParticipants.some((c) => c.id === contact.id)}
                           onChange={() => toggleContactSelection(contact)}
                         />
                       </TableCell>
@@ -407,10 +406,7 @@ export default function TestContactField({
               Selected Contacts:
             </Typography>
             <TableContainer>
-              <Table
-                size="small"
-                sx={{ tableLayout: "fixed", fontSize: "9pt" }}
-              >
+              <Table size="small" sx={{ tableLayout: "fixed", fontSize: "9pt" }}>
                 <TableHead>
                   <TableRow>
                     <TableCell
@@ -420,26 +416,12 @@ export default function TestContactField({
                         fontSize: "9pt",
                       }}
                     ></TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>
-                      First Name
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>
-                      Last Name
-                    </TableCell>
-                    <TableCell
-                      sx={{ width: "30%", fontWeight: "bold", fontSize: "9pt" }}
-                    >
-                      Email
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>
-                      Mobile
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>
-                      MS File Number
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>
-                      Invite Status
-                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>First Name</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>Last Name</TableCell>
+                    <TableCell sx={{ width: "30%", fontWeight: "bold", fontSize: "9pt" }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>Mobile</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>MS File Number</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "9pt" }}>Invite Status</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -454,10 +436,7 @@ export default function TestContactField({
                       }}
                     >
                       <TableCell>
-                        <Checkbox
-                          checked
-                          onChange={() => toggleContactSelection(contact)}
-                        />
+                        <Checkbox checked onChange={() => toggleContactSelection(contact)} />
                       </TableCell>
                       <TableCell>
                         <a
@@ -482,7 +461,7 @@ export default function TestContactField({
                       <TableCell>{contact.Email}</TableCell>
                       <TableCell>{contact.Mobile}</TableCell>
                       <TableCell>{contact.ID_Number}</TableCell>
-                      <TableCell>{contact.status}</TableCell>
+                      <TableCell>{getInviteStatusDisplay(contact.status, formData?.Send_Invites)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -492,11 +471,7 @@ export default function TestContactField({
         </DialogContent>
 
         <DialogActions>
-          <Button
-            onClick={handleCancel}
-            variant="outlined"
-            sx={{ fontSize: "9pt" }}
-          >
+          <Button onClick={handleCancel} variant="outlined" sx={{ fontSize: "9pt" }}>
             Cancel
           </Button>
           <Button
@@ -511,5 +486,5 @@ export default function TestContactField({
         </DialogActions>
       </Dialog>
     </Box>
-  );
+  )
 }

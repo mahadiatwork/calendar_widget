@@ -538,6 +538,7 @@ const FirstComponent = ({
             value={formData?.scheduledWith}
             handleInputChange={handleInputChange}
             clickedEvent={clickedEvent}
+            formData={formData}
           />
         </Grid>
         <Grid

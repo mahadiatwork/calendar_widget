@@ -63,23 +63,54 @@ function App() {
   const searchDataByDate = useCallback(async () => {
     setLoader(true);
     setMyEvents([]);
-    const req_data_meetings1 = {
-      url: `https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:${encodeURIComponent(
-        startDateTime
-      )})and(End_DateTime:less_equal:${encodeURIComponent(
-        endDateTime
-      )}))&per_page=200`,
-      method: "GET",
-      param_type: 1,
-    };
+    
+    // Implement pagination to fetch all records
+    let allEventsData = [];
+    let currentPage = 1;
+    let hasMoreRecords = true;
 
-    // Fetching data with custom search criteria
-    const searchResp = await ZOHO.CRM.CONNECTION.invoke(
-      "zoho_crm_conn",
-      req_data_meetings1
-    );
+    while (hasMoreRecords) {
+      const req_data_meetings = {
+        url: `https://www.zohoapis.com.au/crm/v3/Events/search?criteria=((Start_DateTime:greater_equal:${encodeURIComponent(
+          startDateTime
+        )})and(End_DateTime:less_equal:${encodeURIComponent(
+          endDateTime
+        )}))&per_page=200&page=${currentPage}`,
+        method: "GET",
+        param_type: 1,
+      };
 
-    const eventsData = searchResp?.details?.statusMessage?.data || [];
+      try {
+        // Fetching data with custom search criteria for current page
+        const searchResp = await ZOHO.CRM.CONNECTION.invoke(
+          "zoho_crm_conn",
+          req_data_meetings
+        );
+
+        console.log(`Page ${currentPage} response:`, searchResp);
+
+        const pageEventsData = searchResp?.details?.statusMessage?.data || [];
+        const moreRecords = searchResp?.details?.statusMessage?.info?.more_records || false;
+
+        // Add current page data to all events
+        allEventsData = [...allEventsData, ...pageEventsData];
+
+        // Check if there are more records to fetch
+        hasMoreRecords = moreRecords;
+        currentPage++;
+
+        console.log(`Fetched page ${currentPage - 1}, more records: ${moreRecords}, total events so far: ${allEventsData.length}`);
+
+      } catch (error) {
+        console.error(`Error fetching page ${currentPage}:`, error);
+        hasMoreRecords = false; // Stop pagination on error
+      }
+    }
+
+    console.log(`Total events fetched from search: ${allEventsData.length}`);
+
+    // Use the accumulated data instead of single page data
+    const eventsData = allEventsData;
 
     const allMeetings = await ZOHO.CRM.API.getAllRecords({
       Entity: "Events",
@@ -108,55 +139,7 @@ function App() {
     // Combine into a final array
     const combinedEvents = [...eventsData, ...uniqueNewMeetings];
 
-    // const req_data_meetings2 = {
-    //   parameters: {
-    //     select_query: `
-    //       SELECT
-    //         id,
-    //         Event_Title,
-    //         Start_DateTime,
-    //         End_DateTime,
-    //         Duration_Min,
-    //         What_Id,
-    //         Type_of_Activity,
-    //         resource,
-    //         Owner,
-    //         Venue,
-    //         Event_Priority,
-    //         Remind_At,
-    //         Recurring_Activity,
-    //         Colour,
-    //         Banner,
-    //         Description,
-    //         Regarding,
-    //         Reminder_Text,
-    //         Send_Reminders,
-    //         Participants,
-
-    //         Event_Status
-    //       FROM Events
-    //       WHERE
-    //         (Start_DateTime >= '${startDateTime}')
-    //         AND (End_DateTime <= '${endDateTime}')
-    //     `,
-    //   },
-    //   method: "POST",
-    //   url: "https://www.zohoapis.com.au/crm/v3/coql",
-    //   param_type: 2,
-    // };
-
-    // await ZOHO.CRM.CONNECTION.invoke(conn_name, req_data_meetings2).then(function (data) {
-
-    //   // Extract the array of events safely
-    //   const events = data?.details?.statusMessage?.data || [];
-
-    //   console.log("data using coql:", events);
-    //   // combinedEvents = [...events];
-    // });
-
-
     const eventsDataResult = combinedEvents.map((item, index) => {
-
       return {
         id: item.id,
         title: item.Event_Title,
