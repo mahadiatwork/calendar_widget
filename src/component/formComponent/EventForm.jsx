@@ -353,9 +353,18 @@ const EventForm = ({
 
               if (wasSuccessful) {
                 handleInputChange("id", data?.data[0]?.details?.id);
+                console.log({leather: item})
                 setEvents((prev) => [
                   ...prev,
-                  { ...formData, id: data?.data[0].details?.id },
+                  {
+                    ...formData,
+                    id: data?.data[0].details?.id,
+                    scheduleFor: {
+                      name: item.full_name,
+                      id: item.id,
+                      email: item.email,
+                    },
+                  },
                 ]);
                 return { success: true, data };
               }
@@ -612,7 +621,7 @@ const EventForm = ({
           );
 
           // // Always create or update history, regardless of addActivityToHistory
-          await createOrUpdateHistory()
+          await createOrUpdateHistory();
         } else {
           throw new Error("Failed to update the event.");
         }
