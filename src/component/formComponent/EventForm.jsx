@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import "@mobiscroll/react/dist/css/mobiscroll.min.css";
 import {
   Box,
@@ -9,22 +9,18 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  FormControl,
   FormControlLabel,
   FormGroup,
   IconButton,
-  InputLabel,
   Link,
   MenuItem,
   Tab,
   Tabs,
   TextField,
-  Tooltip,
   Typography,
   Select as MuiSelect,
   Snackbar,
   Alert,
-  Divider,
 } from "@mui/material";
 import { useState } from "react";
 import "react-quill/dist/quill.snow.css";
@@ -32,11 +28,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { Input, Select, Textarea } from "@mobiscroll/react";
-import ReactQuill from "react-quill";
 
 import FirstComponent from "./FirstComponent";
-import SecondComponent from "./SecondComponent";
 import ThirdComponent from "./ThirdComponent";
 import { transformFormSubmission } from "../handleDataFormatting";
 import {
@@ -64,7 +57,7 @@ function TabPanel(props) {
 
 function addDurationToDateTime(dateString, duration) {
   // Convert the date string to a Date object
-  let date = new Date(dateString);
+  const date = new Date(dateString);
 
   // Split the duration into hours and minutes
   const [hours, minutes] = duration.split(":").map(Number);
@@ -118,6 +111,21 @@ const EventForm = ({
   const todayDate = getLocalDateTime();
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [eraseChecked, setEraseChecked] = useState(false);
+  const descriptionText = formData.Description?.trim() || "";
+
+  const [activityDetails, setActivityDetails] = useState(descriptionText);
+  const [addActivityToHistory, setAddActivityToHistory] = useState(
+    descriptionText !== ""
+  );
+  const [result, setResult] = useState(formData.result || "");
+  const [isActivityDetailsUpdated, setIsActivityDetailsUpdated] =
+    useState(false);
+  const [existingHistory, setExistingHistory] = useState([]);
+  const [filteredActivities, setFilteredActivities] = useState([]);
+  const [clearChecked, setClearChecked] = useState(
+    formData?.Event_Status === "Closed"
+  );
 
   dayjs.extend(utc);
   dayjs.extend(timezone);
@@ -146,7 +154,7 @@ const EventForm = ({
       Type_of_Activity: "",
       resource: 0,
       scheduleFor: "",
-      scheduleWith: [],
+      scheduledWith: [],
       location: "",
       priority: "",
       Remind_At: "",
@@ -163,6 +171,51 @@ const EventForm = ({
     onClose();
     setOpen(false);
   };
+
+  // Check for existing history only when Clear tab is active
+  useEffect(() => {
+    if (formData.id && value === 3) {
+      // Fetch existing history for this event
+      console.log({ id: formData.id });
+      const fetchHistory = async () => {
+        try {
+          const historyResponse = await ZOHO.CRM.API.searchRecord({
+            Entity: "History1",
+            Type: "criteria",
+            Query: `(Event_ID:equals:${formData.id})`,
+          });
+
+          console.log({ historyResponse });
+
+          if (
+            historyResponse &&
+            historyResponse.data &&
+            historyResponse.data.length > 0
+          ) {
+            setExistingHistory(historyResponse.data);
+            // If there's existing history, pre-populate the activity details
+            if (historyResponse.data[0].History_Details_Plain) {
+              setActivityDetails(historyResponse.data[0].History_Details_Plain);
+              setAddActivityToHistory(true);
+            }
+            if (historyResponse.data[0].History_Result) {
+              setResult(historyResponse.data[0].History_Result);
+            }
+          } else {
+            // Auto-check "Add Activity Details to History" if there's description data but no existing history
+            if (formData.Description && formData.Description.trim() !== "") {
+              setAddActivityToHistory(true);
+              setActivityDetails(formData.Description);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching history:", error);
+        }
+      };
+
+      fetchHistory();
+    }
+  }, [formData.id, value]);
 
   const logResponse = async ({
     name,
@@ -199,7 +252,12 @@ const EventForm = ({
     }
   };
 
-  const handleApiError = async (error, operation, transformedData, formData) => {
+  const handleApiError = async (
+    error,
+    operation,
+    transformedData,
+    formData
+  ) => {
     const errorDetails = {
       message: error.message,
       stack: error.stack,
@@ -314,10 +372,12 @@ const EventForm = ({
           });
 
           const results = await Promise.all(promises);
-          const successCount = results.filter(r => r.success).length;
-          
+          const successCount = results.filter((r) => r.success).length;
+
           if (successCount > 0) {
-            setSnackbarMessage(`${successCount} event(s) created successfully!`);
+            setSnackbarMessage(
+              `${successCount} event(s) created successfully!`
+            );
             setSnackbarSeverity("success");
             setSnackbarOpen(true);
           } else {
@@ -389,153 +449,143 @@ const EventForm = ({
     }
   };
 
+  // Helper to create or update history
+  const createOrUpdateHistory = async () => {
+    // Prepare record data for history
+    const recordData = {
+      Name: formData.title || "Unnamed Event",
+      Duration: String(formData.duration),
+      History_Type: formData.Type_of_Activity,
+      ...(formData.associateWith?.id && {
+        Stakeholder: { id: formData.associateWith.id },
+      }),
+      Regarding: formData.Regarding,
+      Date: dayjs(formData.start)
+        .tz("Australia/Adelaide")
+        .format("YYYY-MM-DDTHH:mm:ssZ"),
+      ...(addActivityToHistory && { History_Details_Plain: activityDetails }),
+      History_Result: result,
+      Event_ID: formData.id,
+    };
+
+    if (existingHistory.length > 0) {
+      return await updateHistoryOnly();
+    } else {
+      const Time_Occured = dayjs()
+        .tz("Australia/Adelaide")
+        .format("YYYY-MM-DDTHH:mm:ssZ");
+
+      const historyResponse = await ZOHO.CRM.API.insertRecord({
+        Entity: "History1",
+        APIData: recordData,
+        Trigger: ["workflow"],
+      });
+
+      const History_Date_Time = dayjs(formData.start)
+        .tz("Australia/Adelaide")
+        .format("YYYY-MM-DDTHH:mm:ssZ");
+
+      if (historyResponse.data[0].code === "SUCCESS") {
+        // Handle participants if available
+        if (formData.scheduledWith && formData.scheduledWith.length > 0) {
+          for (const participant of formData.scheduledWith) {
+            console.log("doing");
+            const historyXContactRecordData = {
+              Contact_Details: { id: participant.id },
+              Contact_History_Info: {
+                id: historyResponse?.data[0]?.details?.id,
+              },
+            };
+
+            try {
+              const contactHistoryResponse = await ZOHO.CRM.API.insertRecord({
+                Entity: "History_X_Contacts",
+                APIData: historyXContactRecordData,
+                Trigger: ["workflow"],
+              });
+
+              console.log(
+                `Record inserted for participant ${
+                  participant.name || participant.id
+                }`
+              );
+            } catch (error) {
+              console.error(
+                `Error inserting record for ${
+                  participant.name || participant.id
+                }:`,
+                error
+              );
+              await handleApiError(
+                error,
+                `Create Contact History for ${
+                  participant.name || participant.id
+                }`,
+                historyXContactRecordData,
+                formData
+              );
+            }
+          }
+        }
+
+        setSnackbarMessage("New history created successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+      } else {
+        setSnackbarMessage("Failed to create new history.");
+        setSnackbarSeverity("warning");
+        setSnackbarOpen(true);
+        return false;
+      }
+      return true;
+    }
+  };
+
+  // Helper to update only the history record
+  const updateHistoryOnly = async () => {
+    const historyRecordId = existingHistory[0]?.id;
+    const updatedHistoryData = {
+      History_Details_Plain: activityDetails,
+      History_Result: result,
+      id: historyRecordId,
+    };
+
+    const updateResponse = await ZOHO.CRM.API.updateRecord({
+      Entity: "History1",
+      RecordID: historyRecordId,
+      APIData: updatedHistoryData,
+    });
+
+    await logResponse({
+      name: `Update History: ${historyRecordId}`,
+      Payload_2: updatedHistoryData,
+      response: updateResponse,
+      result: updateResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
+      trigger: "History Update",
+      meetingType: formData.Type_of_Activity || "",
+      Widget_Source: "Calendar Widget",
+    });
+
+    if (updateResponse.data[0].code === "SUCCESS") {
+      setSnackbarMessage("History updated successfully!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+    } else {
+      setSnackbarMessage("Failed to update history.");
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
+      return false;
+    }
+    return true;
+  };
+
   // ========================================
   // HANDLE CLEAR UPDATE FOR CLEAR TAB ONLY
   // ========================================
   const handleClearUpdate = async (e) => {
     if (e) e.preventDefault();
-    
+
     try {
-      // Helper to update only the history record
-      const updateHistoryOnly = async () => {
-        const historyRecordId = existingHistory[0]?.id;
-        const updatedHistoryData = {
-          History_Details_Plain: activityDetails,
-          History_Result: result,
-          id: historyRecordId
-        };
-
-        const updateResponse = await ZOHO.CRM.API.updateRecord({
-          Entity: "History1",
-          RecordID: historyRecordId,
-          APIData: updatedHistoryData,
-        });
-
-        await logResponse({
-          name: `Update History: ${historyRecordId}`,
-          Payload_2: updatedHistoryData,
-          response: updateResponse,
-          result: updateResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
-          trigger: "History Update",
-          meetingType: formData.Type_of_Activity || "",
-          Widget_Source: "Calendar Widget",
-        });
-
-        if (updateResponse.data[0].code === "SUCCESS") {
-          setSnackbarMessage("History updated successfully!");
-          setSnackbarSeverity("success");
-          setSnackbarOpen(true);
-        } else {
-          setSnackbarMessage("Failed to update history.");
-          setSnackbarSeverity("warning");
-          setSnackbarOpen(true);
-          return false;
-        }
-        return true;
-      };
-
-      // Helper to create or update history
-      const createOrUpdateHistory = async () => {
-        // Prepare record data for history
-        const recordData = {
-          Name: formData.title || "Unnamed Event",
-          Duration: formData.duration,
-          History_Type: formData.Type_of_Activity,
-          Stakeholder: formData.associateWith ? { 
-            id: formData.associateWith.id 
-          } : null,
-          Regarding: formData.Regarding,
-          Date: formData.start,
-          Owner: formData.Owner,
-          History_Details_Plain: activityDetails,
-          History_Result: result,
-          Event_ID: formData.id,
-        };
-
-        if (existingHistory.length > 0) {
-          return await updateHistoryOnly();
-        } else {
-          const historyResponse = await ZOHO.CRM.API.insertRecord({
-            Entity: "History1",
-            APIData: recordData,
-            Trigger: ["workflow"],
-          });
-
-          await logResponse({
-            name: `Create History: ${formData.title || formData.id}`,
-            Payload_2: recordData,
-            response: historyResponse,
-            result: historyResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
-            trigger: "History Create",
-            meetingType: formData.Type_of_Activity || "",
-            Widget_Source: "Calendar Widget",
-          });
-
-          if (historyResponse.data[0].code === "SUCCESS") {
-            // Handle participants if available
-            if (formData.scheduleWith && formData.scheduleWith.length > 0) {
-              for (const participant of formData.scheduleWith) {
-                const historyXContactRecordData = {
-                  Contact_Details: { id: participant.id },
-                  Contact_History_Info: {
-                    id: historyResponse?.data[0]?.details?.id,
-                  },
-                  Duration: formData.duration,
-                  History_Type: formData.Type_of_Activity,
-                  Stakeholder: formData.associateWith ? { 
-                    id: formData.associateWith.id 
-                  } : null,
-                  Regarding: formData.Regarding,
-                  History_Date_Time: formData.start,
-                  Owner: formData.Owner,
-                  History_Details: activityDetails,
-                  History_Result: result,
-                  Event_ID: formData.id,
-                };
-
-                try {
-                  const contactHistoryResponse = await ZOHO.CRM.API.insertRecord({
-                    Entity: "History_X_Contacts",
-                    APIData: historyXContactRecordData,
-                    Trigger: ["workflow"],
-                  });
-                  
-                  await logResponse({
-                    name: `Create Contact History: ${participant.name || participant.id}`,
-                    Payload_2: historyXContactRecordData,
-                    response: contactHistoryResponse,
-                    result: contactHistoryResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
-                    trigger: "Contact History Create",
-                    meetingType: formData.Type_of_Activity || "",
-                    Widget_Source: "Calendar Widget",
-                  });
-                  
-                  console.log(`Record inserted for participant ${participant.name || participant.id}`);
-                } catch (error) {
-                  console.error(`Error inserting record for ${participant.name || participant.id}:`, error);
-                  await handleApiError(
-                    error,
-                    `Create Contact History for ${participant.name || participant.id}`,
-                    historyXContactRecordData,
-                    formData
-                  );
-                }
-              }
-            }
-
-            setSnackbarMessage("New history created successfully!");
-            setSnackbarSeverity("success");
-            setSnackbarOpen(true);
-          } else {
-            setSnackbarMessage("Failed to create new history.");
-            setSnackbarSeverity("warning");
-            setSnackbarOpen(true);
-            return false;
-          }
-          return true;
-        }
-      };
-
       // CASE 1: "Clear" checked and "Erase" unchecked → Close the event
       if (clearChecked && !eraseChecked) {
         const updateResponse = await ZOHO.CRM.API.updateRecord({
@@ -546,16 +596,6 @@ const EventForm = ({
             Event_Status: "Closed",
             result: result,
           },
-        });
-
-        await logResponse({
-          name: `Clear Event: ${formData.title || formData.id}`,
-          Payload_2: { id: formData.id, Event_Status: "Closed", result },
-          response: updateResponse,
-          result: updateResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
-          trigger: "Event Clear",
-          meetingType: formData.Type_of_Activity || "",
-          Widget_Source: "Calendar Widget",
         });
 
         if (updateResponse.data[0].code === "SUCCESS") {
@@ -570,10 +610,9 @@ const EventForm = ({
                 : event
             )
           );
-          
-          if (addActivityToHistory) {
-            await createOrUpdateHistory();
-          }
+
+          // // Always create or update history, regardless of addActivityToHistory
+          await createOrUpdateHistory()
         } else {
           throw new Error("Failed to update the event.");
         }
@@ -587,16 +626,6 @@ const EventForm = ({
           RecordID: formData.id,
         });
 
-        await logResponse({
-          name: `Get Event: ${formData.title || formData.id}`,
-          Payload_2: { id: formData.id },
-          response: eventResponse,
-          result: eventResponse.data.length > 0 ? "Success" : "Error",
-          trigger: "Event Get",
-          meetingType: formData.Type_of_Activity || "",
-          Widget_Source: "Calendar Widget",
-        });
-
         if (eventResponse.data.length > 0) {
           const updateResponse = await ZOHO.CRM.API.updateRecord({
             Entity: "Events",
@@ -605,16 +634,6 @@ const EventForm = ({
               id: formData.id,
               Event_Status: "Open",
             },
-          });
-
-          await logResponse({
-            name: `Reopen Event: ${formData.title || formData.id}`,
-            Payload_2: { id: formData.id, Event_Status: "Open" },
-            response: updateResponse,
-            result: updateResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
-            trigger: "Event Reopen",
-            meetingType: formData.Type_of_Activity || "",
-            Widget_Source: "Calendar Widget",
           });
 
           if (updateResponse.data[0].code === "SUCCESS") {
@@ -632,10 +651,9 @@ const EventForm = ({
                   : event
               )
             );
-            
-            if (addActivityToHistory) {
-              await createOrUpdateHistory();
-            }
+
+            // Always create or update history, regardless of addActivityToHistory
+            // await createOrUpdateHistory();
           } else {
             throw new Error("Failed to update the event status.");
           }
@@ -648,24 +666,12 @@ const EventForm = ({
 
       // CASE 3: "Erase" checked → Delete the event
       if (!clearChecked && eraseChecked) {
-        // If adding to history, do that first before deleting the event
-        if (addActivityToHistory) {
-          await createOrUpdateHistory();
-        }
-        
+        // Always create or update history before deleting, regardless of addActivityToHistory
+        await createOrUpdateHistory();
+
         const deleteResponse = await ZOHO.CRM.API.deleteRecord({
           Entity: "Events",
           RecordID: formData.id,
-        });
-
-        await logResponse({
-          name: `Delete Event: ${formData.title || formData.id}`,
-          Payload_2: { id: formData.id },
-          response: deleteResponse,
-          result: deleteResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
-          trigger: "Event Delete",
-          meetingType: formData.Type_of_Activity || "",
-          Widget_Source: "Calendar Widget",
         });
 
         if (deleteResponse.data[0].code === "SUCCESS") {
@@ -682,7 +688,12 @@ const EventForm = ({
       }
 
       // Handle only history update when event data is unchanged
-      if (!clearChecked && !eraseChecked && isActivityDetailsUpdated && existingHistory.length > 0) {
+      if (
+        !clearChecked &&
+        !eraseChecked &&
+        isActivityDetailsUpdated &&
+        existingHistory.length > 0
+      ) {
         await updateHistoryOnly();
       }
 
@@ -703,6 +714,26 @@ const EventForm = ({
     }
   };
 
+  // ========================================
+  // COMBINED SUBMIT FOR ALL TABS
+  // ========================================
+  const handleCombinedSubmit = async () => {
+    try {
+      // First, handle the event creation/update (first three tabs)
+      await handleSubmit();
+
+      // Then, if we're on the Clear tab, handle the clear operations
+      if (value === 3) {
+        await handleClearUpdate();
+      }
+    } catch (error) {
+      console.error("Error in combined submit:", error);
+      setSnackbarMessage("An unexpected error occurred during submission!");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
   // Delete existing history
   const handleDeleteHistory = async () => {
     const historyRecordId = existingHistory[0]?.id;
@@ -716,45 +747,31 @@ const EventForm = ({
         per_page: 200,
       });
 
-      await logResponse({
-        name: `Get Related History: ${historyRecordId}`,
-        Payload_2: { id: historyRecordId },
-        response: getAllHistoryXcontacts,
-        result: "Success",
-        trigger: "Get Related History",
-        meetingType: formData.Type_of_Activity || "",
-        Widget_Source: "Calendar Widget",
-      });
-
       const deleteResponse = await ZOHO.CRM.API.deleteRecord({
         Entity: "History1",
         RecordID: historyRecordId,
       });
 
-      await logResponse({
-        name: `Delete History: ${historyRecordId}`,
-        Payload_2: { id: historyRecordId },
-        response: deleteResponse,
-        result: deleteResponse.data[0].code === "SUCCESS" ? "Success" : "Error",
-        trigger: "History Delete",
-        meetingType: formData.Type_of_Activity || "",
-        Widget_Source: "Calendar Widget",
-      });
-
       if (deleteResponse.data[0].code === "SUCCESS") {
         setActivityDetails("");
-        if (getAllHistoryXcontacts.data && getAllHistoryXcontacts.data.length > 0) {
+        if (
+          getAllHistoryXcontacts.data &&
+          getAllHistoryXcontacts.data.length > 0
+        ) {
           for (const participant of getAllHistoryXcontacts.data) {
             const relatedRecordsDelete = await ZOHO.CRM.API.deleteRecord({
               Entity: "History1",
               RecordID: participant?.id,
             });
-            
+
             await logResponse({
               name: `Delete Related History: ${participant?.id}`,
               Payload_2: { id: participant?.id },
               response: relatedRecordsDelete,
-              result: relatedRecordsDelete.data[0].code === "SUCCESS" ? "Success" : "Error",
+              result:
+                relatedRecordsDelete.data[0].code === "SUCCESS"
+                  ? "Success"
+                  : "Error",
               trigger: "Related History Delete",
               meetingType: formData.Type_of_Activity || "",
               Widget_Source: "Calendar Widget",
@@ -872,57 +889,14 @@ const EventForm = ({
     setEventToDelete(null);
   };
 
-  const [clearChecked, setClearChecked] = useState(
-    formData?.Event_Status === "Closed"
-  );
-  const [eraseChecked, setEraseChecked] = useState(false);
-  const [addActivityToHistory, setAddActivityToHistory] = useState(false);
-  const [activityDetails, setActivityDetails] = useState(
-    formData.Description || ""
-  );
-  const [result, setResult] = useState(formData.result || "");
-  const [isActivityDetailsUpdated, setIsActivityDetailsUpdated] = useState(false);
-  const [existingHistory, setExistingHistory] = useState([]);
-  const [filteredActivities, setFilteredActivities] = useState([]);
-  
-  // Check for existing history on component mount or when editing an event
-  useEffect(() => {
-    if (formData.id) {
-      // Fetch existing history for this event
-      const fetchHistory = async () => {
-        try {
-          const historyResponse = await ZOHO.CRM.API.searchRecords({
-            Entity: "History1",
-            Type: "criteria",
-            Query: `(Event_ID:equals:${formData.id})`,
-          });
-          
-          if (historyResponse && historyResponse.data && historyResponse.data.length > 0) {
-            setExistingHistory(historyResponse.data);
-            // If there's existing history, pre-populate the activity details
-            if (historyResponse.data[0].History_Details_Plain) {
-              setActivityDetails(historyResponse.data[0].History_Details_Plain);
-              setAddActivityToHistory(true);
-            }
-            if (historyResponse.data[0].History_Result) {
-              setResult(historyResponse.data[0].History_Result);
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching history:", error);
-        }
-      };
-      
-      fetchHistory();
-    }
-  }, [formData.id]);
-
   // Update filtered activities when activity type changes
   useEffect(() => {
     if (formData?.Type_of_Activity) {
-      const filteredOptions = getResultBasedOnActivityType2(formData.Type_of_Activity);
+      const filteredOptions = getResultBasedOnActivityType2(
+        formData.Type_of_Activity
+      );
       setFilteredActivities(filteredOptions);
-  
+
       // Set the first option as the default if no result is already set
       if (filteredOptions.length > 0 && !result) {
         setResult(filteredOptions[0]);
@@ -1056,7 +1030,7 @@ const EventForm = ({
           {showClearTab && <Tab label="Clear" sx={{ fontSize: "9pt" }} />}
         </Tabs>
       </Box>
-      
+
       {/* GENERAL TAB */}
       {value === 0 && (
         <Box sx={{ p: 0, borderRadius: 1 }}>
@@ -1111,7 +1085,7 @@ const EventForm = ({
           </Box>
         </Box>
       )}
-      
+
       {/* DETAILS TAB */}
       {value === 1 && (
         <Box sx={{ p: 1, borderRadius: 1 }}>
@@ -1156,7 +1130,7 @@ const EventForm = ({
           </Box>
         </Box>
       )}
-      
+
       {/* RECURRENCE TAB */}
       {value === 2 && (
         <Box sx={{ p: 2, borderRadius: 1 }}>
@@ -1187,30 +1161,27 @@ const EventForm = ({
           </Box>
         </Box>
       )}
-      
+
       {/* CLEAR TAB */}
       {value === 3 && showClearTab && (
         <Box sx={{ p: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: "9pt" }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: "bold", fontSize: "9pt" }}
+          >
             Results:
           </Typography>
 
           <FormGroup row>
             <FormControlLabel
               control={
-                <Checkbox
-                  checked={clearChecked}
-                  onChange={handleClearChange}
-                />
+                <Checkbox checked={clearChecked} onChange={handleClearChange} />
               }
               label="Clear"
             />
             <FormControlLabel
               control={
-                <Checkbox
-                  checked={eraseChecked}
-                  onChange={handleEraseChange}
-                />
+                <Checkbox checked={eraseChecked} onChange={handleEraseChange} />
               }
               label="Erase"
             />
@@ -1296,7 +1267,7 @@ const EventForm = ({
               size="small"
               variant="contained"
               color="primary"
-              onClick={handleClearUpdate}
+              onClick={handleCombinedSubmit}
             >
               UPDATE
             </Button>
