@@ -970,9 +970,43 @@ const TaskScheduler = ({
                     display={"inline-block"}
                     minWidth={"120px"}
                   >
-                    Title
+                    Activity Title
                   </Typography>
                   <Typography variant="p">{hoverInEvents?.title}</Typography>
+                </Box>
+                   <Box
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  mb={2}
+                  px={1.5}
+                >
+                  <Typography
+                    variant="p"
+                    sx={{
+                      fontSize: "medium",
+                      fontWeight: "bolder",
+                      textAlign: "left",
+                    }}
+                    display={"inline-block"}
+                    maxWidth={"120px"}
+                  >
+                    Activity Type
+                  </Typography>
+                  <Typography
+                    variant="p"
+                    sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: "8",
+                      WebkitBoxOrient: "vertical",
+                      ml: 2,
+                      textAlign: "right",
+                    }}
+                  >
+                    {hoverInEvents?.Type_of_Activity}
+                  </Typography>
                 </Box>
                 <Box
                   display={"flex"}

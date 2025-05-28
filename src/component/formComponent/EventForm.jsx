@@ -339,6 +339,8 @@ const EventForm = ({
                 Trigger: ["workflow"],
               });
 
+              console.log({result: data})
+
               const wasSuccessful = data.data[0].code === "SUCCESS";
 
               await logResponse({
@@ -353,19 +355,29 @@ const EventForm = ({
 
               if (wasSuccessful) {
                 handleInputChange("id", data?.data[0]?.details?.id);
-                console.log({leather: item})
+                console.log({leather: formData})
                 setEvents((prev) => [
                   ...prev,
                   {
                     ...formData,
                     id: data?.data[0].details?.id,
                     scheduleFor: {
-                      name: item.full_name,
-                      id: item.id,
-                      email: item.email,
+                      name: item.Full_Name,
+                      id: item.participant,
+                      email: item.Email,
                     },
                   },
                 ]);
+                console.log({
+                    ...formData,
+                    id: data?.data[0].details?.id,
+                    scheduleFor: {
+                      name: item.Full_Name,
+                      id: item.participant,
+                      email: item.Email,
+                    },
+                  })
+                resetFormState();
                 return { success: true, data };
               }
               return { success: false, data };
