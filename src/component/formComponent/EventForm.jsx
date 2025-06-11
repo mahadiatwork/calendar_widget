@@ -411,6 +411,7 @@ const EventForm = ({
         } else {
           // CREATE SINGLE EVENT
           const transformedData = transformFormSubmission(formData);
+
           formData.start = new Date(formData.start);
           formData.end = new Date(formData.end);
 

@@ -37,7 +37,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
       Full_Name: contact?.Full_Name || null,
       type: "contact",
       participant: contact?.participant ?? contact?.id ?? null,
-       status: contact.status,
+      status: contact.status,
     }));
   };
 
@@ -62,7 +62,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
         Full_Name: individualParticipant?.Full_Name || null,
         type: "contact",
         participant: individualParticipant?.participant || null,
-          status: individualParticipant.status,
+        status: individualParticipant.status,
       },
     ]
     : transformScheduleWithToParticipants(data?.scheduledWith || []);
@@ -125,7 +125,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
     transformedData.Send_Reminders = true;
   }
 
-  if(data.Send_Invites){
+  if (data.Send_Invites) {
     const startTime = dayjs(data.start);
 
     let modifiedReminderDate = null;
@@ -145,21 +145,28 @@ export function transformFormSubmission(data, individualParticipant = null) {
 
   // Validate and Add Recurring_Activity
   const validOccurrences = ["daily", "weekly", "monthly", "yearly"]; // Define valid occurrences
-  if (
-    typeof data?.occurrence === "string" &&
-    validOccurrences.includes(data?.occurrence.toLowerCase())
-  ) {
-    transformedData.Recurring_Activity = {
-      RRULE: `FREQ=${data.occurrence.toUpperCase()};INTERVAL=1;UNTIL=${customEndTime}${data.occurrence === "weekly"
-        ? `;BYDAY=${dayName.toUpperCase()}`
-        : data.occurrence === "monthly"
-          ? `;BYMONTHDAY=${dayOfMonth}`
-          : data.occurrence === "yearly"
-            ? `;BYMONTH=${monthNumber};BYMONTHDAY=${dayOfMonth}`
-            : ""
-        };DTSTART=${dayjs(data.startTime).format("YYYY-MM-DD")}`,
-    };
+  if (typeof data?.occurrence === "string" && validOccurrences.includes(data.occurrence.toLowerCase())) {
+    const freq = data.occurrence.toUpperCase();
+    const interval = 1; // Can be dynamic
+    const until = dayjs(customEndTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
+    const dtstart = dayjs(data.startTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
+    const byDay = dayjs(data?.startTime).format("dd").toUpperCase(); // E.g., "MO"
+
+    let rrule = `FREQ=${freq};INTERVAL=${interval};UNTIL=${until}`;
+
+    if (freq === "WEEKLY") {
+      rrule += `;BYDAY=${byDay}`;
+    } else if (freq === "MONTHLY") {
+      rrule += `;BYMONTHDAY=${dayjs(data?.startTime).date()}`;
+    } else if (freq === "YEARLY") {
+      rrule += `;BYMONTH=${dayjs(data?.startTime).month() + 1};BYMONTHDAY=${dayjs(data?.startTime).date()}`;
+    }
+
+    rrule += `;DTSTART=${dtstart}`;
+
+    transformedData.Recurring_Activity = { RRULE: rrule };
   }
+
 
   if (
     transformedData.Remind_At == null ||
