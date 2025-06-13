@@ -339,7 +339,7 @@ const EventForm = ({
                 Trigger: ["workflow"],
               });
 
-              console.log({result: data})
+              console.log({ result: data });
 
               const wasSuccessful = data.data[0].code === "SUCCESS";
 
@@ -355,7 +355,7 @@ const EventForm = ({
 
               if (wasSuccessful) {
                 handleInputChange("id", data?.data[0]?.details?.id);
-                console.log({leather: formData})
+                console.log({ leather: formData });
                 setEvents((prev) => [
                   ...prev,
                   {
@@ -369,14 +369,14 @@ const EventForm = ({
                   },
                 ]);
                 console.log({
-                    ...formData,
-                    id: data?.data[0].details?.id,
-                    scheduleFor: {
-                      name: item.Full_Name,
-                      id: item.participant,
-                      email: item.Email,
-                    },
-                  })
+                  ...formData,
+                  id: data?.data[0].details?.id,
+                  scheduleFor: {
+                    name: item.Full_Name,
+                    id: item.participant,
+                    email: item.Email,
+                  },
+                });
                 resetFormState();
                 return { success: true, data };
               }
@@ -1008,6 +1008,8 @@ const EventForm = ({
   // Determine if we should show the Clear tab (only for editing, not for creation)
   const showClearTab = formData.id !== "";
 
+  console.log({ myData: formData });
+
   return (
     <Box
       sx={{
@@ -1048,7 +1050,18 @@ const EventForm = ({
         >
           <Tab label="General" sx={{ fontSize: "9pt" }} />
           <Tab label="Details" sx={{ fontSize: "9pt" }} />
-          <Tab label="Reccurence" sx={{ fontSize: "9pt" }} />
+          <Tab
+            label="Reccurence"
+            sx={{
+              fontSize: "9pt",
+              ...(formData?.occurrence &&
+                formData.occurrence !== "once" && {
+                  color: "white",
+                  backgroundColor: "#1976d2",
+                  borderRadius: 1,
+                }),
+            }}
+          />
           {showClearTab && <Tab label="Clear" sx={{ fontSize: "9pt" }} />}
         </Tabs>
       </Box>

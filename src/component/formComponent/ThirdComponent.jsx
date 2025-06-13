@@ -7,7 +7,6 @@ import {
   Radio,
   RadioGroup,
   Typography,
-  Checkbox,
 } from "@mui/material";
 import React, { useState, useEffect, useCallback } from "react";
 import { Datepicker } from "@mobiscroll/react";
@@ -22,26 +21,49 @@ dayjs.extend(timezone);
 const ThirdComponent = ({ formData, handleInputChange }) => {
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
-  // console.log({ startTime: formData?.startTime });
+
   useEffect(() => {
+    const recurrence = formData?.occurrence;
+
+    // Set defaults if nothing is set
     if (!formData.startTime) {
       const currentTime = dayjs().toISOString();
       handleInputChange("startTime", currentTime);
-      handleInputChange(
-        "endTime",
-        dayjs(currentTime).add(1, "year").toISOString()
-      );
+      handleInputChange("endTime", dayjs(currentTime).add(1, "year").toISOString());
     }
 
-    if (!formData.occurrence) {
-      handleInputChange("occurrence", "once"); // Set default occurrence to 'once'
+    // Parse RRULE if occurrence is an object
+    if (recurrence && typeof recurrence === "object" && recurrence.RRULE) {
+      const ruleParts = recurrence.RRULE.split(";").reduce((acc, part) => {
+        const [key, val] = part.split("=");
+        acc[key] = val;
+        return acc;
+      }, {});
+
+      if (ruleParts.DTSTART) {
+        const parsedStart = dayjs(ruleParts.DTSTART).toISOString();
+        handleInputChange("startTime", parsedStart);
+
+        if (ruleParts.UNTIL) {
+          const parsedEnd = dayjs(ruleParts.UNTIL).endOf("day").toISOString();
+          handleInputChange("endTime", parsedEnd);
+        }
+
+        const freqMap = {
+          DAILY: "daily",
+          WEEKLY: "weekly",
+          MONTHLY: "monthly",
+          YEARLY: "yearly",
+        };
+        const freq = ruleParts.FREQ;
+        if (freq && freqMap[freq]) {
+          handleInputChange("occurrence", freqMap[freq]);
+        }
+      }
+    } else if (!formData.occurrence) {
+      handleInputChange("occurrence", "once"); // fallback
     }
-  }, [
-    formData.startTime,
-    formData.endTime,
-    formData.occurrence,
-    handleInputChange,
-  ]);
+  }, [formData.occurrence, formData.startTime, formData.endTime, handleInputChange]);
 
   const CustomInputComponent = useCallback(({ field, formattedDate }) => {
     return (
@@ -65,12 +87,12 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
   return (
     <Box>
       <FormControl>
-        <FormLabel id="demo-radio-buttons-group-label" sx={{ fontSize: "9pt" }}>
+        <FormLabel id="frequency-radio-group" sx={{ fontSize: "9pt" }}>
           Frequency
         </FormLabel>
         <RadioGroup
-          aria-labelledby="demo-radio-buttons-group-label"
-          name="radio-buttons-group"
+          aria-labelledby="frequency-radio-group"
+          name="occurrence"
           value={formData.occurrence || "once"}
           onChange={(e) => handleInputChange("occurrence", e.target.value)}
         >
@@ -110,18 +132,14 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
       <Grid container spacing={2} sx={{ mt: 1, py: 1 }}>
         <Grid size={6}>
           <Box display="flex" alignItems="center">
-            <Typography
-              variant="body1"
-              sx={{ fontSize: "9pt", minWidth: "80px" }}
-            >
+            <Typography variant="body1" sx={{ fontSize: "9pt", minWidth: "80px" }}>
               Starts:
             </Typography>
-
             <Datepicker
               controls={["calendar", "time"]}
               calendarType="month"
               display="center"
-              calendarScroll={"vertical"}
+              calendarScroll="vertical"
               inputComponent={() => {
                 const dateValue = formData?.startTime;
                 const formattedDate =
@@ -145,10 +163,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
         </Grid>
         <Grid size={6}>
           <Box display="flex" alignItems="center">
-            <Typography
-              variant="body1"
-              sx={{ fontSize: "9pt", minWidth: "80px" }}
-            >
+            <Typography variant="body1" sx={{ fontSize: "9pt", minWidth: "80px" }}>
               Ends:
             </Typography>
             <Datepicker
@@ -156,7 +171,7 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
               calendarType="month"
               display="center"
               disabled={formData.noEndDate}
-              calendarScroll={"vertical"}
+              calendarScroll="vertical"
               inputComponent={() => {
                 const dateValue = formData?.endTime;
                 const formattedDate =
@@ -177,34 +192,6 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
               isOpen={openEndDatepicker}
             />
           </Box>
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={formData.noEndDate}
-                onChange={(e) => {
-                  const isChecked = e.target.checked;
-                  if (isChecked) {
-                    const oneYearFromStart = dayjs(formData.startTime)
-                      .add(1, "year")
-                      .toISOString();
-                    handleInputChange("endTime", oneYearFromStart);
-                    // handleInputChange("endTime", "");
-                    //-------------
-                    handleInputChange("noEndDate", true);
-                  } else if (formData.startTime) {
-                    const oneHourFromStart = dayjs(formData.startTime)
-                      .add(1, "hour")
-                      .toISOString();
-                    handleInputChange("endTime", oneHourFromStart); // Recalculate endTime
-                    handleInputChange("noEndDate", false);
-                  }
-                }}
-              />
-            }
-            label="No end date"
-            sx={{ "& .MuiTypography-root": { fontSize: "9pt" } }}
-          />
         </Grid>
       </Grid>
     </Box>
