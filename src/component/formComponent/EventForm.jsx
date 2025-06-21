@@ -176,7 +176,6 @@ const EventForm = ({
   useEffect(() => {
     if (formData.id && value === 3) {
       // Fetch existing history for this event
-      console.log({ id: formData.id });
       const fetchHistory = async () => {
         try {
           const historyResponse = await ZOHO.CRM.API.searchRecord({
@@ -185,7 +184,6 @@ const EventForm = ({
             Query: `(Event_ID:equals:${formData.id})`,
           });
 
-          console.log({ historyResponse });
 
           if (
             historyResponse &&
@@ -354,7 +352,6 @@ const EventForm = ({
 
               if (wasSuccessful) {
                 handleInputChange("id", data?.data[0]?.details?.id);
-                console.log({ leather: formData });
                 setEvents((prev) => [
                   ...prev,
                   {
@@ -510,7 +507,6 @@ const EventForm = ({
         // Handle participants if available
         if (formData.scheduledWith && formData.scheduledWith.length > 0) {
           for (const participant of formData.scheduledWith) {
-            console.log("doing");
             const historyXContactRecordData = {
               Contact_Details: { id: participant.id },
               Contact_History_Info: {
@@ -1007,7 +1003,6 @@ const EventForm = ({
   // Determine if we should show the Clear tab (only for editing, not for creation)
   const showClearTab = formData.id !== "";
 
-  console.log({ myData: formData });
 
   return (
     <Box
