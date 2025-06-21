@@ -287,6 +287,7 @@ const EventForm = ({
       // UPDATE EXISTING EVENT
       if (formData.id !== "") {
         const transformedData = transformFormSubmission(formData);
+
         const config = {
           Entity: "Events",
           APIData: transformedData,
@@ -338,8 +339,6 @@ const EventForm = ({
                 APIData: transformedData,
                 Trigger: ["workflow"],
               });
-
-              console.log({ result: data });
 
               const wasSuccessful = data.data[0].code === "SUCCESS";
 
@@ -767,7 +766,7 @@ const EventForm = ({
         RelatedList: "Contacts3",
         page: 1,
         per_page: 200,
-      });
+      });  
 
       const deleteResponse = await ZOHO.CRM.API.deleteRecord({
         Entity: "History1",
@@ -1172,6 +1171,7 @@ const EventForm = ({
           <ThirdComponent
             formData={formData}
             handleInputChange={handleInputChange}
+            clickedEvent={clickedEvent}
           />
           <Box display="flex" justifyContent="space-between" mt={2}>
             <Button

@@ -18,52 +18,71 @@ import CustomTextField from "../atom/CustomTextField";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const ThirdComponent = ({ formData, handleInputChange }) => {
+const ThirdComponent = ({ formData, handleInputChange,clickedEvent }) => {
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
 
-  useEffect(() => {
-    const recurrence = formData?.occurrence;
+useEffect(() => {
+  const recurrence = formData?.occurrence;
 
-    // Set defaults if nothing is set
-    if (!formData.startTime) {
-      const currentTime = dayjs().toISOString();
-      handleInputChange("startTime", currentTime);
-      handleInputChange("endTime", dayjs(currentTime).add(1, "year").toISOString());
-    }
+  if (!formData.startTime) {
+    const currentTime = dayjs().toISOString();
+    handleInputChange("startTime", currentTime);
+    handleInputChange("endTime", dayjs(currentTime).add(1, "year").toISOString());
+  }
 
-    // Parse RRULE if occurrence is an object
-    if (recurrence && typeof recurrence === "object" && recurrence.RRULE) {
-      const ruleParts = recurrence.RRULE.split(";").reduce((acc, part) => {
-        const [key, val] = part.split("=");
-        acc[key] = val;
-        return acc;
-      }, {});
+  if (recurrence && typeof recurrence === "object" && recurrence.RRULE) {
+    const ruleParts = recurrence.RRULE.split(";").reduce((acc, part) => {
+      const [key, val] = part.split("=");
+      acc[key] = val;
+      return acc;
+    }, {});
 
-      if (ruleParts.DTSTART) {
-        const parsedStart = dayjs(ruleParts.DTSTART).toISOString();
-        handleInputChange("startTime", parsedStart);
+    if (ruleParts.DTSTART) {
+      const datePart = dayjs(ruleParts.DTSTART);
 
-        if (ruleParts.UNTIL) {
-          const parsedEnd = dayjs(ruleParts.UNTIL).endOf("day").toISOString();
-          handleInputChange("endTime", parsedEnd);
-        }
+      // Use time from clickedEvent
+      const timeStart = clickedEvent?.start ? dayjs(clickedEvent.start) : null;
+      const timeEnd = clickedEvent?.end ? dayjs(clickedEvent.end) : null;
 
-        const freqMap = {
-          DAILY: "daily",
-          WEEKLY: "weekly",
-          MONTHLY: "monthly",
-          YEARLY: "yearly",
-        };
-        const freq = ruleParts.FREQ;
-        if (freq && freqMap[freq]) {
-          handleInputChange("occurrence", freqMap[freq]);
-        }
+      // console.log("timeEnd", dayjs.hour(timeEnd.hour())
+
+      const mergedStart = timeStart
+        ? datePart.hour(timeStart.hour()).minute(timeStart.minute()).second(0)
+        : datePart;
+
+     const mergedEnd = timeEnd
+  ? dayjs(ruleParts.UNTIL)
+      .hour(timeEnd.hour())
+      .minute(timeEnd.minute())
+      .second(0)
+  : datePart.add(1, "hour");
+
+// handleInputChange("endTime", mergedEnd.endOf("day").toISOString());
+
+      handleInputChange("startTime", mergedStart.toISOString());
+      handleInputChange("endTime", mergedEnd.toISOString());
+
+      // console.log("mergedStart.toISOString()", mergedStart.toISOString())
+      // console.log("mergedEnd.toISOString()", mergedEnd.toISOString())
+
+      // Set occurrence type from FREQ
+      const freqMap = {
+        DAILY: "daily",
+        WEEKLY: "weekly",
+        MONTHLY: "monthly",
+        YEARLY: "yearly",
+      };
+      const freq = ruleParts.FREQ;
+      if (freq && freqMap[freq]) {
+        handleInputChange("occurrence", freqMap[freq]);
       }
-    } else if (!formData.occurrence) {
-      handleInputChange("occurrence", "once"); // fallback
     }
-  }, [formData.occurrence, formData.startTime, formData.endTime, handleInputChange]);
+  } else if (!formData.occurrence) {
+    handleInputChange("occurrence", "once");
+  }
+}, [formData.occurrence, formData.startTime, formData.endTime, handleInputChange, clickedEvent]);
+
 
   const CustomInputComponent = useCallback(({ field, formattedDate }) => {
     return (
@@ -84,6 +103,11 @@ const ThirdComponent = ({ formData, handleInputChange }) => {
     );
   }, []);
 
+  console.log({
+   start: clickedEvent?.start,
+   end: clickedEvent?.end
+  })
+  console.log("formData", formData)
   return (
     <Box>
       <FormControl>
