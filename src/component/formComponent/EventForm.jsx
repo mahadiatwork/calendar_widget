@@ -21,6 +21,7 @@ import {
   Select as MuiSelect,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import { useState } from "react";
 import "react-quill/dist/quill.snow.css";
@@ -127,6 +128,8 @@ const EventForm = ({
     formData?.Event_Status === "Closed"
   );
 
+  const [loading, setLoading] = useState(false);
+
   dayjs.extend(utc);
   dayjs.extend(timezone);
 
@@ -183,7 +186,6 @@ const EventForm = ({
             Type: "criteria",
             Query: `(Event_ID:equals:${formData.id})`,
           });
-
 
           if (
             historyResponse &&
@@ -281,6 +283,7 @@ const EventForm = ({
   // HANDLE SUBMIT FOR FIRST THREE TABS (General, Details, Recurrence)
   // ========================================
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       // UPDATE EXISTING EVENT
       if (formData.id !== "") {
@@ -465,6 +468,7 @@ const EventForm = ({
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
+    setLoading(false);
   };
 
   // Helper to create or update history
@@ -762,7 +766,7 @@ const EventForm = ({
         RelatedList: "Contacts3",
         page: 1,
         per_page: 200,
-      });  
+      });
 
       const deleteResponse = await ZOHO.CRM.API.deleteRecord({
         Entity: "History1",
@@ -1003,6 +1007,26 @@ const EventForm = ({
   // Determine if we should show the Clear tab (only for editing, not for creation)
   const showClearTab = formData.id !== "";
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          bgcolor: "rgba(255,255,255,0.7)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 9999,
+        }}
+      >
+        <CircularProgress size={40} color="primary" />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -1049,7 +1073,8 @@ const EventForm = ({
             sx={{
               fontSize: "9pt",
               ...(formData?.occurrence &&
-                formData.occurrence !== "once" && {
+                typeof formData?.occurrence === "object" &&
+                formData?.occurrence?.RRULE && {
                   color: "white",
                   backgroundColor: "#1976d2",
                   borderRadius: 1,

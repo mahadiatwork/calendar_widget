@@ -8,7 +8,7 @@ import {
   RadioGroup,
   Typography,
 } from "@mui/material";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Datepicker } from "@mobiscroll/react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -18,11 +18,16 @@ import CustomTextField from "../atom/CustomTextField";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const ThirdComponent = ({ formData, handleInputChange,clickedEvent }) => {
+const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
 
+const initialized = useRef(false);
+
 useEffect(() => {
+  if (initialized.current) return;
+  initialized.current = true;
+
   const recurrence = formData?.occurrence;
 
   if (!formData.startTime) {
@@ -41,32 +46,20 @@ useEffect(() => {
     if (ruleParts.DTSTART) {
       const datePart = dayjs(ruleParts.DTSTART);
 
-      // Use time from clickedEvent
       const timeStart = clickedEvent?.start ? dayjs(clickedEvent.start) : null;
       const timeEnd = clickedEvent?.end ? dayjs(clickedEvent.end) : null;
-
-      // console.log("timeEnd", dayjs.hour(timeEnd.hour())
 
       const mergedStart = timeStart
         ? datePart.hour(timeStart.hour()).minute(timeStart.minute()).second(0)
         : datePart;
 
-     const mergedEnd = timeEnd
-  ? dayjs(ruleParts.UNTIL)
-      .hour(timeEnd.hour())
-      .minute(timeEnd.minute())
-      .second(0)
-  : datePart.add(1, "hour");
-
-// handleInputChange("endTime", mergedEnd.endOf("day").toISOString());
+      const mergedEnd = timeEnd
+        ? dayjs(ruleParts.UNTIL).hour(timeEnd.hour()).minute(timeEnd.minute()).second(0)
+        : datePart.add(1, "hour");
 
       handleInputChange("startTime", mergedStart.toISOString());
       handleInputChange("endTime", mergedEnd.toISOString());
 
-      // console.log("mergedStart.toISOString()", mergedStart.toISOString())
-      // console.log("mergedEnd.toISOString()", mergedEnd.toISOString())
-
-      // Set occurrence type from FREQ
       const freqMap = {
         DAILY: "daily",
         WEEKLY: "weekly",
@@ -78,11 +71,13 @@ useEffect(() => {
         handleInputChange("occurrence", freqMap[freq]);
       }
     }
-  } else if (!formData.occurrence) {
-    handleInputChange("occurrence", "once");
+  } else {
+    const timeStart = dayjs(formData.start);
+    const timeEnd = dayjs(formData.end);
+    handleInputChange("startTime", timeStart);
+    handleInputChange("endTime", timeEnd);
   }
-}, [formData.occurrence, formData.startTime, formData.endTime, handleInputChange, clickedEvent]);
-
+}, []);
 
   const CustomInputComponent = useCallback(({ field, formattedDate }) => {
     return (
@@ -103,11 +98,6 @@ useEffect(() => {
     );
   }, []);
 
-  console.log({
-   start: clickedEvent?.start,
-   end: clickedEvent?.end
-  })
-  console.log("formData", formData)
   return (
     <Box>
       <FormControl>
@@ -156,7 +146,10 @@ useEffect(() => {
       <Grid container spacing={2} sx={{ mt: 1, py: 1 }}>
         <Grid size={6}>
           <Box display="flex" alignItems="center">
-            <Typography variant="body1" sx={{ fontSize: "9pt", minWidth: "80px" }}>
+            <Typography
+              variant="body1"
+              sx={{ fontSize: "9pt", minWidth: "80px" }}
+            >
               Starts:
             </Typography>
             <Datepicker
@@ -187,7 +180,10 @@ useEffect(() => {
         </Grid>
         <Grid size={6}>
           <Box display="flex" alignItems="center">
-            <Typography variant="body1" sx={{ fontSize: "9pt", minWidth: "80px" }}>
+            <Typography
+              variant="body1"
+              sx={{ fontSize: "9pt", minWidth: "80px" }}
+            >
               Ends:
             </Typography>
             <Datepicker
