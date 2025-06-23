@@ -283,7 +283,7 @@ const EventForm = ({
   // HANDLE SUBMIT FOR FIRST THREE TABS (General, Details, Recurrence)
   // ========================================
   const handleSubmit = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       // UPDATE EXISTING EVENT
       if (formData.id !== "") {
@@ -410,6 +410,11 @@ const EventForm = ({
         } else {
           // CREATE SINGLE EVENT
           const transformedData = transformFormSubmission(formData);
+
+
+          console.log({transformedData})
+
+          return
 
           formData.start = new Date(formData.start);
           formData.end = new Date(formData.end);
@@ -1011,16 +1016,17 @@ const EventForm = ({
     return (
       <Box
         sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          bgcolor: "rgba(255,255,255,0.7)",
+          position: "fixed", // Use fixed to center relative to viewport
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 1300, // Above modal/dialogs
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          zIndex: 9999,
+          width: "100vw",
+          height: "100vh",
+          backgroundColor: "rgba(255, 255, 255, 0.8)", // Optional overlay
         }}
       >
         <CircularProgress size={40} color="primary" />

@@ -22,62 +22,70 @@ const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
   const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
   const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
 
-const initialized = useRef(false);
+  const initialized = useRef(false);
 
-useEffect(() => {
-  if (initialized.current) return;
-  initialized.current = true;
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
 
-  const recurrence = formData?.occurrence;
+    const recurrence = formData?.occurrence;
 
-  if (!formData.startTime) {
-    const currentTime = dayjs().toISOString();
-    handleInputChange("startTime", currentTime);
-    handleInputChange("endTime", dayjs(currentTime).add(1, "year").toISOString());
-  }
-
-  if (recurrence && typeof recurrence === "object" && recurrence.RRULE) {
-    const ruleParts = recurrence.RRULE.split(";").reduce((acc, part) => {
-      const [key, val] = part.split("=");
-      acc[key] = val;
-      return acc;
-    }, {});
-
-    if (ruleParts.DTSTART) {
-      const datePart = dayjs(ruleParts.DTSTART);
-
-      const timeStart = clickedEvent?.start ? dayjs(clickedEvent.start) : null;
-      const timeEnd = clickedEvent?.end ? dayjs(clickedEvent.end) : null;
-
-      const mergedStart = timeStart
-        ? datePart.hour(timeStart.hour()).minute(timeStart.minute()).second(0)
-        : datePart;
-
-      const mergedEnd = timeEnd
-        ? dayjs(ruleParts.UNTIL).hour(timeEnd.hour()).minute(timeEnd.minute()).second(0)
-        : datePart.add(1, "hour");
-
-      handleInputChange("startTime", mergedStart.toISOString());
-      handleInputChange("endTime", mergedEnd.toISOString());
-
-      const freqMap = {
-        DAILY: "daily",
-        WEEKLY: "weekly",
-        MONTHLY: "monthly",
-        YEARLY: "yearly",
-      };
-      const freq = ruleParts.FREQ;
-      if (freq && freqMap[freq]) {
-        handleInputChange("occurrence", freqMap[freq]);
-      }
+    if (!formData.startTime) {
+      const currentTime = dayjs().toISOString();
+      handleInputChange("startTime", currentTime);
+      handleInputChange(
+        "endTime",
+        dayjs(currentTime).add(1, "year").toISOString()
+      );
     }
-  } else {
-    const timeStart = dayjs(formData.start);
-    const timeEnd = dayjs(formData.end);
-    handleInputChange("startTime", timeStart);
-    handleInputChange("endTime", timeEnd);
-  }
-}, []);
+
+    if (recurrence && typeof recurrence === "object" && recurrence.RRULE) {
+      const ruleParts = recurrence.RRULE.split(";").reduce((acc, part) => {
+        const [key, val] = part.split("=");
+        acc[key] = val;
+        return acc;
+      }, {});
+
+      if (ruleParts.DTSTART) {
+        const datePart = dayjs(ruleParts.DTSTART);
+
+        const timeStart = clickedEvent?.start
+          ? dayjs(clickedEvent.start)
+          : null;
+        const timeEnd = clickedEvent?.end ? dayjs(clickedEvent.end) : null;
+
+        const mergedStart = timeStart
+          ? datePart.hour(timeStart.hour()).minute(timeStart.minute()).second(0)
+          : datePart;
+
+        const mergedEnd = timeEnd
+          ? dayjs(ruleParts.UNTIL)
+              .hour(timeEnd.hour())
+              .minute(timeEnd.minute())
+              .second(0)
+          : datePart.add(1, "hour");
+
+        handleInputChange("startTime", mergedStart.toISOString());
+        handleInputChange("endTime", mergedEnd.toISOString());
+
+        const freqMap = {
+          DAILY: "daily",
+          WEEKLY: "weekly",
+          MONTHLY: "monthly",
+          YEARLY: "yearly",
+        };
+        const freq = ruleParts.FREQ;
+        if (freq && freqMap[freq]) {
+          handleInputChange("occurrence", freqMap[freq]);
+        }
+      }
+    } else {
+      const timeStart = dayjs(formData.start);
+      const timeEnd = dayjs(formData.end);
+      handleInputChange("startTime", timeStart);
+      handleInputChange("endTime", timeEnd);
+    }
+  }, []);
 
   const CustomInputComponent = useCallback(({ field, formattedDate }) => {
     return (
@@ -207,7 +215,16 @@ useEffect(() => {
               }}
               onClose={() => setOpenEndDatepicker(false)}
               onChange={(e) => {
-                handleInputChange("endTime", e.value);
+                const selectedDate = dayjs(e.value); // Only take the date part
+                const currentTime = dayjs(formData?.endTime); // Only take the time part
+
+                // Merge: use the date from selectedDate, and time from currentTime
+                const mergedDateTime = selectedDate
+                  .hour(currentTime.hour())
+                  .minute(currentTime.minute())
+                  .second(currentTime.second());
+
+                handleInputChange("endTime", mergedDateTime.toISOString());
               }}
               isOpen={openEndDatepicker}
             />
