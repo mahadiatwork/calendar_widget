@@ -28,7 +28,7 @@ const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
     if (initialized.current) return;
     initialized.current = true;
 
-    const recurrence = formData?.occurrence;
+    const recurrence = clickedEvent?.Recurring_Activity ? clickedEvent?.Recurring_Activity : formData?.occurrence;
 
     if (!formData.startTime) {
       const currentTime = dayjs().toISOString();
@@ -105,6 +105,8 @@ const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
       />
     );
   }, []);
+
+  console.log({clickedEvent: clickedEvent?.Recurring_Activity})
 
   return (
     <Box>
@@ -224,7 +226,7 @@ const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
                   .minute(currentTime.minute())
                   .second(currentTime.second());
 
-                handleInputChange("endTime", mergedDateTime.toISOString());
+                handleInputChange("endTime", mergedDateTime);
               }}
               isOpen={openEndDatepicker}
             />

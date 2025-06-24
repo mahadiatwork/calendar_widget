@@ -411,13 +411,10 @@ const EventForm = ({
           // CREATE SINGLE EVENT
           const transformedData = transformFormSubmission(formData);
 
-
-          console.log({transformedData})
-
-          return
-
           formData.start = new Date(formData.start);
           formData.end = new Date(formData.end);
+          formData.endTime = new Date(formData.endTime);
+          formData.Recurring_Activity = transformedData.Recurring_Activity;
 
           const data = await ZOHO.CRM.API.insertRecord({
             Entity: "Events",
@@ -1034,6 +1031,9 @@ const EventForm = ({
     );
   }
 
+   const recurrence = clickedEvent?.Recurring_Activity ? clickedEvent?.Recurring_Activity : formData?.occurrence;
+
+
   return (
     <Box
       sx={{
@@ -1078,9 +1078,7 @@ const EventForm = ({
             label="Reccurence"
             sx={{
               fontSize: "9pt",
-              ...(formData?.occurrence &&
-                typeof formData?.occurrence === "object" &&
-                formData?.occurrence?.RRULE && {
+              ...(recurrence && typeof recurrence === "object" && recurrence.RRULE && {
                   color: "white",
                   backgroundColor: "#1976d2",
                   borderRadius: 1,

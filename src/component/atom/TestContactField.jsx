@@ -213,7 +213,6 @@ export default function TestContactField({
     setIsModalOpen(false);
   };
 
-  console.log({ formData });
   return (
     <Box>
       {/* Single-line display for selected contacts */}

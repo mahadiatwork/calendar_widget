@@ -148,8 +148,8 @@ export function transformFormSubmission(data, individualParticipant = null) {
   if (typeof data?.occurrence === "string" && validOccurrences.includes(data.occurrence.toLowerCase())) {
     const freq = data.occurrence.toUpperCase();
     const interval = 1; // Can be dynamic
-    const until = dayjs(customEndTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
-    const dtstart = dayjs(data.startTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
+    const until = dayjs(data?.endTime).format("YYYY-MM-DD");
+    const dtstart = dayjs(data?.startTime).format("YYYY-MM-DD");
     const byDay = dayjs(data?.startTime).format("dd").toUpperCase(); // E.g., "MO"
 
     let rrule = `FREQ=${freq};INTERVAL=${interval};UNTIL=${until}`;
@@ -166,6 +166,7 @@ export function transformFormSubmission(data, individualParticipant = null) {
 
     transformedData.Recurring_Activity = { RRULE: rrule };
   }
+
 
 
   if (
