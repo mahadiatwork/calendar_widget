@@ -28,7 +28,9 @@ const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
     if (initialized.current) return;
     initialized.current = true;
 
-    const recurrence = clickedEvent?.Recurring_Activity ? clickedEvent?.Recurring_Activity : formData?.occurrence;
+    const recurrence = clickedEvent?.Recurring_Activity
+      ? clickedEvent?.Recurring_Activity
+      : formData?.occurrence;
 
     if (!formData.startTime) {
       const currentTime = dayjs().toISOString();
@@ -106,7 +108,8 @@ const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
     );
   }, []);
 
-  console.log({clickedEvent: clickedEvent?.Recurring_Activity})
+  const minDate = dayjs("2024-01-01").format("YYYY-MM-DD");
+  const maxDate = dayjs(formData.startTime).add(1, "year").format("YYYY-MM-DD");
 
   return (
     <Box>
@@ -202,6 +205,8 @@ const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
               display="center"
               disabled={formData.noEndDate}
               calendarScroll="vertical"
+              min={minDate}
+              max={maxDate}
               inputComponent={() => {
                 const dateValue = formData?.endTime;
                 const formattedDate =
