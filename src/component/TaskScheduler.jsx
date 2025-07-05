@@ -901,21 +901,13 @@ const TaskScheduler = ({
             <Eventcalendar
               timezonePlugin={momentTimezone}
               dataTimezone="utc"
-              displayTimezone="Australia/Adelaide"
+              // displayTimezone="Australia/Adelaide"
               data={filteredEvents}
               view={myView}
               resources={resources}
               renderHeader={customWithNavButtons}
               invalid={myInvalid}
               renderScheduleEvent={renderEvent}
-              // startDay={(e)=>{console.log('faky',e)}}
-              // refDate={calendarRef}
-              // onPageChange={(e) => {
-              //   setSelectedDate(e.firstDay);
-              //   setStartDateTime(e.firstDay);
-              //   setEndDateTime(e.lastDay);
-              // }}
-              // onSelectedDateChange={onDateChange}
               onPageChange={onPageChange}
               dragToMove={true}
               dragToCreate={true}

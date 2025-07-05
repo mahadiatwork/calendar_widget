@@ -30,7 +30,7 @@ function getResourceByType(type) {
 }
 
 export function transformFormSubmission(data, individualParticipant = null) {
-
+  const localTimezone = dayjs.tz.guess();
 
   const transformScheduleWithToParticipants = (scheduleWith) => {
     return scheduleWith.map((contact) => ({
@@ -41,10 +41,6 @@ export function transformFormSubmission(data, individualParticipant = null) {
     }));
   };
 
-
-  const dayOfMonth = dayjs(data?.startTime).date();
-  const dayName = dayjs(data?.startTime).format("dd");
-  const monthNumber = dayjs(data?.startTime).format("MM");
   const customEndTime =
     data.noEndDate && data.occurrence === "daily"
       ? dayjs(data?.startTime).add(70, "day").format("YYYY-MM-DD")
@@ -57,36 +53,30 @@ export function transformFormSubmission(data, individualParticipant = null) {
             : dayjs(data?.endTime).format("YYYY-MM-DD");
 
   const participants = individualParticipant
-    ? [
-      {
+    ? [{
         Full_Name: individualParticipant?.Full_Name || null,
         type: "contact",
         participant: individualParticipant?.participant || null,
         status: individualParticipant.status,
-      },
-    ]
+      }]
     : transformScheduleWithToParticipants(data?.scheduledWith || []);
 
-
-  // Initialize transformedData
   let transformedData = {
     ...data,
     Event_Title: data?.title,
     Start_DateTime: dayjs(data?.start)
-      .tz("Australia/Adelaide")
-      .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `start` to ISO with timezone
+      .tz(localTimezone)
+      .format("YYYY-MM-DDTHH:mm:ssZ"),
     End_DateTime: dayjs(data?.end)
-      .tz("Australia/Adelaide")
-      .format("YYYY-MM-DDTHH:mm:ssZ"), // Format `end` to ISO with timezone
-    Description: data?.Description, // Map `description` to `Description`
-    Event_Priority: data?.priority, // Map `priority` to `Event_Priority`
+      .tz(localTimezone)
+      .format("YYYY-MM-DDTHH:mm:ssZ"),
+    Description: data?.Description,
+    Event_Priority: data?.priority,
     Owner: {
       id: data.scheduleFor?.id,
     },
     $send_notification: data?.send_notification,
-
     se_module: "Accounts",
-
     Participants: participants,
     Duration_Min: data.duration.toString(),
     Venue: data.location,
@@ -94,7 +84,6 @@ export function transformFormSubmission(data, individualParticipant = null) {
     Send_Reminders: data.Send_Reminders
   };
 
-  // Add What_Id only if id exists
   if (data.associateWith?.id) {
     transformedData.What_Id = {
       id: data.associateWith.id,
@@ -102,55 +91,55 @@ export function transformFormSubmission(data, individualParticipant = null) {
   }
 
   const resourceValue = getResourceByType(data.Type_of_Activity);
-
   transformedData.resource = resourceValue;
 
+  const startTime = dayjs(data.start).tz(localTimezone);
 
   if (data.Send_Reminders) {
-    const startTime = dayjs(data.start);
-
     let modifiedReminderDate = null;
 
     if (data.Reminder_Text === "At time of meeting") {
-      modifiedReminderDate = startTime.tz("Australia/Adelaide")
-        .format("YYYY-MM-DDTHH:mm:ssZ");
+      modifiedReminderDate = startTime.format("YYYY-MM-DDTHH:mm:ssZ");
     } else {
-      const reminderTime = startTime.subtract(parseInt(data?.Reminder_Text.split(" ")[0]), 'minute');
-      modifiedReminderDate = reminderTime.tz("Australia/Adelaide")
+      const offsetMin = parseInt(data?.Reminder_Text.split(" ")[0], 10);
+      modifiedReminderDate = startTime
+        .subtract(offsetMin, "minute")
         .format("YYYY-MM-DDTHH:mm:ssZ");
-      transformedData.Remind_At = modifiedReminderDate;
-      // transformedData.Participant_Reminder = modifiedReminderDate;
-      transformedData.User_Reminder = modifiedReminderDate;
     }
+
+    transformedData.Remind_At = modifiedReminderDate;
+    transformedData.User_Reminder = modifiedReminderDate;
     transformedData.Send_Reminders = true;
   }
 
   if (data.Send_Invites) {
-    const startTime = dayjs(data.start);
-
-    let modifiedReminderDate = null;
+    let inviteReminderDate = null;
 
     if (data.Reminder_Text === "At time of meeting") {
-      modifiedReminderDate = startTime.tz("Australia/Adelaide")
-        .format("YYYY-MM-DDTHH:mm:ssZ");
+      inviteReminderDate = startTime.format("YYYY-MM-DDTHH:mm:ssZ");
     } else {
-      const reminderTime = startTime.subtract(parseInt(data?.Reminder_Text.split(" ")[0]), 'minute');
-      modifiedReminderDate = reminderTime.tz("Australia/Adelaide")
+      const offsetMin = parseInt(data?.Reminder_Text.split(" ")[0], 10);
+      inviteReminderDate = startTime
+        .subtract(offsetMin, "minute")
         .format("YYYY-MM-DDTHH:mm:ssZ");
-      transformedData.Remind_At = modifiedReminderDate;
-      transformedData.User_Reminder = modifiedReminderDate;
     }
+
+    transformedData.Remind_At = inviteReminderDate;
+    transformedData.User_Reminder = inviteReminderDate;
     transformedData.send_notification = true;
   }
 
-  // Validate and Add Recurring_Activity
-  const validOccurrences = ["daily", "weekly", "monthly", "yearly"]; // Define valid occurrences
-  if (typeof data?.occurrence === "string" && validOccurrences.includes(data.occurrence.toLowerCase())) {
+  // Recurring Activity
+  const validOccurrences = ["daily", "weekly", "monthly", "yearly"];
+  if (
+    typeof data?.occurrence === "string" &&
+    validOccurrences.includes(data.occurrence.toLowerCase())
+  ) {
     const freq = data.occurrence.toUpperCase();
-    const interval = 1; // Can be dynamic
-    const until = dayjs(data?.endTime).format("YYYY-MM-DD");
+    const interval = 1;
+    const until = dayjs(customEndTime).format("YYYY-MM-DD");
     const dtstart = dayjs(data?.startTime).format("YYYY-MM-DD");
-    const byDay = dayjs(data?.startTime).format("dd").toUpperCase(); // E.g., "MO"
+    const byDay = dayjs(data?.startTime).format("dd").toUpperCase();
 
     let rrule = `FREQ=${freq};INTERVAL=${interval};UNTIL=${until}`;
 
@@ -163,23 +152,20 @@ export function transformFormSubmission(data, individualParticipant = null) {
     }
 
     rrule += `;DTSTART=${dtstart}`;
-
     transformedData.Recurring_Activity = { RRULE: rrule };
   }
 
-
-
+  // Cleanup
   if (
     transformedData.Remind_At == null ||
-    transformedData.Remind_At == "Invalid Date" ||
-    transformedData.Remind_At == "" ||
-    transformedData.Reminder_Text == ""
+    transformedData.Remind_At === "Invalid Date" ||
+    transformedData.Remind_At === "" ||
+    transformedData.Reminder_Text === ""
   ) {
     delete transformedData.Remind_At;
     delete transformedData.Reminder_Text;
   }
 
-  // Remove null or undefined keys
   Object.keys(transformedData).forEach((key) => {
     if (transformedData[key] === null || transformedData[key] === undefined) {
       delete transformedData[key];
