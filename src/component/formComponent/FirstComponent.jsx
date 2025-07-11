@@ -31,6 +31,7 @@ import {
   DateTimePicker,
   LocalizationProvider,
 } from "@mui/x-date-pickers";
+import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
 import TestContactField from "../atom/TestContactField";
 
 const FirstComponent = ({
@@ -336,7 +337,7 @@ const FirstComponent = ({
 
         <Grid size={7}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateTimePicker
+            <DesktopDateTimePicker
               label="Start Time"
               value={startValue}
               disabled={formData.Banner ? true : false}
@@ -378,7 +379,7 @@ const FirstComponent = ({
             isOpen={openEndDatepicker}
           /> */}
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateTimePicker
+            <DesktopDateTimePicker
               label="End Time"
               value={endValue}
               disabled={formData.Banner ? true : false}
