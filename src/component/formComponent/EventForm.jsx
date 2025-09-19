@@ -116,9 +116,7 @@ const EventForm = ({
   const descriptionText = formData.Description?.trim() || "";
 
   const [activityDetails, setActivityDetails] = useState(descriptionText);
-  const [addActivityToHistory, setAddActivityToHistory] = useState(
-    descriptionText !== ""
-  );
+  const [addActivityToHistory, setAddActivityToHistory] = useState(true);
   const [result, setResult] = useState(formData.result || "");
   const [isActivityDetailsUpdated, setIsActivityDetailsUpdated] =
     useState(false);
@@ -202,9 +200,9 @@ const EventForm = ({
               setResult(historyResponse.data[0].History_Result);
             }
           } else {
-            // Auto-check "Add Activity Details to History" if there's description data but no existing history
+            // Default to checked for "Add Activity Details to History" when clearing activity
+            setAddActivityToHistory(true);
             if (formData.Description && formData.Description.trim() !== "") {
-              setAddActivityToHistory(true);
               setActivityDetails(formData.Description);
             }
           }
