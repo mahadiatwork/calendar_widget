@@ -1,7 +1,6 @@
 import {
   Autocomplete,
   Box,
-  Button,
   Checkbox,
   FormControl,
   FormControlLabel,
@@ -12,25 +11,18 @@ import {
   Select,
   TextField,
   Typography,
-  Tooltip
 } from "@mui/material";
 import React from "react";
 import CustomTextField from "../atom/CustomTextField";
 import { useState } from "react";
-import { Datepicker } from "@mobiscroll/react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import AccountField from "../atom/AccountField";
 import RegardingField from "../atom/RegardingField";
-import { SketchPicker } from "react-color";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import CustomColorPicker from "../atom/CustomColorPicker";
-import {
-  DatePicker,
-  DateTimePicker,
-  LocalizationProvider,
-} from "@mui/x-date-pickers";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
 import TestContactField from "../atom/TestContactField";
 
@@ -47,8 +39,6 @@ const FirstComponent = ({
 }) => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
-  const [openStartDatepicker, setOpenStartDatepicker] = useState(false);
-  const [openEndDatepicker, setOpenEndDatepicker] = useState(false);
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [startValue, setStartValue] = useState(dayjs(formData.start));
   const [endValue, setEndValue] = useState(dayjs(formData.end));
@@ -70,7 +60,7 @@ const FirstComponent = ({
     setSendNotification(formData?.Send_Invites);
     setSendReminders(formData?.Send_Reminders);
   }, [formData.start, formData.end, formData.Send_Invites, formData.Send_Reminders]);
-  const [reminderMinutes, setReminderMinutes] = useState(15);
+  const [reminderMinutes] = useState(15);
 
   const ringAlarm = [
     { name: "At time of meeting", value: 0 },
@@ -122,24 +112,6 @@ const FirstComponent = ({
       handleInputChange("Type_of_Activity", selectedActivity.type);
       handleInputChange("resource", selectedActivity.resource);
     }
-  };
-
-  const customInputComponent = (field, label, openDatepickerState) => {
-    return (
-      <CustomTextField
-        fullWidth
-        disabled={formData.Banner ? true : false}
-        size="small"
-        label={label}
-        variant="outlined"
-        value={
-          formData[field] !== ""
-            ? dayjs(formData[field]).format("DD/MM/YYYY h:mm A")
-            : null
-        }
-        onClick={() => openDatepickerState(true)}
-      />
-    );
   };
 
   const formatTime = (date, hour) => {
@@ -198,9 +170,6 @@ const FirstComponent = ({
     handleInputChange("color", e);
   };
 
-  const handleNotificationChange = (e) => {
-    handleInputChange("send_notification", e.target.checked);
-  };
   // const fn =()=>{
   //   handleInputChange("Remind_At",'')
   //   handleInputChange('Reminder_Text','')
@@ -253,21 +222,6 @@ const FirstComponent = ({
       }
     }
   };
-
-  const handleReminderChange = (value) => {
-    setReminderMinutes(value);
-    handleInputChange("Remind_Participants", [
-      { period: "minutes", unit: value },
-    ]);
-    if (value === "None") {
-      handleInputChange("Reminder_Text", "None");
-    } else {
-      handleInputChange("Reminder_Text", `${value} minutes before`);
-    }
-  };
-
-
-
 
   return (
     <Box>

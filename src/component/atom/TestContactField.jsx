@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -25,13 +25,11 @@ export default function TestContactField({
   clickedEvent = {}, // Default to an empty object
   formData,
 }) {
-  const [contacts, setContacts] = useState([]); // Fetched contacts
   const [selectedParticipants, setSelectedParticipants] = useState(value || []); // Selected participants
   const [searchType, setSearchType] = useState("First_Name"); // Search criteria
   const [searchText, setSearchText] = useState(""); // Search input
   const [filteredContacts, setFilteredContacts] = useState([]); // Filtered contacts for display
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-  const debounceTimer = useRef(null); // Debounce timer for search
 
   // Helper function to determine invite status display
   const getInviteStatusDisplay = (status, sendInvites) => {
@@ -112,6 +110,7 @@ export default function TestContactField({
     };
 
     fetchParticipantsDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleInputChange is stable from parent
   }, [clickedEvent, ZOHO]);
 
   // Open modal and sync selected participants

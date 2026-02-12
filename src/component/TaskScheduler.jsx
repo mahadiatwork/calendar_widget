@@ -28,8 +28,6 @@ import {
   DialogContent,
   Modal,
   Snackbar,
-  Tab,
-  Tabs,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
@@ -173,10 +171,11 @@ const TaskScheduler = ({
     } else {
       setFilteredEvents(filtered);
     }
-  }, [priorityFilter, activityTypeFilter, myEvents, userFilter]);
+  }, [priorityFilter, activityTypeFilter, myEvents, userFilter, types]);
 
   useEffect(() => {
     setUserFilter(loggedInUser?.full_name ? [loggedInUser.full_name] : []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial user filter only on mount
   }, []);
 
   useEffect(() => {
@@ -475,18 +474,6 @@ const TaskScheduler = ({
     },
   ];
 
-  const adminMeetings = [
-    "Meeting",
-    "Appointment",
-    "Boardroom",
-    "Room 1",
-    "Room 2",
-    "Room 3",
-    "Vacation",
-  ];
-
-  const genericMeetings = ["Meeting"];
-
   // Filtered meetings based on the types state – show all columns for SUPER_ADMIN and ADMIN
   const filteredMeetings = (types) => {
     if (types === SUPER_ADMIN || types === ADMIN) {
@@ -705,44 +692,6 @@ const TaskScheduler = ({
     setArgumentLoader(false);
   };
 
-  const onDateChange = async (args) => {
-    let currentDate = dayjs(args.date).format("YYYY-MM-DD");
-    setSelectedDate(currentDate);
-    // return;
-    if (view === "day") {
-      const beginDate =
-        dayjs(currentDate).startOf("day").format("YYYY-MM-DD") +
-        "T00:00:00+10:30";
-      const closeDate =
-        dayjs(currentDate).endOf("day").format("YYYY-MM-DD") +
-        "T23:59:59+10:30";
-      setStartDateTime(beginDate);
-      setEndDateTime(closeDate);
-    }
-
-    if (view === "week") {
-      const beginDate =
-        dayjs(currentDate).startOf("week").format("YYYY-MM-DD") +
-        "T00:00:00+10:30";
-      const closeDate =
-        dayjs(currentDate).endOf("week").format("YYYY-MM-DD") +
-        "T23:59:59+10:30";
-      setStartDateTime(beginDate);
-      setEndDateTime(closeDate);
-    }
-
-    if (view === "month") {
-      const beginDate =
-        dayjs(currentDate).startOf("month").format("YYYY-MM-DD") +
-        "T00:00:00+10:30";
-      const closeDate =
-        dayjs(currentDate).endOf("month").format("YYYY-MM-DD") +
-        "T23:59:59+10:30";
-      setStartDateTime(beginDate);
-      setEndDateTime(closeDate);
-    }
-  };
-
   const onPageChange = async (e) => {
     let newStartDate = dayjs(e.month).format("YYYY-MM-DD");
     setSelectedDate(newStartDate);
@@ -783,8 +732,6 @@ const TaskScheduler = ({
 
   const openTooltip = useCallback((args) => {
     const event = args.event;
-
-    const doctor = args.resourceObj;
     // const time = formatDate('hh:mm A', new Date(event.start)) + ' - ' + formatDate('hh:mm A', new Date(event.end));
 
     if (timer.current) {
@@ -847,7 +794,6 @@ const TaskScheduler = ({
   }, []);
 
   const renderEvent = useCallback((data) => {
-    const ev = data.original;
     const isClosed = data.original.Event_Status === "Closed"; // Check if the event is closed
     const isAllDay = data.allDay;
     const theme = "mbsc-ios"; // your theme name

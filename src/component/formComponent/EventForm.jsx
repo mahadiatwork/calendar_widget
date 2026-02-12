@@ -40,51 +40,6 @@ import {
 
 const ZOHO = window.ZOHO;
 
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box p={3}>{children}</Box>}
-    </div>
-  );
-}
-
-function addDurationToDateTime(dateString, duration) {
-  // Convert the date string to a Date object
-  const date = new Date(dateString);
-
-  // Split the duration into hours and minutes
-  const [hours, minutes] = duration.split(":").map(Number);
-
-  // Add the duration to the date object
-  date.setHours(date.getHours() + hours);
-  date.setMinutes(date.getMinutes() + minutes);
-
-  // Format the date back to a string (keeping the original format)
-  const modifiedDate = date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
-
-  return modifiedDate;
-}
-
-function getLocalDateTime() {
-  const today = new Date();
-
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed, so add 1
-  const day = String(today.getDate()).padStart(2, "0");
-  const hours = String(today.getHours()).padStart(2, "0"); // Local hours
-  const minutes = String(today.getMinutes()).padStart(2, "0"); // Local minutes
-
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
 const EventForm = ({
   myEvents,
   setEvents,
@@ -109,7 +64,6 @@ const EventForm = ({
 }) => {
   const [value, setValue] = useState(0);
   const [edited, setEdited] = useState(false);
-  const todayDate = getLocalDateTime();
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [eraseChecked, setEraseChecked] = useState(false);
@@ -213,6 +167,7 @@ const EventForm = ({
 
       fetchHistory();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Description sync intentional
   }, [formData.id, value]);
 
   const logResponse = async ({
@@ -493,19 +448,11 @@ const EventForm = ({
     if (existingHistory.length > 0) {
       return await updateHistoryOnly();
     } else {
-      const Time_Occured = dayjs()
-        .tz("Australia/Adelaide")
-        .format("YYYY-MM-DDTHH:mm:ssZ");
-
       const historyResponse = await ZOHO.CRM.API.insertRecord({
         Entity: "History1",
         APIData: recordData,
         Trigger: ["workflow"],
       });
-
-      const History_Date_Time = dayjs(formData.start)
-        .tz("Australia/Adelaide")
-        .format("YYYY-MM-DDTHH:mm:ssZ");
 
       if (historyResponse.data[0].code === "SUCCESS") {
         // Handle participants if available
@@ -519,7 +466,7 @@ const EventForm = ({
             };
 
             try {
-              const contactHistoryResponse = await ZOHO.CRM.API.insertRecord({
+              await ZOHO.CRM.API.insertRecord({
                 Entity: "History_X_Contacts",
                 APIData: historyXContactRecordData,
                 Trigger: ["workflow"],
@@ -923,6 +870,7 @@ const EventForm = ({
         setResult(filteredOptions[0]);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- result intentionally not in deps
   }, [formData?.Type_of_Activity]);
 
   // Handle result selection change

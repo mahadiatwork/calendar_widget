@@ -33,7 +33,8 @@ export default function AccountField({
     }
   }, [formData.associateWith]); // Rerun effect only when formData.What_Id changes
 
-  // Utility to debounce the search function
+  // Utility to debounce the search function (lodash debounce has stable ref)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce() returns a function with unknown deps
   const debounceSearch = useCallback(
     debounce(async (query) => {
       if (query.trim()) {

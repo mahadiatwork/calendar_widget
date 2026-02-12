@@ -87,6 +87,7 @@ const ThirdComponent = ({ formData, handleInputChange, clickedEvent }) => {
       handleInputChange("startTime", timeStart);
       handleInputChange("endTime", timeEnd);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- init recurrence from clickedEvent only
   }, []);
 
   const CustomInputComponent = useCallback(({ field, formattedDate }) => {

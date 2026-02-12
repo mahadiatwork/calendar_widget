@@ -28,6 +28,7 @@ const RegardingField = ({ formData, handleInputChange }) => {
       setSelectedValue(existingValue);
       setManualInput("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- predefinedOptions derived from Type_of_Activity and existingValue
   }, [formData.Type_of_Activity, existingValue]);
 
   const handleSelectChange = (event) => {
