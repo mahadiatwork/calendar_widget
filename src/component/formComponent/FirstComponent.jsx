@@ -62,6 +62,14 @@ const FirstComponent = ({
     formData.Event_Status === "Open" || false
   );
   const [sendReminders, setSendReminders] = useState(formData?.Send_Reminders); // Initially, reminders are enabled
+
+  // Sync state values with formData when it changes (e.g., when opening a different event)
+  React.useEffect(() => {
+    setStartValue(dayjs(formData.start));
+    setEndValue(dayjs(formData.end));
+    setSendNotification(formData?.Send_Invites);
+    setSendReminders(formData?.Send_Reminders);
+  }, [formData.start, formData.end, formData.Send_Invites, formData.Send_Reminders]);
   const [reminderMinutes, setReminderMinutes] = useState(15);
 
   const ringAlarm = [
@@ -89,7 +97,7 @@ const FirstComponent = ({
       handleInputChange("end", modifiedEndDate);
       handleInputChange("start", modifiedStartDate);
       setEndValue(dayjs(endTime));
-    } else {
+    } else if (durationInMinutes && durationInMinutes.value !== undefined) {
       const reminderTime = startTime.subtract(
         durationInMinutes.value,
         "minute"
@@ -149,26 +157,21 @@ const FirstComponent = ({
 
   const handleBannerChecked = (e) => {
     handleInputChange("Banner", e.target.checked);
-    console.log({ selectedDate });
-    if (selectedDate) {
-      const timeAt6AM = formatTime(selectedDate, 6);
-      const timeAt7AM = formatTime(selectedDate, 7);
-      // console.log("fahim", timeAt6AM, timeAt7AM);
-      handleInputChange("start", timeAt6AM);
-      handleInputChange("end", timeAt7AM);
-      setStartValue(dayjs(timeAt6AM));
-      setEndValue(dayjs(timeAt7AM));
-    } else {
-      const now = new Date();
-      // console.log(now);
-      const timeAt6AM = formatTime(now, 6);
-      const timeAt7AM = formatTime(now, 7);
-      // console.log("fahim", timeAt6AM, timeAt7AM);
-      handleInputChange("start", timeAt6AM);
-      handleInputChange("end", timeAt7AM);
-      setStartValue(dayjs(timeAt6AM));
-      setEndValue(dayjs(timeAt7AM));
-    }
+    // Preserve the date from the form's start/end; only change time to 6 AM / 7 AM
+    const dateToUse =
+      formData.start != null && formData.start !== ""
+        ? new Date(formData.start)
+        : formData.end != null && formData.end !== ""
+          ? new Date(formData.end)
+          : selectedDate
+            ? new Date(selectedDate)
+            : new Date();
+    const timeAt6AM = formatTime(dateToUse, 6);
+    const timeAt7AM = formatTime(dateToUse, 7);
+    handleInputChange("start", timeAt6AM);
+    handleInputChange("end", timeAt7AM);
+    setStartValue(dayjs(timeAt6AM));
+    setEndValue(dayjs(timeAt7AM));
   };
 
   function getTimeDifference(end) {
@@ -652,11 +655,14 @@ const FirstComponent = ({
             <Autocomplete
               id="schedule-for-autocomplete"
               size="small"
-              options={users}
+              options={users || []}
               getOptionLabel={(option) =>
                 option?.name || option?.full_name || ""
               }
-              value={formData?.scheduleFor || ""}
+              isOptionEqualToValue={(option, value) =>
+                option?.id === value?.id || String(option?.id) === String(value?.id)
+              }
+              value={formData?.scheduleFor || null}
               onChange={(event, newValue) => {
                 handleInputChange("scheduleFor", {
                   name: newValue?.full_name || "",

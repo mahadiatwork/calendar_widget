@@ -1,50 +1,50 @@
 // Function to check if a date falls within a specific range
 export const isDateInRange = (date, rangeType) => {
-    const today = new Date();
-    const targetDate = new Date(date);
-    let startDate, endDate;
+  const today = new Date();
+  const targetDate = new Date(date);
+  let startDate, endDate;
 
-    switch (rangeType) {
-        case "Current Week":
-            startDate = new Date(today);
-            startDate.setDate(today.getDate() - today.getDay()); // Start of the week (Sunday)
-            endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + 6); // End of the week (Saturday)
-            break;
-        case "Current Month":
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            break;
-        case "Last 7 Days":
-            startDate = new Date();
-            startDate.setDate(today.getDate() - 7);
-            endDate = today;
-            break;
-        case "Last 30 Days":
-            startDate = new Date();
-            startDate.setDate(today.getDate() - 30);
-            endDate = today;
-            break;
-        case "Last 90 Days":
-            startDate = new Date();
-            startDate.setDate(today.getDate() - 90);
-            endDate = today;
-            break;
-        case "Next Week":
-            startDate = new Date();
-            startDate.setDate(today.getDate() + (7 - today.getDay())); // Start of next week
-            endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + 6); // End of next week
-            break;
-        case "Default":
-        default:
-            startDate = new Date();
-            startDate.setDate(today.getDate() - 14); // Last 14 days
-            endDate = null;
-            break;
-    }
+  switch (rangeType) {
+    case "Current Week":
+      startDate = new Date(today);
+      startDate.setDate(today.getDate() - today.getDay()); // Start of the week (Sunday)
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6); // End of the week (Saturday)
+      break;
+    case "Current Month":
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      break;
+    case "Last 7 Days":
+      startDate = new Date();
+      startDate.setDate(today.getDate() - 7);
+      endDate = today;
+      break;
+    case "Last 30 Days":
+      startDate = new Date();
+      startDate.setDate(today.getDate() - 30);
+      endDate = today;
+      break;
+    case "Last 90 Days":
+      startDate = new Date();
+      startDate.setDate(today.getDate() - 90);
+      endDate = today;
+      break;
+    case "Next Week":
+      startDate = new Date();
+      startDate.setDate(today.getDate() + (7 - today.getDay())); // Start of next week
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6); // End of next week
+      break;
+    case "Default":
+    default:
+      startDate = new Date();
+      startDate.setDate(today.getDate() - 14); // Last 14 days
+      endDate = null;
+      break;
+  }
 
-    return targetDate >= startDate && targetDate <= endDate;
+  return targetDate >= startDate && targetDate <= endDate;
 };
 
 
@@ -95,43 +95,43 @@ export const typeOptions = [
 
 
 export const getResultBasedOnActivityType = (activityType) => {
-switch (activityType) {
-  case "Meeting":
-    return "Meeting Held";
-  case "To-Do":
-    return "To-do Done";
-  case "Appointment":
-    return "Appointment Completed";
-  case "Boardroom":
-    return "Boardroom - Completed";
-  case "Call Billing":
-    return "Call Billing - Completed";
-  case "Email Billing":
-    return "Email Billing - Completed";
-  case "Initial Consultation":
-    return "Initial Consultation - Completed";
-  case "Call":
-    return "Call Attempted";
-  case "Mail":
-    return "Mail - Completed";
-  case "Meeting Billing":
-    return "Meeting Billing - Completed";
-  case "Personal Activity":
-    return "Personal Activity - Completed";
-  case "Room 1":
-    return "Room 1 - Completed";
-  case "Room 2":
-    return "Room 2 - Completed";
-  case "Room 3":
-    return "Room 3 - Completed";
-  case "To Do Billing":
-    return "To Do Billing - Completed";
-  case "Vacation":
-    return "Vacation - Completed";
-  default:
-    return "Note"; // Default result if no specific type is matched
-}
-};  
+  switch (activityType) {
+    case "Meeting":
+      return "Meeting Held";
+    case "To-Do":
+      return "To-do Done";
+    case "Appointment":
+      return "Appointment Completed";
+    case "Boardroom":
+      return "Boardroom - Completed";
+    case "Call Billing":
+      return "Call Billing - Completed";
+    case "Email Billing":
+      return "Email Billing - Completed";
+    case "Initial Consultation":
+      return "Initial Consultation - Completed";
+    case "Call":
+      return "Call Attempted";
+    case "Mail":
+      return "Mail - Completed";
+    case "Meeting Billing":
+      return "Meeting Billing - Completed";
+    case "Personal Activity":
+      return "Personal Activity - Completed";
+    case "Room 1":
+      return "Room 1 - Completed";
+    case "Room 2":
+      return "Room 2 - Completed";
+    case "Room 3":
+      return "Room 3 - Completed";
+    case "To Do Billing":
+      return "To Do Billing - Completed";
+    case "Vacation":
+      return "Vacation - Completed";
+    default:
+      return "Note"; // Default result if no specific type is matched
+  }
+};
 
 export const activityResultMapping = {
   "Call": ["Call Attempted", "Call Completed", "Call Left Message", "Call Received"],
@@ -206,3 +206,23 @@ export const reminderMapping = {
   "5 minutes before": 5,
   "None": 0,
 };
+
+
+export const activityType = [
+  { type: "Meeting", resource: 1 },
+  { type: "To-Do", resource: 2 },
+  { type: "Appointment", resource: 3 },
+  { type: "Boardroom", resource: 4 },
+  { type: "Call Billing", resource: 5 },
+  { type: "Email Billing", resource: 6 },
+  { type: "Initial Consultation", resource: 7 },
+  { type: "Call", resource: 8 },
+  { type: "Mail", resource: 9 },
+  { type: "Meeting Billing", resource: 10 },
+  { type: "Personal Activity", resource: 11 },
+  { type: "Room 1", resource: 12 },
+  { type: "Room 2", resource: 13 },
+  { type: "Room 3", resource: 14 },
+  { type: "To Do Billing", resource: 15 },
+  { type: "Vacation", resource: 16 },
+];

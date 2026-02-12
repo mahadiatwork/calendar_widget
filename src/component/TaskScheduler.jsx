@@ -36,6 +36,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import DrawerComponent from "./DrawerComponent";
+import { activityType as activityTypeMapping } from "./helperFunction";
 
 momentTimezone.moment = moment;
 dayjs.extend(utc);
@@ -67,24 +68,7 @@ const TaskScheduler = ({
   setRecentColor,
   loggedInUser,
 }) => {
-  const [activityType, setActivityType] = useState([
-    { type: "Meeting", resource: 1 },
-    { type: "To-Do", resource: 2 },
-    { type: "Appointment", resource: 3 },
-    { type: "Boardroom", resource: 4 },
-    { type: "Call Billing", resource: 5 },
-    { type: "Email Billing", resource: 6 },
-    { type: "Initial Consultation", resource: 7 },
-    { type: "Call", resource: 8 },
-    { type: "Mail", resource: 9 },
-    { type: "Meeting Billing", resource: 10 },
-    { type: "Personal Activity", resource: 11 },
-    { type: "Room 1", resource: 12 },
-    { type: "Room 2", resource: 13 },
-    { type: "Room 3", resource: 14 },
-    { type: "To Do Billing", resource: 15 },
-    { type: "Vacation", resource: 16 },
-  ]);
+  const [activityType, setActivityType] = useState(activityTypeMapping);
   const [selectedDate, setSelectedDate] = useState(
     dayjs().format("YYYY-MM-DD")
   );
@@ -503,17 +487,10 @@ const TaskScheduler = ({
 
   const genericMeetings = ["Meeting"];
 
-  // Filtered meetings based on the types state
+  // Filtered meetings based on the types state – show all columns for SUPER_ADMIN and ADMIN
   const filteredMeetings = (types) => {
-    if (types === SUPER_ADMIN) {
-      return meetings; // Show all meetings
-    }
-
-    if (types === ADMIN) {
-      const filteredMeetings = meetings.filter((meeting) =>
-        adminMeetings.includes(meeting.name)
-      );
-      return filteredMeetings;
+    if (types === SUPER_ADMIN || types === ADMIN) {
+      return meetings; // Show all meetings/columns
     }
 
     if (types === GENERIC) {
@@ -655,19 +632,57 @@ const TaskScheduler = ({
     setArgumentLoader(true);
     setClickedEvent(args?.event);
     console.log("mehedi", args?.event)
+    const eventType = args?.event?.Type_of_Activity;
+    const eventResource = args?.event?.resource;
+    let mappedResource = eventResource;
+
+    // If resource is missing but Type_of_Activity exists, find resource from helperFunction
+    // Check for null, undefined, or 0 (0 is not a valid resource ID in helperFunction)
+    if ((mappedResource == null || mappedResource === 0) && eventType) {
+      // Case-insensitive comparison to find matching activity type
+      const eventTypeLower = typeof eventType === 'string' ? eventType.toLowerCase().trim() : '';
+      
+      if (eventTypeLower) {
+        const foundActivity = activityTypeMapping.find((a) => 
+          a.type.toLowerCase() === eventTypeLower
+        );
+        
+        if (foundActivity) {
+          mappedResource = foundActivity.resource;
+          console.log(`Mapped resource ${mappedResource} for Type_of_Activity: ${eventType}`);
+        }
+      }
+    }
+
+    // Resolve scheduleFor to a user object from users so the "Schedule for" Autocomplete displays correctly
+    const eventOwner = args?.event?.scheduleFor;
+    let scheduleForValue = eventOwner
+      ? { ...eventOwner, full_name: eventOwner.full_name ?? eventOwner.name }
+      : null;
+    if (scheduleForValue && Array.isArray(users) && users.length > 0) {
+      const matchedUser = users.find(
+        (u) =>
+          u.id === scheduleForValue.id ||
+          String(u.id) === String(scheduleForValue.id)
+      );
+      if (matchedUser) {
+        scheduleForValue = {
+          ...matchedUser,
+          full_name: matchedUser.full_name ?? matchedUser.name,
+        };
+      }
+    }
+
     setFormData({
       id: args?.event?.id,
       title: args?.event?.title,
       startTime: "",
       endTime: "",
-      duration: parseInt(args?.event?.duration),
+      duration: parseInt(args?.event?.duration) || 0,
       associateWith: args?.event?.associateWith,
-      Type_of_Activity: args?.event?.Type_of_Activity,
-      resource: args?.event?.resource,
-      scheduleFor: {
-        ...args?.event?.scheduleFor,
-        full_name: args?.event?.scheduleFor?.name,
-      },
+      Type_of_Activity: eventType,
+      resource: mappedResource,
+      scheduleFor: scheduleForValue,
       scheduledWith: args?.event?.scheduledWith,
       location: args?.event?.location,
       priority: args?.event?.priority?.toLowerCase(),
@@ -967,7 +982,7 @@ const TaskScheduler = ({
                   </Typography>
                   <Typography variant="p">{hoverInEvents?.title}</Typography>
                 </Box>
-                   <Box
+                <Box
                   display={"flex"}
                   justifyContent={"space-between"}
                   alignItems={"center"}
