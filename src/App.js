@@ -87,29 +87,6 @@ function App() {
     setFilterSaveSnackbarOpen(true);
   }, []);
 
-  // Latest filter uses generic persist (different org variable).
-  const persistOrgVariable = useCallback((apiname, value) => {
-    const json = typeof value === "string" ? value : JSON.stringify(value);
-    if (typeof ZOHO?.CRM?.API?.setOrgVariable === "function") {
-      return ZOHO.CRM.API.setOrgVariable(apiname, json).catch((err) => {
-        console.warn("Failed to persist " + apiname, err);
-        throw err;
-      });
-    }
-    if (typeof ZOHO?.CRM?.FUNCTIONS?.execute === "function") {
-      const req_data = {
-        arguments: JSON.stringify({ api_name: apiname, value: json }),
-      };
-      return ZOHO.CRM.FUNCTIONS.execute("SetOrgVariable", req_data).catch(
-        (err) => {
-          console.warn("Failed to persist " + apiname + " via function", err);
-          throw err;
-        }
-      );
-    }
-    return Promise.resolve();
-  }, []);
-
   const persistLatestFilter = useCallback(
     (value) => {
       if (!loggedInUser?.id) return Promise.resolve();

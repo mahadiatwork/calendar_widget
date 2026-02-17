@@ -272,7 +272,7 @@ const EventForm = ({
           const end = formData.end instanceof Date ? formData.end : new Date(formData.end);
           setEvents((prevEvents) =>
             prevEvents.map((event) => {
-              if (event.id != formData.id) return event;
+              if (String(event.id) !== String(formData.id)) return event;
               const scheduleFor = formData.scheduleFor
                 ? {
                     ...formData.scheduleFor,
