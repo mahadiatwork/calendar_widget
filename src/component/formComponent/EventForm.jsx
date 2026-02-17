@@ -268,10 +268,27 @@ const EventForm = ({
           setSnackbarMessage("Event updated successfully!");
           setSnackbarSeverity("success");
           setSnackbarOpen(true);
+          const start = formData.start instanceof Date ? formData.start : new Date(formData.start);
+          const end = formData.end instanceof Date ? formData.end : new Date(formData.end);
           setEvents((prevEvents) =>
-            prevEvents.map((event) =>
-              event.id === formData.id ? formData : event
-            )
+            prevEvents.map((event) => {
+              if (event.id != formData.id) return event;
+              const scheduleFor = formData.scheduleFor
+                ? {
+                    ...formData.scheduleFor,
+                    name: formData.scheduleFor.name ?? formData.scheduleFor.full_name ?? event.scheduleFor?.name,
+                  }
+                : event.scheduleFor;
+              return {
+                ...event,
+                ...formData,
+                id: event.id,
+                start,
+                end,
+                scheduleFor,
+                color: formData.color ?? event.color,
+              };
+            })
           );
           resetFormState();
         } else {

@@ -4,7 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { Box, CircularProgress } from "@mui/material";
+import { Alert, Box, CircularProgress, Snackbar } from "@mui/material";
+import {
+  loadUserPreferences,
+  persistLatestFilterToUserPreferences,
+  saveFiltersToUserPreferences,
+} from "./helpers/userPreferencesFilters";
 const ZOHO = window.ZOHO;
 
 dayjs.extend(utc);
@@ -23,6 +28,95 @@ function App() {
   const [loader, setLoader] = useState(false);
   const [recentColor, setRecentColor] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
+  const [savedFilters, setSavedFilters] = useState([]);
+  const [initialFilter, setInitialFilter] = useState(null);
+  const [filterSaveInProgress, setFilterSaveInProgress] = useState(false);
+  const [filterSaveSnackbarOpen, setFilterSaveSnackbarOpen] = useState(false);
+  const [filterSnackbarMessage, setFilterSnackbarMessage] = useState(
+    "Filter saved successfully"
+  );
+  const [filterSnackbarSeverity, setFilterSnackbarSeverity] = useState(
+    "success"
+  );
+
+  // Persist saved filters to User_Preferences module (Preference_Of = user, Saved_Filters = value, Name = "username - Preference").
+  const persistSavedFilters = useCallback(
+    (value) => {
+      if (!loggedInUser?.id) return Promise.reject(new Error("User not loaded"));
+      return saveFiltersToUserPreferences(
+        value,
+        loggedInUser.id,
+        loggedInUser.full_name
+      );
+    },
+    [loggedInUser?.id, loggedInUser?.full_name]
+  );
+
+  // Save filter button: save to User_Preferences, then show loading and success snackbar.
+  const saveFiltersWithFeedback = useCallback(
+    (value) => {
+      if (!loggedInUser?.id) return;
+      setFilterSaveInProgress(true);
+      saveFiltersToUserPreferences(
+        value,
+        loggedInUser.id,
+        loggedInUser.full_name
+      )
+        .then(() => {
+          setFilterSaveInProgress(false);
+          setFilterSnackbarMessage("Filter saved successfully");
+          setFilterSnackbarSeverity("success");
+          setFilterSaveSnackbarOpen(true);
+        })
+        .catch(() => setFilterSaveInProgress(false));
+    },
+    [loggedInUser?.id, loggedInUser?.full_name]
+  );
+
+  const showFilterUpdateSuccessSnackbar = useCallback(() => {
+    setFilterSnackbarMessage("Filter updated successfully");
+    setFilterSnackbarSeverity("success");
+    setFilterSaveSnackbarOpen(true);
+  }, []);
+
+  const showFilterUpdateErrorSnackbar = useCallback((message) => {
+    setFilterSnackbarMessage(
+      message || "Failed to update filter in CRM. Check console for details."
+    );
+    setFilterSnackbarSeverity("error");
+    setFilterSaveSnackbarOpen(true);
+  }, []);
+
+  // Latest filter uses generic persist (different org variable).
+  const persistOrgVariable = useCallback((apiname, value) => {
+    const json = typeof value === "string" ? value : JSON.stringify(value);
+    if (typeof ZOHO?.CRM?.API?.setOrgVariable === "function") {
+      return ZOHO.CRM.API.setOrgVariable(apiname, json).catch((err) => {
+        console.warn("Failed to persist " + apiname, err);
+        throw err;
+      });
+    }
+    if (typeof ZOHO?.CRM?.FUNCTIONS?.execute === "function") {
+      const req_data = {
+        arguments: JSON.stringify({ api_name: apiname, value: json }),
+      };
+      return ZOHO.CRM.FUNCTIONS.execute("SetOrgVariable", req_data).catch(
+        (err) => {
+          console.warn("Failed to persist " + apiname + " via function", err);
+          throw err;
+        }
+      );
+    }
+    return Promise.resolve();
+  }, []);
+
+  const persistLatestFilter = useCallback(
+    (value) => {
+      if (!loggedInUser?.id) return Promise.resolve();
+      return persistLatestFilterToUserPreferences(loggedInUser.id, value);
+    },
+    [loggedInUser?.id]
+  );
 
   const getUserDataAndColor = async () => {
     try {
@@ -31,8 +125,22 @@ function App() {
           Entity: "users",
           approved: "both",
           RecordID: data?.users[0]?.id,
-        }).then(function (data) {
-          setLoggedInUser(data?.users[0]);
+        }).then(function (userData) {
+          const user = userData?.users?.[0];
+          setLoggedInUser(user);
+          if (user?.id) {
+            const emptyFilter = {
+              priorityFilter: [],
+              activityTypeFilter: [],
+              userFilter: [],
+            };
+            loadUserPreferences(user.id).then(({ savedFilters, latestFilter }) => {
+              setSavedFilters(savedFilters);
+              setInitialFilter(
+                latestFilter != null ? latestFilter : emptyFilter
+              );
+            });
+          }
         });
       });
 
@@ -57,6 +165,7 @@ function App() {
         const colorsArray = JSON.parse(data?.Success?.Content || "[]");
         setRecentColor(colorsArray);
       });
+
     } catch (error) {}
   };
 
@@ -228,8 +337,31 @@ function App() {
         recentColor={recentColor}
         setRecentColor={setRecentColor}
         loggedInUser={loggedInUser}
+        savedFilters={savedFilters}
+        setSavedFilters={setSavedFilters}
+        initialFilter={initialFilter}
+        persistSavedFilters={persistSavedFilters}
+        persistSavedFiltersWithFeedback={saveFiltersWithFeedback}
+        persistLatestFilter={persistLatestFilter}
+        filterSaveInProgress={filterSaveInProgress}
+        onFilterUpdateSuccess={showFilterUpdateSuccessSnackbar}
+        onFilterUpdateError={showFilterUpdateErrorSnackbar}
       />
-      {/* <TaskScheduler /> */}
+      <Snackbar
+        open={filterSaveSnackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setFilterSaveSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setFilterSaveSnackbarOpen(false)}
+          severity={filterSnackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {filterSnackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

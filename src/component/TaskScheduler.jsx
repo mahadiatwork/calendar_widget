@@ -52,6 +52,12 @@ setOptions({
 const now = new Date();
 const today = now.toISOString().slice(0, 16);
 
+const EMPTY_FILTER = {
+  priorityFilter: [],
+  activityTypeFilter: [],
+  userFilter: [],
+};
+
 const TaskScheduler = ({
   myEvents,
   setMyEvents,
@@ -65,6 +71,15 @@ const TaskScheduler = ({
   recentColor,
   setRecentColor,
   loggedInUser,
+  savedFilters = [],
+  setSavedFilters,
+  initialFilter,
+  persistSavedFilters,
+  persistSavedFiltersWithFeedback,
+  persistLatestFilter,
+  filterSaveInProgress = false,
+  onFilterUpdateSuccess,
+  onFilterUpdateError,
 }) => {
   const [activityType, setActivityType] = useState(activityTypeMapping);
   const [selectedDate, setSelectedDate] = useState(
@@ -157,7 +172,8 @@ const TaskScheduler = ({
 
     if (userFilter.length > 0) {
       filtered = filtered.filter((obj) => {
-        return userFilter.includes(obj.scheduleFor.name);
+        const name = obj.scheduleFor?.name ?? obj.scheduleFor?.full_name;
+        return name != null && userFilter.includes(name);
       });
     }
 
@@ -174,9 +190,135 @@ const TaskScheduler = ({
   }, [priorityFilter, activityTypeFilter, myEvents, userFilter, types]);
 
   useEffect(() => {
-    setUserFilter(loggedInUser?.full_name ? [loggedInUser.full_name] : []);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial user filter only on mount
-  }, []);
+    if (initialFilter != null) {
+      setPriorityFilter(
+        Array.isArray(initialFilter.priorityFilter)
+          ? initialFilter.priorityFilter
+          : []
+      );
+      setActivityTypeFilter(
+        Array.isArray(initialFilter.activityTypeFilter)
+          ? initialFilter.activityTypeFilter
+          : []
+      );
+      setUserFilter(
+        Array.isArray(initialFilter.userFilter) ? initialFilter.userFilter : []
+      );
+    } else if (loggedInUser?.full_name) {
+      setUserFilter([loggedInUser.full_name]);
+    }
+  }, [initialFilter, loggedInUser?.full_name]);
+
+  const applyFilter = useCallback(
+    (savedFilter) => {
+      if (!savedFilter) return;
+      const pf = Array.isArray(savedFilter.priorityFilter)
+        ? savedFilter.priorityFilter
+        : [];
+      const af = Array.isArray(savedFilter.activityTypeFilter)
+        ? savedFilter.activityTypeFilter
+        : [];
+      const uf = Array.isArray(savedFilter.userFilter)
+        ? savedFilter.userFilter
+        : [];
+      setPriorityFilter(pf);
+      setActivityTypeFilter(af);
+      setUserFilter(uf);
+      if (persistLatestFilter) {
+        persistLatestFilter({ priorityFilter: pf, activityTypeFilter: af, userFilter: uf }).catch(
+          (err) => console.warn("Could not persist latest filter", err)
+        );
+      }
+    },
+    [persistLatestFilter]
+  );
+
+  const clearFilter = useCallback(() => {
+    setPriorityFilter([]);
+    setActivityTypeFilter([]);
+    setUserFilter([]);
+    if (persistLatestFilter) {
+      persistLatestFilter(EMPTY_FILTER).catch((err) =>
+        console.warn("Could not persist latest filter", err)
+      );
+    }
+  }, [persistLatestFilter]);
+
+  const saveCurrentFilter = useCallback(
+    (name) => {
+      const newFilter = {
+        name: name || "Unnamed filter",
+        priorityFilter: [...priorityFilter],
+        activityTypeFilter: [...activityTypeFilter],
+        userFilter: [...userFilter],
+      };
+      const next = [...savedFilters, newFilter];
+      setSavedFilters(next);
+      if (persistSavedFiltersWithFeedback) {
+        persistSavedFiltersWithFeedback(next);
+      } else if (persistSavedFilters) {
+        persistSavedFilters(next);
+      }
+    },
+    [
+      priorityFilter,
+      activityTypeFilter,
+      userFilter,
+      savedFilters,
+      setSavedFilters,
+      persistSavedFiltersWithFeedback,
+      persistSavedFilters,
+    ]
+  );
+
+  const updateSavedFilter = useCallback(
+    (index, updatedFilter) => {
+      if (index < 0 || !updatedFilter) return;
+      setSavedFilters((prev) => {
+        const next = prev.slice();
+        next[index] = {
+          name: updatedFilter.name ?? prev[index]?.name ?? "Unnamed filter",
+          priorityFilter: Array.isArray(updatedFilter.priorityFilter)
+            ? updatedFilter.priorityFilter
+            : prev[index]?.priorityFilter ?? [],
+          activityTypeFilter: Array.isArray(updatedFilter.activityTypeFilter)
+            ? updatedFilter.activityTypeFilter
+            : prev[index]?.activityTypeFilter ?? [],
+          userFilter: Array.isArray(updatedFilter.userFilter)
+            ? updatedFilter.userFilter
+            : prev[index]?.userFilter ?? [],
+        };
+        if (persistSavedFilters) {
+          persistSavedFilters(next)
+            .then(() => onFilterUpdateSuccess?.())
+            .catch((err) => {
+              console.warn("Failed to persist saved filters after update", err);
+              const msg =
+                err?.message ?? (typeof err === "object" ? JSON.stringify(err) : String(err));
+              onFilterUpdateError?.(msg);
+            });
+        }
+        return next;
+      });
+    },
+    [setSavedFilters, persistSavedFilters, onFilterUpdateSuccess, onFilterUpdateError]
+  );
+
+  const deleteSavedFilter = useCallback(
+    (index) => {
+      if (index < 0) return;
+      setSavedFilters((prev) => {
+        const next = prev.filter((_, i) => i !== index);
+        if (persistSavedFilters) {
+          persistSavedFilters(next).catch((err) => {
+            console.warn("Failed to persist saved filters after delete", err);
+          });
+        }
+        return next;
+      });
+    },
+    [setSavedFilters, persistSavedFilters]
+  );
 
   useEffect(() => {
     for (const event of myEvents) {
@@ -474,20 +616,31 @@ const TaskScheduler = ({
     },
   ];
 
-  // Filtered meetings based on the types state – show all columns for SUPER_ADMIN and ADMIN
+  // Columns allowed for ADMIN (Meeting, Appointment, Boardroom, Room 1–3, Vacation)
+  const ADMIN_COLUMN_NAMES = [
+    "Meeting",
+    "Appointment",
+    "Boardroom",
+    "Room 1",
+    "Room 2",
+    "Room 3",
+    "Vacation",
+  ];
+
+  // Filtered meetings based on the types state
   const filteredMeetings = (types) => {
-    if (types === SUPER_ADMIN || types === ADMIN) {
-      return meetings; // Show all meetings/columns
+    if (types === SUPER_ADMIN) {
+      return meetings; // Show all columns
+    }
+
+    if (types === ADMIN) {
+      return meetings.filter((meeting) =>
+        ADMIN_COLUMN_NAMES.includes(meeting.name)
+      );
     }
 
     if (types === GENERIC) {
-      // Add specific logic for Generic view if needed
-      // const filteredMeetings = meetings.filter((meeting) =>
-      //   adminMeetings.includes(meeting.name)
-      // );
-      // Generic will see all meeting type without header.
-      // return meetings?.map((el) => ({ id: el.id }));
-      // return [filteredMeetings[0]];
+      // Generic stays as is: single column / default fallback
     }
 
     return [
@@ -495,7 +648,7 @@ const TaskScheduler = ({
         id: 1,
         name: "",
       },
-    ]; // Default fallback
+    ]; // Default fallback (GENERIC or unset types)
   };
 
   const resources = filteredMeetings(types);
@@ -1134,13 +1287,20 @@ const TaskScheduler = ({
           <DrawerComponent
             open={drawerOpen}
             setOpen={setDrawerOpen}
-            users={users} // Pass users list here
+            users={users}
             priorityFilter={priorityFilter}
             setPriorityFilter={setPriorityFilter}
             activityTypeFilter={activityTypeFilter}
             setActivityTypeFilter={setActivityTypeFilter}
-            userFilter={userFilter} // Pass user filter state
-            setUserFilter={setUserFilter} // Pass user filter setter
+            userFilter={userFilter}
+            setUserFilter={setUserFilter}
+            savedFilters={savedFilters}
+            onApplyFilter={applyFilter}
+            onClearFilter={clearFilter}
+            onSaveCurrentFilter={saveCurrentFilter}
+            onUpdateSavedFilter={updateSavedFilter}
+            onDeleteSavedFilter={deleteSavedFilter}
+            filterSaveInProgress={filterSaveInProgress}
           />
 
           <Dialog
