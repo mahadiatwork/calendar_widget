@@ -37,6 +37,8 @@ const DrawerComponent = ({
   users,
   userFilter,
   setUserFilter,
+  selectedColumns,
+  setSelectedColumns,
   savedFilters = [],
   onApplyFilter,
   onClearFilter,
@@ -139,6 +141,13 @@ const DrawerComponent = ({
       target: { value },
     } = event;
     setUserFilter(typeof value === "string" ? value.split(",") : value);
+  };
+
+  const handleColumnChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedColumns(typeof value === "string" ? value.split(",") : value);
   };
   return (
     <Drawer
@@ -292,6 +301,39 @@ const DrawerComponent = ({
                 <ListItemText primary={user.full_name} />
               </MenuItem>
             ))}
+          </Select>
+        </FormControl>
+
+        {/* Visible Columns filter */}
+        <FormControl fullWidth size="small" sx={{ mt: 3 }}>
+          <InputLabel>Visible Columns</InputLabel>
+          <Select
+            multiple
+            value={selectedColumns || []}
+            onChange={handleColumnChange}
+            MenuProps={MenuProps}
+            input={<OutlinedInput label="Visible Columns" />}
+            renderValue={(selected) => {
+              if (!Array.isArray(users) || selected.length === 0)
+                return "All users";
+              return users
+                .filter((u) => selected.includes(u.id))
+                .map((u) => u.full_name)
+                .join(", ");
+            }}
+          >
+            {Array.isArray(users) &&
+              users.map((user) => (
+                <MenuItem key={user.id} value={user.id}>
+                  <Checkbox
+                    checked={
+                      Array.isArray(selectedColumns) &&
+                      selectedColumns.includes(user.id)
+                    }
+                  />
+                  <ListItemText primary={user.full_name} />
+                </MenuItem>
+              ))}
           </Select>
         </FormControl>
 

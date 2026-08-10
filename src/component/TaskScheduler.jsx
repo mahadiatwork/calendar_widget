@@ -40,9 +40,6 @@ momentTimezone.moment = moment;
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const SUPER_ADMIN = "Super Admin";
-const ADMIN = "Admin";
-const GENERIC = "Generic";
 
 setOptions({
   theme: "ios",
@@ -101,7 +98,6 @@ const TaskScheduler = ({
 
   const [clickedEvent, setClickedEvent] = useState(null);
   const [argumentLoader, setArgumentLoader] = useState(false);
-  const [types, setTypes] = useState();
   const [myColors, setColors] = useState([]);
   const [open, setOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -142,18 +138,6 @@ const TaskScheduler = ({
     Event_Status: newEvent?.Event_Status,
   });
   const timer = useRef(null);
-  const usertype = loggedInUser?.User_Type;
-  useEffect(() => {
-    if (usertype !== undefined) {
-      if (usertype === SUPER_ADMIN) {
-        setTypes(SUPER_ADMIN);
-      } else if (usertype === ADMIN) {
-        setTypes(ADMIN);
-      } else {
-        setTypes(GENERIC);
-      }
-    }
-  }, [usertype]);
 
   useEffect(() => {
     let filtered = myEvents;
@@ -177,17 +161,14 @@ const TaskScheduler = ({
       });
     }
 
-    if (types === GENERIC) {
-      setFilteredEvents(
-        filtered.map((event) => ({
-          ...event,
-          resource: 1, // Ensure all events get resource = 1
-        }))
-      );
-    } else {
-      setFilteredEvents(filtered);
-    }
-  }, [priorityFilter, activityTypeFilter, myEvents, userFilter, types]);
+    // Map each event's resource to its owner's user ID for user-based column display
+    setFilteredEvents(
+      filtered.map((event) => ({
+        ...event,
+        resource: event.scheduleFor?.id ?? null,
+      }))
+    );
+  }, [priorityFilter, activityTypeFilter, myEvents, userFilter]);
 
   useEffect(() => {
     if (initialFilter != null) {
@@ -517,12 +498,7 @@ const TaskScheduler = ({
       "end",
       new Date(dayjs(args.date).add(1, "hour").toDate())
     );
-    // setInitialMinutesToDateTime({
-    //   name: "5 minutes before",
-    //   value: 5,
-    // });
     handleInputChange("duration", 60);
-    handleInputChange("scheduleFor", loggedInUser);
     handleInputChange("priority", "medium");
     let date = new Date(args.date);
 
@@ -536,122 +512,33 @@ const TaskScheduler = ({
 
     handleInputChange("Remind_At", modifiedDate);
     handleInputChange("Reminder_Text", "");
-    const selectedActivity = activityType.find(
-      (item) => item.resource === args.resource
-    );
 
-    if (selectedActivity) {
-      // Update both the activity type and the resource
-      handleInputChange("Type_of_Activity", selectedActivity.type);
-      handleInputChange("resource", selectedActivity.resource);
-      // console.log({ formData });
-    }
+    // Pre-fill scheduleFor from the clicked user column
+    const clickedUser = Array.isArray(users)
+      ? users.find((u) => u.id === args.resource)
+      : null;
+    handleInputChange("scheduleFor", clickedUser || loggedInUser);
+
     setOpen(true);
   };
 
-  const meetings = [
-    {
-      id: 1,
-      name: "Meeting",
-    },
-    {
-      id: 2,
-      name: "To-do",
-    },
-    {
-      id: 3,
-      name: "Appointment",
-    },
-    {
-      id: 4,
-      name: "Boardroom",
-    },
-    {
-      id: 5,
-      name: "Call Billing",
-    },
-    {
-      id: 6,
-      name: "Email Billing",
-    },
-    {
-      id: 7,
-      name: "Initial Consultation",
-    },
-    {
-      id: 8,
-      name: "Call",
-    },
-    {
-      id: 9,
-      name: "Mail",
-    },
-    {
-      id: 10,
-      name: "Meeting Billing",
-    },
-    {
-      id: 11,
-      name: "Personal Activity",
-    },
-    {
-      id: 12,
-      name: "Room 1",
-    },
-    {
-      id: 13,
-      name: "Room 2",
-    },
-    {
-      id: 14,
-      name: "Room 3",
-    },
-    {
-      id: 15,
-      name: "To Do Billing",
-    },
-    {
-      id: 16,
-      name: "Vacation",
-    },
-  ];
+  // State for controlling which user columns are visible (empty = show all)
+  const [selectedColumns, setSelectedColumns] = useState([]);
 
-  // Columns allowed for ADMIN (Meeting, Appointment, Boardroom, Room 1–3, Vacation)
-  const ADMIN_COLUMN_NAMES = [
-    "Meeting",
-    "Appointment",
-    "Boardroom",
-    "Room 1",
-    "Room 2",
-    "Room 3",
-    "Vacation",
-  ];
+  // Build resources from the users list — each user becomes a column
+  const userResources = useMemo(() => {
+    if (!Array.isArray(users)) return [];
+    return users.map((user) => ({
+      id: user.id,
+      name: user.full_name,
+    }));
+  }, [users]);
 
-  // Filtered meetings based on the types state
-  const filteredMeetings = (types) => {
-    if (types === SUPER_ADMIN) {
-      return meetings; // Show all columns
-    }
-
-    if (types === ADMIN) {
-      return meetings.filter((meeting) =>
-        ADMIN_COLUMN_NAMES.includes(meeting.name)
-      );
-    }
-
-    if (types === GENERIC) {
-      // Generic stays as is: single column / default fallback
-    }
-
-    return [
-      {
-        id: 1,
-        name: "",
-      },
-    ]; // Default fallback (GENERIC or unset types)
-  };
-
-  const resources = filteredMeetings(types);
+  // Filter visible resources by selectedColumns (empty selectedColumns = show all)
+  const visibleResources = useMemo(() => {
+    if (selectedColumns.length === 0) return userResources;
+    return userResources.filter((r) => selectedColumns.includes(r.id));
+  }, [userResources, selectedColumns]);
 
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
@@ -993,7 +880,7 @@ const TaskScheduler = ({
   //   return <Box> Fetching data ....</Box>;
   // }
 
-  if (!usertype) {
+  if (!loggedInUser) {
     return <>...</>;
   }
 
@@ -1018,7 +905,7 @@ const TaskScheduler = ({
               // displayTimezone="Australia/Adelaide"
               data={filteredEvents}
               view={myView}
-              resources={resources}
+              resources={visibleResources}
               renderHeader={customWithNavButtons}
               invalid={myInvalid}
               renderScheduleEvent={renderEvent}
@@ -1294,6 +1181,8 @@ const TaskScheduler = ({
             setActivityTypeFilter={setActivityTypeFilter}
             userFilter={userFilter}
             setUserFilter={setUserFilter}
+            selectedColumns={selectedColumns}
+            setSelectedColumns={setSelectedColumns}
             savedFilters={savedFilters}
             onApplyFilter={applyFilter}
             onClearFilter={clearFilter}
