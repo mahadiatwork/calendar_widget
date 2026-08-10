@@ -24,9 +24,37 @@
       sans-serif;
   }
   
-  .demo-doctors-appointment.demo-wrapper,
-  .demo-doctors-appointment .mbsc-grid,
-  .demo-doctors-appointment .mbsc-row,
-  .demo-doctors-appointment .docs-appointment-calendar {
-    height: 100%;
-  }
+.demo-doctors-appointment.demo-wrapper,
+.demo-doctors-appointment .mbsc-grid,
+.demo-doctors-appointment .mbsc-row,
+.demo-doctors-appointment .docs-appointment-calendar {
+  height: 100%;
+}
+
+/* Fixed-width user columns + horizontal scrolling so names are never truncated */
+.mbsc-schedule-col-width,
+.mbsc-schedule-wrapper-multi .mbsc-schedule-col-width {
+  width: 10em;
+}
+
+.mbsc-schedule-resource-title {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Full-day absence events: solid color block with a centered icon */
+.mbsc-absence-event-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;
+}
+
+.mbsc-absence-icon {
+  color: #fff;
+  flex: 0 0 auto;
+}

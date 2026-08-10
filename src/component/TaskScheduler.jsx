@@ -33,6 +33,7 @@ import {
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import DrawerComponent from "./DrawerComponent";
 import { activityType as activityTypeMapping } from "./helperFunction";
 
@@ -53,6 +54,23 @@ const EMPTY_FILTER = {
   priorityFilter: [],
   activityTypeFilter: [],
   userFilter: [],
+};
+
+// Activity types / keywords treated as absences (vacation, time off, etc.)
+const ABSENCE_ACTIVITY_TYPES = ["vacation", "holiday"];
+
+// Determines whether an event represents a full-day absence.
+const isAbsenceEvent = (original) => {
+  const type = String(original?.Type_of_Activity || "").toLowerCase();
+  const title = String(original?.title || "").toLowerCase();
+  return (
+    original?.allDay === true ||
+    ABSENCE_ACTIVITY_TYPES.includes(type) ||
+    title.includes("vacation") ||
+    title.includes("time off") ||
+    title.includes("leave") ||
+    title.includes("holiday")
+  );
 };
 
 const TaskScheduler = ({
@@ -524,6 +542,11 @@ const TaskScheduler = ({
 
   // State for controlling which user columns are visible (empty = show all)
   const [selectedColumns, setSelectedColumns] = useState([]);
+  // State for the "Filter by Team/Group" feature (empty = show all teams)
+  const [teamFilter, setTeamFilter] = useState([]);
+
+  // Derive a user's team/group from their Zoho role (falls back to "Unassigned")
+  const getUserTeam = (user) => user?.role?.name || "Unassigned";
 
   // Build resources from the users list — each user becomes a column
   const userResources = useMemo(() => {
@@ -531,14 +554,27 @@ const TaskScheduler = ({
     return users.map((user) => ({
       id: user.id,
       name: user.full_name,
+      team: getUserTeam(user),
     }));
   }, [users]);
 
-  // Filter visible resources by selectedColumns (empty selectedColumns = show all)
+  // Unique list of teams/groups, derived from the user resources
+  const userTeams = useMemo(() => {
+    const teams = [...new Set(userResources.map((r) => r.team).filter(Boolean))];
+    return teams.sort((a, b) => a.localeCompare(b));
+  }, [userResources]);
+
+  // Filter visible resources by selectedColumns and teamFilter (empty = show all)
   const visibleResources = useMemo(() => {
-    if (selectedColumns.length === 0) return userResources;
-    return userResources.filter((r) => selectedColumns.includes(r.id));
-  }, [userResources, selectedColumns]);
+    let resources = userResources;
+    if (selectedColumns.length > 0) {
+      resources = resources.filter((r) => selectedColumns.includes(r.id));
+    }
+    if (teamFilter.length > 0) {
+      resources = resources.filter((r) => teamFilter.includes(r.team));
+    }
+    return resources;
+  }, [userResources, selectedColumns, teamFilter]);
 
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
@@ -836,6 +872,8 @@ const TaskScheduler = ({
   const renderEvent = useCallback((data) => {
     const isClosed = data.original.Event_Status === "Closed"; // Check if the event is closed
     const isAllDay = data.allDay;
+    const isAbsence = isAbsenceEvent(data.original);
+    const eventColor = data.style?.background || data.original?.color || "#757575";
     const theme = "mbsc-ios"; // your theme name
     return (
       <>
@@ -845,33 +883,47 @@ const TaskScheduler = ({
             (isAllDay ? " mbsc-schedule-event-all-day-background" : "") +
             theme
           }
-          style={{ background: data.style.background }}
+          style={{ background: eventColor }}
         />
-        <div
-          className={
-            "mbsc-schedule-event-inner " +
-            theme +
-            (isAllDay ? " mbsc-schedule-event-all-day-inner" : "") +
-            (data.cssClass || "")
-          }
-          style={{ color: "black" }}
-        >
+        {isAbsence ? (
           <div
             className={
-              "mbsc-schedule-event-title " +
-              (isAllDay ? " mbsc-schedule-event-all-day-title " : "") +
-              theme
+              "mbsc-schedule-event-inner mbsc-absence-event-inner " +
+              theme +
+              (isAllDay ? " mbsc-schedule-event-all-day-inner" : "") +
+              (data.cssClass || "")
             }
-            style={{ textDecoration: isClosed ? "line-through" : "none" }}
+            style={{ color: "white" }}
           >
-            {data.title}
+            <BeachAccessIcon fontSize="small" className="mbsc-absence-icon" />
           </div>
-          {!isAllDay && (
-            <div className={"mbsc-schedule-event-range " + theme}>
-              {data.start} - {data.end}
+        ) : (
+          <div
+            className={
+              "mbsc-schedule-event-inner " +
+              theme +
+              (isAllDay ? " mbsc-schedule-event-all-day-inner" : "") +
+              (data.cssClass || "")
+            }
+            style={{ color: "black" }}
+          >
+            <div
+              className={
+                "mbsc-schedule-event-title " +
+                (isAllDay ? " mbsc-schedule-event-all-day-title " : "") +
+                theme
+              }
+              style={{ textDecoration: isClosed ? "line-through" : "none" }}
+            >
+              {data.title}
             </div>
-          )}
-        </div>
+            {!isAllDay && (
+              <div className={"mbsc-schedule-event-range " + theme}>
+                {data.start} - {data.end}
+              </div>
+            )}
+          </div>
+        )}
       </>
     );
   }, []);
@@ -1183,6 +1235,9 @@ const TaskScheduler = ({
             setUserFilter={setUserFilter}
             selectedColumns={selectedColumns}
             setSelectedColumns={setSelectedColumns}
+            teamFilter={teamFilter}
+            setTeamFilter={setTeamFilter}
+            userTeams={userTeams}
             savedFilters={savedFilters}
             onApplyFilter={applyFilter}
             onClearFilter={clearFilter}
