@@ -277,9 +277,17 @@ function App() {
     });
   }, []);
 
+  // Load user data (logged in user, saved filters, latest filter, users, colors) only once.
+  // Kept separate from searchDataByDate so that moving between days does not re-run
+  // getUserDataAndColor, which re-sets initialFilter and resets the applied saved filter.
   useEffect(() => {
     if (zohoLoaded) {
       getUserDataAndColor();
+    }
+  }, [zohoLoaded]);
+
+  useEffect(() => {
+    if (zohoLoaded) {
       searchDataByDate();
     }
   }, [zohoLoaded, searchDataByDate]);
