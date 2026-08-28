@@ -39,9 +39,6 @@ const DrawerComponent = ({
   setUserFilter,
   selectedColumns,
   setSelectedColumns,
-  teamFilter = [],
-  setTeamFilter,
-  userTeams = [],
   savedFilters = [],
   onApplyFilter,
   onClearFilter,
@@ -81,11 +78,15 @@ const DrawerComponent = ({
 
   const handleSaveEdit = () => {
     if (editIndex === null || !onUpdateSavedFilter) return;
+    const matchingCols = Array.isArray(users)
+      ? users.filter((u) => editUser.includes(u.full_name)).map((u) => u.id)
+      : [];
     const updated = {
       name: editName.trim() || "Unnamed filter",
       priorityFilter: editPriority,
       activityTypeFilter: editActivityType,
       userFilter: editUser,
+      selectedColumns: matchingCols,
     };
     onUpdateSavedFilter(editIndex, updated);
     if (onApplyFilter) onApplyFilter(updated);
@@ -143,21 +144,36 @@ const DrawerComponent = ({
     const {
       target: { value },
     } = event;
-    setUserFilter(typeof value === "string" ? value.split(",") : value);
+    const nextUsers = typeof value === "string" ? value.split(",") : value;
+    setUserFilter(nextUsers);
+    if (setSelectedColumns && Array.isArray(users)) {
+      if (nextUsers.length === 0) {
+        setSelectedColumns([]);
+      } else {
+        const matchingIds = users
+          .filter((u) => nextUsers.includes(u.full_name))
+          .map((u) => u.id);
+        setSelectedColumns(matchingIds);
+      }
+    }
   };
 
   const handleColumnChange = (event) => {
     const {
       target: { value },
     } = event;
-    setSelectedColumns(typeof value === "string" ? value.split(",") : value);
-  };
-
-  const handleTeamChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setTeamFilter(typeof value === "string" ? value.split(",") : value);
+    const nextCols = typeof value === "string" ? value.split(",") : value;
+    setSelectedColumns(nextCols);
+    if (setUserFilter && Array.isArray(users)) {
+      if (nextCols.length === 0) {
+        setUserFilter([]);
+      } else {
+        const matchingNames = users
+          .filter((u) => nextCols.includes(u.id))
+          .map((u) => u.full_name);
+        setUserFilter(matchingNames);
+      }
+    }
   };
   return (
     <Drawer
@@ -342,31 +358,6 @@ const DrawerComponent = ({
                     }
                   />
                   <ListItemText primary={user.full_name} />
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl>
-
-        {/* Team/Group filter */}
-        <FormControl fullWidth size="small" sx={{ mt: 3 }}>
-          <InputLabel>Team / Group</InputLabel>
-          <Select
-            multiple
-            value={Array.isArray(teamFilter) ? teamFilter : []}
-            onChange={handleTeamChange}
-            MenuProps={MenuProps}
-            input={<OutlinedInput label="Team / Group" />}
-            renderValue={(selected) =>
-              selected.length === 0 ? "All teams" : selected.join(", ")
-            }
-          >
-            {Array.isArray(userTeams) &&
-              userTeams.map((team) => (
-                <MenuItem key={team} value={team}>
-                  <Checkbox
-                    checked={(Array.isArray(teamFilter) ? teamFilter : []).includes(team)}
-                  />
-                  <ListItemText primary={team} />
                 </MenuItem>
               ))}
           </Select>

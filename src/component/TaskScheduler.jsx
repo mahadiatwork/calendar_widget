@@ -113,6 +113,8 @@ const TaskScheduler = ({
   const [priorityFilter, setPriorityFilter] = useState([]);
   const [activityTypeFilter, setActivityTypeFilter] = useState([]);
   const [userFilter, setUserFilter] = useState([]);
+  // State for controlling which user columns are visible (empty = show all)
+  const [selectedColumns, setSelectedColumns] = useState([]);
 
   const [clickedEvent, setClickedEvent] = useState(null);
   const [argumentLoader, setArgumentLoader] = useState(false);
@@ -200,13 +202,28 @@ const TaskScheduler = ({
           ? initialFilter.activityTypeFilter
           : []
       );
-      setUserFilter(
-        Array.isArray(initialFilter.userFilter) ? initialFilter.userFilter : []
-      );
+      const uf = Array.isArray(initialFilter.userFilter)
+        ? initialFilter.userFilter
+        : [];
+      setUserFilter(uf);
+
+      let sc = Array.isArray(initialFilter.selectedColumns)
+        ? initialFilter.selectedColumns
+        : [];
+      if (sc.length === 0 && uf.length > 0 && Array.isArray(users)) {
+        sc = users.filter((u) => uf.includes(u.full_name)).map((u) => u.id);
+      }
+      setSelectedColumns(sc);
     } else if (loggedInUser?.full_name) {
       setUserFilter([loggedInUser.full_name]);
+      if (loggedInUser?.id) {
+        setSelectedColumns([loggedInUser.id]);
+      } else if (Array.isArray(users)) {
+        const match = users.find((u) => u.full_name === loggedInUser.full_name);
+        if (match) setSelectedColumns([match.id]);
+      }
     }
-  }, [initialFilter, loggedInUser?.full_name]);
+  }, [initialFilter, loggedInUser?.full_name, loggedInUser?.id, users]);
 
   const applyFilter = useCallback(
     (savedFilter) => {
@@ -223,19 +240,32 @@ const TaskScheduler = ({
       setPriorityFilter(pf);
       setActivityTypeFilter(af);
       setUserFilter(uf);
+
+      let sc = Array.isArray(savedFilter.selectedColumns)
+        ? savedFilter.selectedColumns
+        : [];
+      if (sc.length === 0 && uf.length > 0 && Array.isArray(users)) {
+        sc = users.filter((u) => uf.includes(u.full_name)).map((u) => u.id);
+      }
+      setSelectedColumns(sc);
+
       if (persistLatestFilter) {
-        persistLatestFilter({ priorityFilter: pf, activityTypeFilter: af, userFilter: uf }).catch(
-          (err) => console.warn("Could not persist latest filter", err)
-        );
+        persistLatestFilter({
+          priorityFilter: pf,
+          activityTypeFilter: af,
+          userFilter: uf,
+          selectedColumns: sc,
+        }).catch((err) => console.warn("Could not persist latest filter", err));
       }
     },
-    [persistLatestFilter]
+    [persistLatestFilter, users]
   );
 
   const clearFilter = useCallback(() => {
     setPriorityFilter([]);
     setActivityTypeFilter([]);
     setUserFilter([]);
+    setSelectedColumns([]);
     if (persistLatestFilter) {
       persistLatestFilter(EMPTY_FILTER).catch((err) =>
         console.warn("Could not persist latest filter", err)
@@ -245,11 +275,16 @@ const TaskScheduler = ({
 
   const saveCurrentFilter = useCallback(
     (name) => {
+      let sc = [...selectedColumns];
+      if (sc.length === 0 && userFilter.length > 0 && Array.isArray(users)) {
+        sc = users.filter((u) => userFilter.includes(u.full_name)).map((u) => u.id);
+      }
       const newFilter = {
         name: name || "Unnamed filter",
         priorityFilter: [...priorityFilter],
         activityTypeFilter: [...activityTypeFilter],
         userFilter: [...userFilter],
+        selectedColumns: sc,
       };
       const next = [...savedFilters, newFilter];
       setSavedFilters(next);
@@ -263,6 +298,8 @@ const TaskScheduler = ({
       priorityFilter,
       activityTypeFilter,
       userFilter,
+      selectedColumns,
+      users,
       savedFilters,
       setSavedFilters,
       persistSavedFiltersWithFeedback,
@@ -275,6 +312,15 @@ const TaskScheduler = ({
       if (index < 0 || !updatedFilter) return;
       setSavedFilters((prev) => {
         const next = prev.slice();
+        const uf = Array.isArray(updatedFilter.userFilter)
+          ? updatedFilter.userFilter
+          : prev[index]?.userFilter ?? [];
+        let sc = Array.isArray(updatedFilter.selectedColumns)
+          ? updatedFilter.selectedColumns
+          : prev[index]?.selectedColumns ?? [];
+        if (sc.length === 0 && uf.length > 0 && Array.isArray(users)) {
+          sc = users.filter((u) => uf.includes(u.full_name)).map((u) => u.id);
+        }
         next[index] = {
           name: updatedFilter.name ?? prev[index]?.name ?? "Unnamed filter",
           priorityFilter: Array.isArray(updatedFilter.priorityFilter)
@@ -283,9 +329,8 @@ const TaskScheduler = ({
           activityTypeFilter: Array.isArray(updatedFilter.activityTypeFilter)
             ? updatedFilter.activityTypeFilter
             : prev[index]?.activityTypeFilter ?? [],
-          userFilter: Array.isArray(updatedFilter.userFilter)
-            ? updatedFilter.userFilter
-            : prev[index]?.userFilter ?? [],
+          userFilter: uf,
+          selectedColumns: sc,
         };
         if (persistSavedFilters) {
           persistSavedFilters(next)
@@ -300,7 +345,7 @@ const TaskScheduler = ({
         return next;
       });
     },
-    [setSavedFilters, persistSavedFilters, onFilterUpdateSuccess, onFilterUpdateError]
+    [setSavedFilters, persistSavedFilters, onFilterUpdateSuccess, onFilterUpdateError, users]
   );
 
   const deleteSavedFilter = useCallback(
@@ -540,41 +585,22 @@ const TaskScheduler = ({
     setOpen(true);
   };
 
-  // State for controlling which user columns are visible (empty = show all)
-  const [selectedColumns, setSelectedColumns] = useState([]);
-  // State for the "Filter by Team/Group" feature (empty = show all teams)
-  const [teamFilter, setTeamFilter] = useState([]);
-
-  // Derive a user's team/group from their Zoho role (falls back to "Unassigned")
-  const getUserTeam = (user) => user?.role?.name || "Unassigned";
-
   // Build resources from the users list — each user becomes a column
   const userResources = useMemo(() => {
     if (!Array.isArray(users)) return [];
     return users.map((user) => ({
       id: user.id,
       name: user.full_name,
-      team: getUserTeam(user),
     }));
   }, [users]);
 
-  // Unique list of teams/groups, derived from the user resources
-  const userTeams = useMemo(() => {
-    const teams = [...new Set(userResources.map((r) => r.team).filter(Boolean))];
-    return teams.sort((a, b) => a.localeCompare(b));
-  }, [userResources]);
-
-  // Filter visible resources by selectedColumns and teamFilter (empty = show all)
+  // Filter visible resources by selectedColumns (empty = show all)
   const visibleResources = useMemo(() => {
-    let resources = userResources;
     if (selectedColumns.length > 0) {
-      resources = resources.filter((r) => selectedColumns.includes(r.id));
+      return userResources.filter((r) => selectedColumns.includes(r.id));
     }
-    if (teamFilter.length > 0) {
-      resources = resources.filter((r) => teamFilter.includes(r.team));
-    }
-    return resources;
-  }, [userResources, selectedColumns, teamFilter]);
+    return userResources;
+  }, [userResources, selectedColumns]);
 
   const customWithNavButtons = useCallback(() => {
     const props = { placeholder: "Select date...", inputStyle: "box" };
@@ -1235,9 +1261,6 @@ const TaskScheduler = ({
             setUserFilter={setUserFilter}
             selectedColumns={selectedColumns}
             setSelectedColumns={setSelectedColumns}
-            teamFilter={teamFilter}
-            setTeamFilter={setTeamFilter}
-            userTeams={userTeams}
             savedFilters={savedFilters}
             onApplyFilter={applyFilter}
             onClearFilter={clearFilter}
